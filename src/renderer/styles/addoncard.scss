@@ -1,0 +1,77 @@
+.pc-settings-addon-card {
+    position: relative;
+    border-radius: 4px;
+    background: var(--background-tertiary);
+    flex-grow: 1;
+    padding: 15px;
+    padding-bottom: 10px;
+    margin: 10px 10px 20px 0;
+    transition: box-shadow .2s ease-out,transform .2s ease-out,background .2s ease-out,opacity .2s ease-in,-webkit-box-shadow .2s ease-out,-webkit-transform .2s ease-out;
+
+    &:hover {
+        transform: translateY(-1px);
+        box-shadow: var(--elevation-high);
+    }
+
+    .pc-settings-card-header {
+        display: flex;
+        align-items: center;
+        padding-bottom: 10px;
+        margin-bottom: 10px;
+        border-bottom: thin solid var(--background-modifier-accent);
+
+        .pc-settings-card-field {
+            font-weight: 600;
+            font-family: var(--font-display);
+
+            &:not(:first-child) {
+                padding-left: 5px;
+                color: #ddd;
+            }
+        }
+    }
+
+    .pc-settings-card-tools {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: absolute;
+        top: -12px;
+        right: -12px;
+        display: flex;
+        border-radius: 4px;
+        background: var(--background-secondary-alt);
+        box-shadow: var(--elevation-medium);
+
+        .pc-settings-toolbutton {
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+
+            &:hover {
+                background: var(--background-modifier-hover);
+            }
+
+            &:active {
+                color: var(--interactive-active);
+                background-color: var(--background-modifier-active);
+
+                svg {
+                    transform: translateY(1px);
+                }
+            }
+        }
+    }
+
+    .pc-settings-card-desc {
+        padding-bottom: 5px;
+        margin-bottom: 10px;
+        border-bottom: thin solid var(--background-modifier-accent);
+    }
+
+    .pc-settings-card-footer > div {
+        margin-left: auto;
+    }
+}

@@ -1,0 +1,6 @@
+{
+    "name": "PCCompat",
+    "author": "Strencher",
+    "id": "pc-compat",
+    "description": "Allows you to load powerCord plugins within Kernel."
+}

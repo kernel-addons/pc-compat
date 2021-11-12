@@ -1,0 +1,42 @@
+.pc-settings-panel {
+    color: #ddd;
+
+    .pc-settings-title {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+        font-weight: bold;
+        font-size: 20px;
+        font-weight: 600;
+        font-family: var(--font-display);
+        color: var(--header-primary);
+    }
+
+    .pc-settings-addons-controls {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+
+        .pc-settings-overflow-menu {
+            margin-left: 5px;
+        }
+
+        .pc-settings-addons-search {
+            flex-grow: 1;
+        }
+    }
+
+    .pc-settings-card-scroller {
+        display: flex;
+        flex-direction: column;
+    }
+}
+
+.pc-settings-overflow-header {
+    font-size: 12px;
+    font-weight: 700;
+    font-family: var(--font-display);
+    line-height: 16px;
+    text-transform: uppercase;
+    padding: 5px 0 5px 5px;
+}
