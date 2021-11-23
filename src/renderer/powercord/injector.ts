@@ -1,7 +1,7 @@
 import Patcher from "../modules/patcher";
 
 export function inject(id: string, module: string, functionName: string, callback: any, pre = false) {
-    if (!module || typeof (module[functionName]) !== "function") throw new Error(`Failed to patch ${id}; module or functionName was invalid.`);
+    if (!module) throw new Error(`Failed to patch ${id}; module is invalid.`);
 
     if (pre) {
         Patcher.before(id, module, functionName, (_this: any, args: any) => {

@@ -2004,8 +2004,8 @@ const webpack = {
 };
 
 function inject(id, module, functionName, callback, pre = false) {
-	if (!module || typeof module[functionName] !== "function")
-		throw new Error(`Failed to patch ${id}; module or functionName was invalid.`);
+	if (!module)
+		throw new Error(`Failed to patch ${id}; module is invalid.`);
 	if (pre) {
 		Patcher.before(id, module, functionName, (_this, args) => {
 			return Reflect.apply(callback, _this, [
