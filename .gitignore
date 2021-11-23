@@ -5,6 +5,7 @@ themes
 config
 node_modules
 dist
+pnpm-lock.yaml
 # Add to whitelist
 !plugins/.gitkeep
 !themes/.gitkeep
