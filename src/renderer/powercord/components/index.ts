@@ -5,16 +5,26 @@ import { createUpdateWrapper } from '../../modules/utilities';
 import TextInput from "./textinput";
 import AsyncComponent from "./asynccomponent";
 import RadioGroup from "./radiogroup";
+import Modal from "./modal";
+import Category from './category';
 
-let Components = {TextInput, RadioGroup};
+let Components = {
+    settings: {
+        TextInput,
+        RadioGroup,
+        Category
+    },
+    AsyncComponent,
+    modal: Modal,
+};
 
 (() => {
     const cache = new Map();
 
     for (const id in components) {
         const options = components[id];
-
-        Components[id] = (props) => {
+        
+        (options.settings ? Components.settings : Components)[id] = (props) => {
             if (!cache.has(id)) {
                 const module = typeof (options.filter) === "function"
                     ? Webpack.findModule(options.filter)
@@ -33,6 +43,12 @@ let Components = {TextInput, RadioGroup};
             return DiscordModules.React.createElement(Component, props);
         }
     }
+
+    Webpack.wait(() => {
+        const Forms = Webpack.findByProps("FormItem");
+
+        Object.assign(Components, Forms);
+    });
 })();
 
-export default {settings: Components, AsyncComponent};
+export default Components;

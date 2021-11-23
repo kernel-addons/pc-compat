@@ -20,4 +20,6 @@ export function from(promise: Promise<any>, fallback?: any) {
     }))
 };
 // TODO: Finish AsyncComponent
-// export function fromDisplayName()
+// export function fromDisplayName(displayName: string) {
+//     return from(get)
+// }

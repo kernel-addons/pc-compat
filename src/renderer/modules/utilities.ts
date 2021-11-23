@@ -34,4 +34,37 @@ export const createUpdateWrapper = (Component, valueProp = "value", changeProp =
             setValue(value);
         }
     });
+};
+
+export function omit(thing: any[] | object, ...things) {
+    if (Array.isArray(thing)) {
+        return thing.reduce((clone, key) => things.includes(key) ? clone : clone.concat(key), []);
+    }
+
+    const clone = {};
+    for (const key in thing) {
+        if (things.includes(key)) continue;
+        clone[key] = thing[key];
+    }
+
+    return clone;
+};
+
+export function joinClassNames(...classNames: (string | [boolean, string])[]) {
+    let className = [];
+
+    for (const item of classNames) {
+        if (typeof (item) === "string") {
+            className.push(item);
+            continue;
+        }
+
+        if (Array.isArray(item)) {
+            const [should, name] = item;
+            if (!should) continue;
+            className.push(name);
+        }
+    }
+
+    return className.join(" ");
 }

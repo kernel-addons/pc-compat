@@ -15,10 +15,21 @@ function _classPrivateFieldSet(receiver, privateMap, value) {
 	descriptor.value = value;
 	return value;
 }
+function _classPrivateMethodGet(receiver, privateSet, fn) {
+	if (!privateSet.has(receiver)) {
+		throw new TypeError("attempted to get private field on non-instance");
+	}
+	return fn;
+}
+// @ts-nocheck
 if (typeof Array.prototype.at !== "function") {
 	Array.prototype.at = function(index) {
 		return index < 0 ? this[this.length - Math.abs(index)] : this[index];
 	};
+}
+if (typeof setImmediate === "undefined") {
+	window.setImmediate = (callback) => setTimeout(callback, 0)
+	;
 }
 const Events = {
 	CREATE: "CREATE",
@@ -26,88 +37,78 @@ const Events = {
 	PUSH: "PUSH",
 	LOADED: "LOADED"
 };
+var _parseOptions = new WeakSet();
 class WebpackModule {
+	get Events() {
+		return Events;
+	}
+	get chunkName() {
+		return "webpackChunkdiscord_app";
+	}
 	get id() {
 		return "kernel-req" + Math.random().toString().slice(2, 5);
 	}
-	dispatch(event4, ...args1) {
-		if (!(event4 in _classPrivateFieldGet(this, _events)))
-			throw new Error(`Unknown Event: ${event4}`);
-		_classPrivateFieldGet(this, _events)[event4].forEach((callback) => {
+	dispatch(event, ...args) {
+		if (!(event in _classPrivateFieldGet(this, _events)))
+			throw new Error(`Unknown Event: ${event}`);
+		for (const callback of _classPrivateFieldGet(this, _events)[event]) {
 			try {
-				callback(...args1);
+				callback(...args);
 			} catch (err) {
 				console.error(err);
 			}
-		});
+		}
 	}
-	on(event1, callback) {
-		if (!(event1 in _classPrivateFieldGet(this, _events)))
-			throw new Error(`Unknown Event: ${event1}`);
-		return _classPrivateFieldGet(this, _events)[event1].add(callback), () => this.off(event1, callback);
+	on(event, callback) {
+		if (!(event in _classPrivateFieldGet(this, _events)))
+			throw new Error(`Unknown Event: ${event}`);
+		return _classPrivateFieldGet(this, _events)[event].add(callback), () => this.off(event, callback);
 	}
-	off(event2, callback1) {
-		if (!(event2 in _classPrivateFieldGet(this, _events)))
-			throw new Error(`Unknown Event: ${event2}`);
-		return _classPrivateFieldGet(this, _events)[event2].delete(callback1);
+	off(event, callback) {
+		if (!(event in _classPrivateFieldGet(this, _events)))
+			throw new Error(`Unknown Event: ${event}`);
+		return _classPrivateFieldGet(this, _events)[event].delete(callback);
 	}
-	once(event3, callback2) {
-		const unlisten = this.on(event3, (...args) => {
+	once(event, callback) {
+		const unlisten = this.on(event, (...args) => {
 			unlisten();
-			callback2(...args);
+			callback(...args);
 		});
 	}
-	get webpackLength() {
-		return this.webpackNamespace ? this.webpackNamespace.flat(10).length : 0;
+	async waitFor(filter, {retries =100, all, delay =50} = {
+		}) {
+		for (let i = 0; i < retries; i++) {
+			const module = this.findModule(filter, all, false);
+			if (module) return module;
+			await new Promise((res) => setTimeout(res, delay)
+			);
+		}
 	}
-	get webpackNamespace() {
-		return window.webpackJsonp || window.webpackChunkdiscord_app;
-	}
-	wait(callback3) {
-		return new Promise((resolve) => {
-			this.once(Events.LOADED, () => {
-				resolve();
-				typeof callback3 === "function" && callback3();
-			});
-		});
-	}
-	get whenReady() {
-		return this.wait();
-	}
-	request(cache) {
-		if (cache && _classPrivateFieldGet(this, __cache$1)) return _classPrivateFieldGet(this, __cache$1);
-		let req1 = void 0;
-		if ("webpackJsonp" in window && !webpackJsonp.__polyfill) {
-			req1 = window.webpackJsonp.push([
-				[],
-				{
-					[this.id]: (module, exports, req) => module.exports = req
-				},
-				[
-					[
-						this.id
-					]
-				]
-			]);
-		} else if ("webpackChunkdiscord_app" in window) {
-			window.webpackChunkdiscord_app.push([
+	request(cache = true) {
+		if (cache && _classPrivateFieldGet(this, _cache)) return _classPrivateFieldGet(this, _cache);
+		let req = void 0;
+		if ("webpackChunkdiscord_app" in window && webpackChunkdiscord_app != null) {
+			const chunk = [
 				[
 					this.id
 				],
 				{
 				},
-				(__webpack_require__) => req1 = __webpack_require__
-			]);
+				(__webpack_require__) => req = __webpack_require__
+			];
+			webpackChunkdiscord_app.push(chunk);
+			webpackChunkdiscord_app.splice(webpackChunkdiscord_app.indexOf(chunk), 1);
 		}
-		_classPrivateFieldSet(this, __cache$1, req1);
-		return req1;
+		_classPrivateFieldSet(this, _cache, req);
+		return req;
 	}
-	findModule(filter2, all = false, cache1 = true) {
-		const __webpack_require__ = this.request(cache1);
+	findModule(filter, {all =false, cache =true} = {
+		}) {
+		const __webpack_require__ = this.request(cache);
 		const found = [];
 		const wrapFilter = (module) => {
 			try {
-				return filter2(module);
+				return filter(module);
 			} catch (e) {
 				return false;
 			}
@@ -122,14 +123,16 @@ class WebpackModule {
 		}
 		return all ? found : found.at(0);
 	}
-	findModules(filter1) {
-		return this.findModule(filter1, true);
+	findModules(filter) {
+		return this.findModule(filter, {
+			all: true
+		});
 	}
-	bulk(...filters) {
-		const hasOptions = typeof filters.at(-1) === "boolean";
-		const found = new Array(filters.length - (hasOptions ? -1 : 0));
-		const cache = hasOptions && filters.pop();
-		this.findModule((module) => {
+	bulk(...options) {
+		const [filters, {cache =true, wait =false}] = _classPrivateMethodGet(this, _parseOptions, parseOptions).call(this, options);
+		const found = new Array(filters.length);
+		const searchFunction = wait ? this.waitFor : this.findModule;
+		const returnValue = searchFunction.call(this, (module) => {
 			const matches = filters.filter((filter) => {
 				try {
 					return filter(module);
@@ -138,41 +141,56 @@ class WebpackModule {
 				}
 			});
 			if (!matches.length) return false;
-			for (const filter3 of matches) {
-				found[filters.indexOf(filter3)] = module;
+			for (const filter of matches) {
+				found[filters.indexOf(filter)] = module;
 			}
-			return false;
-		}, false, cache);
+			return true;
+		}, {
+			all: true,
+			cache
+		});
+		if (wait) return returnValue.then(() => found
+			);
 		return found;
 	}
-	findByProps(...props1) {
-		const hasOptions = typeof props1.at(-1) === "object" && props1.at(-1) != null && props1.at(-1);
-		const {bulk =false, cache =true} = hasOptions && props1.pop() || {
-		};
+	findByProps(...options) {
+		const [props, {bulk =false, cache =true, wait =false}] = _classPrivateMethodGet(this, _parseOptions, parseOptions).call(this, options);
 		const filter = (props, module) => module && props.every((prop) => prop in module
 		);
-		return bulk ? this.bulk(...props1.map((props) => filter.bind(null, props)
-		).concat(cache)) : this.findModule(filter.bind(null, props1), false, cache);
+		return bulk ? this.bulk(...props.map((props) => filter.bind(null, props)
+		).concat({
+			cache,
+			wait
+		})) : wait ? this.waitFor(filter.bind(null, props)) : this.findModule(filter.bind(null, props), false, cache);
 	}
-	findByDisplayName(...displayName) {
-		const hasOptions = typeof displayName.at(-1) === "object" && displayName.at(-1) != null;
-		const {bulk =false, default: defaultExport = false, cache =true} = hasOptions && displayName.pop() || {
-		};
+	findByDisplayName(...options) {
+		const [displayNames, {all =false, bulk =false, default: defaultExport = false, cache =true, wait =false}] = _classPrivateMethodGet(this, _parseOptions, parseOptions).call(this, options);
 		const filter = (name, module) => {
 			var ref;
 			return defaultExport ? (module === null || module === void 0 ? void 0 : (ref = module.default) === null || ref === void 0 ? void 0 : ref.displayName) === name : (module === null || module === void 0 ? void 0 : module.displayName) === name;
 		};
-		return bulk ? this.bulk(...[
-			...displayName.map((name) => filter.bind(null, name)
-			),
+		return bulk ? this.bulk(...displayNames.map((name) => filter.bind(null, name)
+		).concat({
+			wait,
 			cache
-		]) : this.findModule(filter.bind(null, displayName[0]), false, cache);
+		})) : wait ? this.waitFor(filter.bind(null, displayNames[0]), {
+			all
+		}) : this.findModule(filter.bind(null, displayNames[0]), false, cache);
+	}
+	async wait(callback = null) {
+		return new Promise((resolve) => {
+			this.once(Events.LOADED, () => {
+				resolve();
+				typeof callback === "function" && callback();
+			});
+		});
+	}
+	get whenExists() {
+		return new Promise((resolve) => {
+			this.once(Events.CREATE, resolve);
+		});
 	}
 	constructor() {
-		__cache$1.set(this, {
-			writable: true,
-			value: null
-		});
 		_events.set(this, {
 			writable: true,
 			value: Object.fromEntries(Object.keys(Events).map((key) => [
@@ -181,19 +199,26 @@ class WebpackModule {
 			]
 			))
 		});
-		Object.defineProperty(window, "webpackChunkdiscord_app", {
+		_cache.set(this, {
+			writable: true,
+			value: null
+		});
+		_parseOptions.add(this);
+		Object.defineProperty(window, this.chunkName, {
 			get() {
 				return void 0;
 			},
 			set: (value) => {
-				this.dispatch(Events.CREATE);
+				setImmediate(() => {
+					this.dispatch(Events.CREATE);
+				});
 				const originalPush = value.push;
 				value.push = (...values) => {
 					this.dispatch(Events.LENGTH_CHANGE, value.length + values.length);
 					this.dispatch(Events.PUSH, values);
 					return Reflect.apply(originalPush, value, values);
 				};
-				Object.defineProperty(window, "webpackChunkdiscord_app", {
+				Object.defineProperty(window, this.chunkName, {
 					value,
 					configurable: true,
 					writable: true
@@ -205,28 +230,35 @@ class WebpackModule {
 		let listener = (shouldUnsubscribe, Dispatcher, ActionTypes, event) => {
 			if ((event === null || event === void 0 ? void 0 : event.event) !== "app_ui_viewed") return;
 			if (shouldUnsubscribe) {
-				Dispatcher.unsubscribe(ActionTypes.CONNECTION_OPEN, listener);
+				Dispatcher.unsubscribe(ActionTypes.TRACK, listener);
 			}
 			this.dispatch(Events.LOADED);
 		};
-		const unlisten = this.on(Events.LENGTH_CHANGE, (length) => {
-			if (length < 25) return;
-			unlisten();
-			const [Dispatcher, Constants] = this.findByProps([
+		this.once(Events.CREATE, async () => {
+			const [Dispatcher, Constants] = await this.findByProps([
 				"dirtyDispatch"
 			], [
 				"API_HOST",
 				"ActionTypes"
 			], {
 				cache: false,
-				bulk: true
+				bulk: true,
+				wait: true
 			});
 			Dispatcher.subscribe(Constants.ActionTypes.TRACK, listener = listener.bind(null, true, Dispatcher, Constants.ActionTypes));
 		});
 	}
 }
-var __cache$1 = new WeakMap();
 var _events = new WeakMap();
+var _cache = new WeakMap();
+function parseOptions(args, filter = (thing) => typeof thing === "object" && thing != null && !Array.isArray(thing)
+) {
+	return [
+		args,
+		filter(args.at(-1)) ? args.pop() : {
+		}
+	];
+}
 var _Webpack;
 const Webpack = (_Webpack = window.Webpack) !== null && _Webpack !== void 0 ? _Webpack : window.Webpack = new WebpackModule;
 
@@ -240,36 +272,36 @@ class fs {
 	static readFileSync(path, options = "utf8") {
 		return PCCompatNative.executeJS(`require("fs").readFileSync(${JSON.stringify(path)}, ${JSON.stringify(options)});`);
 	}
-	static writeFileSync(path1, data, options1) {
-		return PCCompatNative.executeJS(`require("fs").writeFileSync(${JSON.stringify(path1)}, ${JSON.stringify(data)}, ${JSON.stringify(options1)})`);
+	static writeFileSync(path, data, options) {
+		return PCCompatNative.executeJS(`require("fs").writeFileSync(${JSON.stringify(path)}, ${JSON.stringify(data)}, ${JSON.stringify(options)})`);
 	}
-	static writeFile(path2, data1, options2, callback) {
-		if (typeof options2 === "function") {
-			callback = options2;
-			options2 = null;
+	static writeFile(path, data, options, callback) {
+		if (typeof options === "function") {
+			callback = options;
+			options = null;
 		}
 		const ret = {
 			error: null
 		};
 		try {
-			this.writeFileSync(path2, data1, options2);
+			this.writeFileSync(path, data, options);
 		} catch (error) {
 			ret.error = error;
 		}
 		callback(ret.error);
 	}
-	static readdirSync(path3, options3) {
-		return PCCompatNative.executeJS(`require("fs").readdirSync(${JSON.stringify(path3)}, ${JSON.stringify(options3)});`);
+	static readdirSync(path, options) {
+		return PCCompatNative.executeJS(`require("fs").readdirSync(${JSON.stringify(path)}, ${JSON.stringify(options)});`);
 	}
-	static existsSync(path4) {
-		return PCCompatNative.executeJS(`require("fs").existsSync(${JSON.stringify(path4)});`);
+	static existsSync(path) {
+		return PCCompatNative.executeJS(`require("fs").existsSync(${JSON.stringify(path)});`);
 	}
-	static mkdirSync(path5, options4) {
-		return PCCompatNative.executeJS(`require("fs").mkdirSync(${JSON.stringify(path5)}, ${JSON.stringify(options4)});`);
+	static mkdirSync(path, options) {
+		return PCCompatNative.executeJS(`require("fs").mkdirSync(${JSON.stringify(path)}, ${JSON.stringify(options)});`);
 	}
-	static statSync(path6, options5) {
+	static statSync(path, options) {
 		return PCCompatNative.executeJS(`
-            const stats = require("fs").statSync(${JSON.stringify(path6)}, ${JSON.stringify(options5)});
+            const stats = require("fs").statSync(${JSON.stringify(path)}, ${JSON.stringify(options)});
             const ret = {
                 ...stats,
                 isFile: () => stats.isFile(),
@@ -278,17 +310,17 @@ class fs {
             ret
         `);
 	}
-	static watch(path7, options6, callback1) {
-		if (typeof options6 === "function") {
-			callback1 = options6;
-			options6 = null;
+	static watch(path, options, callback) {
+		if (typeof options === "function") {
+			callback = options;
+			options = null;
 		}
 		const eventId = "bdcompat-watcher-" + Math.random().toString(36).slice(2, 10);
 		PCCompatNative.IPC.on(eventId, (event, filename) => {
-			callback1(event, filename);
+			callback(event, filename);
 		});
 		return PCCompatNative.executeJS(`
-            require("fs").watch(${JSON.stringify(path7)}, ${JSON.stringify(options6)}, (event, filename) => {
+            require("fs").watch(${JSON.stringify(path)}, ${JSON.stringify(options)}, (event, filename) => {
                 PCCompatNative.IPC.dispatch(${JSON.stringify(eventId)}, event, filename);
             });
         `);
@@ -359,10 +391,10 @@ function getProps(obj, path) {
 		, obj);
 }
 const createUpdateWrapper = (Component, valueProp = "value", changeProp = "onChange", valueProps = "0", valueIndex = 0) => (props) => {
-	const [value1, setValue] = DiscordModules.React.useState(props[valueProp]);
+	const [value, setValue] = DiscordModules.React.useState(props[valueProp]);
 	return DiscordModules.React.createElement(Component, {
 		...props,
-		[valueProp]: value1,
+		[valueProp]: value,
 		[changeProp]: (...args) => {
 			const value = getProps(args, valueProps);
 			if (typeof props[changeProp] === "function") props[changeProp](args[valueIndex]);
@@ -370,6 +402,34 @@ const createUpdateWrapper = (Component, valueProp = "value", changeProp = "onCha
 		}
 	});
 };
+function omit(thing, ...things) {
+	if (Array.isArray(thing)) {
+		return thing.reduce((clone, key) => things.includes(key) ? clone : clone.concat(key)
+			, []);
+	}
+	const clone = {
+	};
+	for (const key in thing) {
+		if (things.includes(key)) continue;
+		clone[key] = thing[key];
+	}
+	return clone;
+}
+function joinClassNames(...classNames) {
+	let className = [];
+	for (const item of classNames) {
+		if (typeof item === "string") {
+			className.push(item);
+			continue;
+		}
+		if (Array.isArray(item)) {
+			const [should, name] = item;
+			if (!should) continue;
+			className.push(name);
+		}
+	}
+	return className.join(" ");
+}
 
 class DOM {
 	static get head() {
@@ -391,13 +451,13 @@ class DOM {
 		this.elements[id] = element;
 		return element;
 	}
-	static getElement(id1) {
-		return this.elements[id1] || this.head.querySelector(`style[id="${id1}"]`);
+	static getElement(id) {
+		return this.elements[id] || this.head.querySelector(`style[id="${id}"]`);
 	}
-	static clearCSS(id2) {
-		const element = this.getElement(id2);
+	static clearCSS(id) {
+		const element = this.getElement(id);
 		if (element) element.remove();
-		delete this.elements[id2];
+		delete this.elements[id];
 	}
 }
 DOM.elements = {
@@ -413,20 +473,20 @@ function _classCheckPrivateStaticAccess(receiver, classConstructor) {
 	}
 }
 class Logger {
-	static _log(type1, module, ...message) {
-		console[_classStaticPrivateMethodGet(this, Logger, parseType).call(Logger, type1)](`%c[Powercord:${module}]%c`, "color: #7289da; font-weight: 700;", "", ...message);
+	static _log(type, module, ...message) {
+		console[_classStaticPrivateMethodGet(this, Logger, parseType).call(Logger, type)](`%c[Powercord:${module}]%c`, "color: #7289da; font-weight: 700;", "", ...message);
 	}
-	static log(module1, ...message1) {
-		this._log("log", module1, ...message1);
+	static log(module, ...message) {
+		this._log("log", module, ...message);
 	}
-	static info(module2, ...message2) {
-		this._log("info", module2, ...message2);
+	static info(module, ...message) {
+		this._log("info", module, ...message);
 	}
-	static warn(module3, ...message3) {
-		this._log("warn", module3, ...message3);
+	static warn(module, ...message) {
+		this._log("warn", module, ...message);
 	}
-	static error(module4, ...message4) {
-		this._log("error", module4, ...message4);
+	static error(module, ...message) {
+		this._log("error", module, ...message);
 	}
 }
 function parseType(type) {
@@ -444,19 +504,19 @@ class Store {
 	has(event) {
 		return event in this.events;
 	}
-	on(event1, listener) {
-		if (!this.has(event1))
-			this.events[event1] = new Set();
-		this.events[event1].add(listener);
-		return () => void this.off(event1, listener);
+	on(event, listener) {
+		if (!this.has(event))
+			this.events[event] = new Set();
+		this.events[event].add(listener);
+		return () => void this.off(event, listener);
 	}
-	off(event2, listener1) {
-		if (!this.has(event2)) return;
-		return this.events[event2].delete(listener1);
+	off(event, listener) {
+		if (!this.has(event)) return;
+		return this.events[event].delete(listener);
 	}
-	emit(event3, ...args) {
-		if (!this.has(event3)) return;
-		for (const listener of this.events[event3]) {
+	emit(event, ...args) {
+		if (!this.has(event)) return;
+		for (const listener of this.events[event]) {
 			try {
 				listener(...args);
 			} catch (error) {
@@ -464,14 +524,14 @@ class Store {
 			}
 		}
 	}
-	useEvent(event4, listener2) {
-		const [state, setState] = DiscordModules.React.useState(listener2());
+	useEvent(event, listener) {
+		const [state, setState] = DiscordModules.React.useState(listener());
 		DiscordModules.React.useEffect(() => {
-			return this.on(event4, () => setState(listener2())
+			return this.on(event, () => setState(listener())
 			);
 		}, [
-			event4,
-			listener2
+			event,
+			listener
 		]);
 		return state;
 	}
@@ -492,7 +552,7 @@ const electron = {
 	shell
 };
 
-const DataStore = new class DataStore extends Store {
+const DataStore1 = new class DataStore extends Store {
 	tryLoadData(name) {
 		try {
 			const location = path.resolve(this.configFolder, `${name}.json`);
@@ -503,21 +563,21 @@ const DataStore = new class DataStore extends Store {
 			Logger.error("DataStore", `Data of ${name} corrupt:`, error);
 		}
 	}
-	trySaveData(name1, data, emit) {
+	trySaveData(name, data, emit) {
 		try {
-			fs.writeFileSync(path.resolve(this.configFolder, `${name1}.json`), JSON.stringify(data, null, "\t"), "utf8");
+			fs.writeFileSync(path.resolve(this.configFolder, `${name}.json`), JSON.stringify(data, null, "\t"), "utf8");
 		} catch (error) {
-			Logger.error("DataStore", `Failed to save data of ${name1}:`, error);
+			Logger.error("DataStore", `Failed to save data of ${name}:`, error);
 		}
-		if (emit) this.emit("data-update", name1, data);
+		if (emit) this.emit("data-update", name, data);
 	}
 	getMisc(misc = "", def) {
 		var ref;
 		return (ref = getProps(this.tryLoadData("misc"), misc)) !== null && ref !== void 0 ? ref : def;
 	}
-	setMisc(misc1 = this.getMisc("", {
+	setMisc(misc = this.getMisc("", {
 		}), prop, value) {
-		this.trySaveData("misc", _.set(misc1, prop.split("."), value));
+		this.trySaveData("misc", _.set(misc, prop.split("."), value));
 		this.emit("misc");
 	}
 	constructor(...args) {
@@ -561,6 +621,10 @@ class Modals {
 		return memoize(this, "ModalsAPI", () => Webpack.findByProps("openModal", "useModalsStore")
 		);
 	}
+	static get ModalStack() {
+		return memoize(this, "ModalStack", () => Webpack.findByProps("push", "popAll")
+		);
+	}
 	static get ModalComponents() {
 		return memoize(this, "ModalComponents", () => Webpack.findByProps("ModalRoot", "ModalHeader")
 		);
@@ -593,8 +657,8 @@ class Modals {
 		}, props), DiscordModules.React.createElement(this.Text, null, content))
 		);
 	}
-	static alert(title1, content1) {
-		return this.showConfirmationModal(title1, content1, {
+	static alert(title, content) {
+		return this.showConfirmationModal(title, content, {
 			cancelText: null
 		});
 	}
@@ -777,14 +841,14 @@ async function sortAddons(addons, order, query, searchOptions, sortBy) {
 }
 function OverflowContextMenu({type: addonType}) {
 	const {default: ContextMenu, MenuRadioItem, MenuCheckboxItem, MenuControlItem, MenuSeparator, MenuGroup} = Components$1.byProps("MenuItem", "default");
-	const [sortBy, searchOptions, order] = DataStore.useEvent("misc", () => [
-		DataStore.getMisc(`${addonType}.sortBy`, "name"),
-		DataStore.getMisc(`${addonType}.searchOption`, {
+	const [sortBy, searchOptions, order] = DataStore1.useEvent("misc", () => [
+		DataStore1.getMisc(`${addonType}.sortBy`, "name"),
+		DataStore1.getMisc(`${addonType}.searchOption`, {
 		}),
-		DataStore.getMisc(`${addonType}.order`, "descending")
+		DataStore1.getMisc(`${addonType}.order`, "descending")
 	]
 	);
-	var _type1;
+	var _type;
 	return ( /*#__PURE__*/ React.createElement(ContextMenu, {
 		navId: "OverflowContextMenu"
 	}, /*#__PURE__*/ React.createElement(MenuControlItem, {
@@ -800,7 +864,7 @@ function OverflowContextMenu({type: addonType}) {
 		checked: order === type,
 		id: "sortBy-" + type,
 		action: () => {
-			DataStore.setMisc(void 0, `${addonType}.order`, type);
+			DataStore1.setMisc(void 0, `${addonType}.order`, type);
 		}
 	})
 	)), /*#__PURE__*/ React.createElement(MenuSeparator, {
@@ -818,7 +882,7 @@ function OverflowContextMenu({type: addonType}) {
 		checked: sortBy === type,
 		id: "sortBy-" + type,
 		action: () => {
-			DataStore.setMisc(void 0, `${addonType}.sortBy`, type);
+			DataStore1.setMisc(void 0, `${addonType}.sortBy`, type);
 		}
 	})
 	)), /*#__PURE__*/ React.createElement(MenuSeparator, {
@@ -834,10 +898,10 @@ function OverflowContextMenu({type: addonType}) {
 		key: "search-" + type,
 		id: "search-" + type,
 		label: type[0].toUpperCase() + type.slice(1),
-		checked: (_type1 = searchOptions[type]) !== null && _type1 !== void 0 ? _type1 : true,
+		checked: (_type = searchOptions[type]) !== null && _type !== void 0 ? _type : true,
 		action: () => {
 			var _type;
-			DataStore.setMisc(void 0, `${addonType}.searchOption.${type}`, !((_type = searchOptions[type]) !== null && _type !== void 0 ? _type : true));
+			DataStore1.setMisc(void 0, `${addonType}.searchOption.${type}`, !((_type = searchOptions[type]) !== null && _type !== void 0 ? _type : true));
 		}
 	})
 	))));
@@ -845,12 +909,12 @@ function OverflowContextMenu({type: addonType}) {
 function AddonPanel({manager, type}) {
 	const {React: React1} = DiscordModules;
 	const [query, setQuery] = React1.useState("");
-	const [addons1, setAddons] = React1.useState(null);
-	const [sortBy, searchOptions, order] = DataStore.useEvent("misc", () => [
-		DataStore.getMisc(`${type}.sortBy`, "name"),
-		DataStore.getMisc(`${type}.searchOption`, {
+	const [addons, setAddons] = React1.useState(null);
+	const [sortBy, searchOptions, order] = DataStore1.useEvent("misc", () => [
+		DataStore1.getMisc(`${type}.sortBy`, "name"),
+		DataStore1.getMisc(`${type}.searchOption`, {
 		}),
-		DataStore.getMisc(`${type}.order`, "descending")
+		DataStore1.getMisc(`${type}.order`, "descending")
 	]
 	);
 	const {ContextMenuActions} = DiscordModules;
@@ -904,7 +968,7 @@ function AddonPanel({manager, type}) {
 	}), /*#__PURE__*/ React.createElement(OverflowMenu, null))
 	)), /*#__PURE__*/ React.createElement("div", {
 		className: "pc-settings-card-scroller"
-	}, addons1 ? addons1.map((addon) => /*#__PURE__*/ React.createElement(AddonCard, {
+	}, addons ? addons.map((addon) => /*#__PURE__*/ React.createElement(AddonCard, {
 		addon: addon,
 		hasSettings: false,
 		manager: manager,
@@ -974,9 +1038,9 @@ class Patcher {
 			return returnValue;
 		};
 	}
-	static pushPatch(caller1, module, functionName) {
+	static pushPatch(caller, module, functionName) {
 		const patch = {
-			caller: caller1,
+			caller,
 			module,
 			functionName,
 			originalFunction: module[functionName],
@@ -990,15 +1054,15 @@ class Patcher {
 		module[functionName] = this.makeOverride(patch);
 		return this._patches.push(patch), patch;
 	}
-	static doPatch(caller2, module1, functionName1, callback, type = "after", options = {
+	static doPatch(caller, module, functionName, callback, type = "after", options = {
 		}) {
 		let {displayName} = options;
 		var ref;
-		const patch = (ref = this._patches.find((e) => e.module === module1 && e.functionName === functionName1
-		)) !== null && ref !== void 0 ? ref : this.pushPatch(caller2, module1, functionName1);
-		if (typeof displayName !== "string") displayName || module1.displayName || module1.name || module1.constructor.displayName || module1.constructor.name;
+		const patch = (ref = this._patches.find((e) => e.module === module && e.functionName === functionName
+		)) !== null && ref !== void 0 ? ref : this.pushPatch(caller, module, functionName);
+		if (typeof displayName !== "string") displayName || module.displayName || module.name || module.constructor.displayName || module.constructor.name;
 		const child = {
-			caller: caller2,
+			caller,
 			type,
 			id: patch.count,
 			callback,
@@ -1006,7 +1070,7 @@ class Patcher {
 				patch.children.splice(patch.children.findIndex((cpatch) => cpatch.id === child.id && cpatch.type === type
 				), 1);
 				if (patch.children.length <= 0) {
-					const patchNum = this._patches.findIndex((p) => p.module == module1 && p.functionName == functionName1
+					const patchNum = this._patches.findIndex((p) => p.module == module && p.functionName == functionName
 					);
 					this._patches[patchNum].undo();
 					this._patches.splice(patchNum, 1);
@@ -1017,14 +1081,14 @@ class Patcher {
 		patch.count++;
 		return child.unpatch;
 	}
-	static before(caller3, module2, functionName2, callback1) {
-		return this.doPatch(caller3, module2, functionName2, callback1, "before");
+	static before(caller, module, functionName, callback) {
+		return this.doPatch(caller, module, functionName, callback, "before");
 	}
-	static after(caller4, module3, functionName3, callback2) {
-		return this.doPatch(caller4, module3, functionName3, callback2, "after");
+	static after(caller, module, functionName, callback) {
+		return this.doPatch(caller, module, functionName, callback, "after");
 	}
-	static instead(caller5, module4, functionName4, callback3) {
-		return this.doPatch(caller5, module4, functionName4, callback3, "instead");
+	static instead(caller, module, functionName, callback) {
+		return this.doPatch(caller, module, functionName, callback, "instead");
 	}
 }
 Patcher._patches = [];
@@ -1049,7 +1113,7 @@ function SettingsPanel({store, name, children, header =null}) {
 
 let SettingsModule;
 Webpack.once("LOADED", () => {
-	SettingsModule = class SettingsModule extends DiscordModules.Flux.Store {
+	SettingsModule = class SettingsModule1 extends DiscordModules.Flux.Store {
 		connectStore() {
 			return DiscordModules.Flux.connectStores([
 				this
@@ -1064,7 +1128,7 @@ Webpack.once("LOADED", () => {
 				toggleSetting: this.toggle.bind(this)
 			};
 		}
-		constructor(id1) {
+		constructor(id) {
 			super(DiscordModules.Dispatcher, {
 			});
 			this.getKeys = () => {
@@ -1083,11 +1147,11 @@ Webpack.once("LOADED", () => {
 				} else {
 					this.settings[id] = value;
 				}
-				DataStore.trySaveData(this.id, this.settings);
+				DataStore1.trySaveData(this.id, this.settings);
 				this.emitChange();
 			};
-			this.settings = DataStore.tryLoadData(id1);
-			this.id = id1;
+			this.settings = DataStore1.tryLoadData(id);
+			this.id = id;
 		}
 	}
 	;
@@ -1130,8 +1194,8 @@ class SettingsRenderer {
 			return true;
 		};
 	}
-	static unregisterPanel(id1) {
-		const panel = this.panels.findIndex((e) => e.id === id1
+	static unregisterPanel(id) {
+		const panel = this.panels.findIndex((e) => e.id === id
 		);
 		if (panel < 0) return;
 		this.panels.splice(panel, 1);
@@ -1168,19 +1232,19 @@ class Emitter {
 	static has(event) {
 		return event in this.events;
 	}
-	static on(event1, listener) {
-		if (!this.has(event1))
-			this.events[event1] = new Set();
-		this.events[event1].add(listener);
-		return this.off.bind(this, event1, listener);
+	static on(event, listener) {
+		if (!this.has(event))
+			this.events[event] = new Set();
+		this.events[event].add(listener);
+		return this.off.bind(this, event, listener);
 	}
-	static off(event2, listener1) {
-		if (!this.has(event2)) return;
-		return this.events[event2].delete(listener1);
+	static off(event, listener) {
+		if (!this.has(event)) return;
+		return this.events[event].delete(listener);
 	}
-	static emit(event3, ...args) {
-		if (!this.has(event3)) return;
-		for (const listener of this.events[event3]) {
+	static emit(event, ...args) {
+		if (!this.has(event)) return;
+		for (const listener of this.events[event]) {
 			try {
 				listener(...args);
 			} catch (error) {
@@ -1205,7 +1269,7 @@ class PluginManager extends Emitter {
 				manager: this
 			})
 		});
-		this.states = DataStore.tryLoadData("plugins");
+		this.states = DataStore1.tryLoadData("plugins");
 		this.loadAllPlugins();
 	}
 	static loadAllPlugins() {
@@ -1245,7 +1309,7 @@ class PluginManager extends Emitter {
 		return pluginOrName;
 	}
 	static saveData() {
-		DataStore.trySaveData("plugins", this.states);
+		DataStore1.trySaveData("plugins", this.states);
 	}
 	static isEnabled(addon) {
 		const plugin = this.resolve(addon);
@@ -1279,18 +1343,18 @@ class PluginManager extends Emitter {
 			this.startPlugin(exports);
 		}
 	}
-	static unloadAddon(addon1, log1 = true) {
-		const plugin = this.resolve(addon1);
-		if (!addon1) return;
+	static unloadAddon(addon, log = true) {
+		const plugin = this.resolve(addon);
+		if (!addon) return;
 		this.stopPlugin(plugin);
 		this.plugins.delete(plugin.entityID);
-		if (log1) {
+		if (log) {
 			Logger.log("PluginsManager", `${plugin.displayName} was unloaded!`);
 		}
 	}
-	static reloadPlugin(addon2) {
-		const plugin = this.resolve(addon2);
-		if (!addon2) return;
+	static reloadPlugin(addon) {
+		const plugin = this.resolve(addon);
+		if (!addon) return;
 		const success = this.stopPlugin(plugin, false);
 		if (!success) {
 			return Logger.error("PluginsManager", `Something went wrong while trying to enable ${plugin.displayName}:`);
@@ -1298,12 +1362,12 @@ class PluginManager extends Emitter {
 		this.startPlugin(plugin, false);
 		Logger.log("PluginsManager", `Finished reloading ${plugin.displayName}.`);
 	}
-	static startPlugin(addon3, log2 = true) {
-		const plugin = this.resolve(addon3);
+	static startPlugin(addon, log = true) {
+		const plugin = this.resolve(addon);
 		if (!plugin) return;
 		try {
 			if (typeof plugin.startPlugin === "function") plugin.startPlugin();
-			if (log2) {
+			if (log) {
 				Logger.log("PluginsManager", `${plugin.displayName} has been started!`);
 			}
 		} catch (error) {
@@ -1311,12 +1375,12 @@ class PluginManager extends Emitter {
 		}
 		return true;
 	}
-	static stopPlugin(addon4, log3 = true) {
-		const plugin = this.resolve(addon4);
+	static stopPlugin(addon, log = true) {
+		const plugin = this.resolve(addon);
 		if (!plugin) return;
 		try {
 			if (typeof plugin.pluginWillUnload === "function") plugin.pluginWillUnload();
-			if (log3) {
+			if (log) {
 				Logger.log("PluginsManager", `${plugin.displayName} has been stopped!`);
 			}
 		} catch (error) {
@@ -1325,30 +1389,30 @@ class PluginManager extends Emitter {
 		}
 		return true;
 	}
-	static enablePlugin(addon5, log4 = true) {
-		const plugin = this.resolve(addon5);
+	static enablePlugin(addon, log = true) {
+		const plugin = this.resolve(addon);
 		if (!plugin) return;
 		this.states[plugin.entityID] = true;
-		DataStore.trySaveData("plugins", this.states);
+		DataStore1.trySaveData("plugins", this.states);
 		this.startPlugin(plugin, false);
-		if (log4) {
+		if (log) {
 			Logger.log("PluginsManager", `${plugin.displayName} has been enabled!`);
 			this.emit("toggle", plugin.entityID, true);
 		}
 	}
-	static disablePlugin(addon6, log5 = true) {
-		const plugin = this.resolve(addon6);
+	static disablePlugin(addon, log = true) {
+		const plugin = this.resolve(addon);
 		if (!plugin) return;
 		this.states[plugin.entityID] = false;
-		DataStore.trySaveData("plugins", this.states);
+		DataStore1.trySaveData("plugins", this.states);
 		this.stopPlugin(plugin, false);
-		if (log5) {
+		if (log) {
 			Logger.log("PluginsManager", `${plugin.displayName} has been disabled!`);
 			this.emit("toggle", plugin.entityID, false);
 		}
 	}
-	static toggle(addon7) {
-		const plugin = this.resolve(addon7);
+	static toggle(addon) {
+		const plugin = this.resolve(addon);
 		if (!plugin) return;
 		if (this.isEnabled(plugin.entityID)) this.disable(plugin);
 		else this.enable(plugin);
@@ -1363,7 +1427,7 @@ class PluginManager extends Emitter {
 		return this.reloadPlugin;
 	}
 }
-PluginManager.folder = path.resolve(DataStore.baseDir, "plugins");
+PluginManager.folder = path.resolve(DataStore1.baseDir, "plugins");
 PluginManager.mainFiles = [
 	"index.js",
 	"index.jsx"
@@ -1386,14 +1450,14 @@ class Plugin {
 	log(...messages) {
 		console.log(`%c[Powercord:Plugin:${this.constructor.name}]`, `color: ${this.color};`, ...messages);
 	}
-	debug(...messages1) {
-		console.debug(`%c[Powercord:Plugin:${this.constructor.name}]`, `color: ${this.color};`, ...messages1);
+	debug(...messages) {
+		console.debug(`%c[Powercord:Plugin:${this.constructor.name}]`, `color: ${this.color};`, ...messages);
 	}
-	warn(...messages2) {
-		console.warn(`%c[Powercord:Plugin:${this.constructor.name}]`, `color: ${this.color};`, ...messages2);
+	warn(...messages) {
+		console.warn(`%c[Powercord:Plugin:${this.constructor.name}]`, `color: ${this.color};`, ...messages);
 	}
-	error(...messages3) {
-		console.error(`%c[Powercord:Plugin:${this.constructor.name}]`, `color: ${this.color};`, ...messages3);
+	error(...messages) {
+		console.error(`%c[Powercord:Plugin:${this.constructor.name}]`, `color: ${this.color};`, ...messages);
 	}
 	// "Internals" :zere_zoom:
 	_load() {
@@ -1406,12 +1470,12 @@ class Plugin {
 	get displayName() {
 		return this.manifest.name;
 	}
-	constructor(id, _path1) {
+	constructor(id, _path) {
 		this.stylesheets = {
 		};
 		this.color = "#7289da";
 		this.entityID = id;
-		this.path = _path1;
+		this.path = _path;
 		this.settings = getSettings(id);
 	}
 }
@@ -1421,7 +1485,7 @@ var entities = /*#__PURE__*/ Object.freeze({
 	Plugin: Plugin
 });
 
-var index$3 = /*#__PURE__*/ Object.freeze({
+var index$2 = /*#__PURE__*/ Object.freeze({
 	__proto__: null,
 	plugins: PluginManager
 });
@@ -1519,7 +1583,7 @@ var commands$1 = /*#__PURE__*/ Object.freeze({
 	unregisterCommand: unregisterCommand
 });
 
-var index$2 = /*#__PURE__*/ Object.freeze({
+var index$1 = /*#__PURE__*/ Object.freeze({
 	__proto__: null,
 	settings: settings,
 	commands: commands$1
@@ -1598,10 +1662,49 @@ var util = /*#__PURE__*/ Object.freeze({
 	forceUpdateElement: forceUpdateElement
 });
 
+let ModalContext = null;
+Webpack.wait(() => {
+	ModalContext = React.createContext(null);
+});
+function open(Component) {
+	const {ModalsAPI} = Modals;
+	return ModalsAPI.openModal((props) => {
+		return React.createElement(ModalContext.Provider, {
+			value: props
+		}, React.createElement(Component, props));
+	});
+}
+function close() {
+	var ref,
+		ref1,
+		ref2,
+		ref3,
+		ref4;
+	const {ModalsAPI} = Modals;
+	const lastModal = (ref4 = (ref = ModalsAPI.useModalsStore) === null || ref === void 0 ? void 0 : (ref1 = ref.getState) === null || ref1 === void 0 ? void 0 : (ref2 = ref1.call(ref)) === null || ref2 === void 0 ? void 0 : (ref3 = ref2.default) === null || ref3 === void 0 ? void 0 : ref3.slice(-1)[0]) === null || ref4 === void 0 ? void 0 : ref4.key;
+	if (!lastModal) return;
+	ModalsAPI.closeModal(lastModal);
+}
+function closeAll() {
+	const {ModalsAPI} = Modals;
+	ModalsAPI.closeAllModals();
+}
+
+var modal = /*#__PURE__*/ Object.freeze({
+	__proto__: null,
+	get ModalContext() {
+		return ModalContext;
+	},
+	open: open,
+	close: close,
+	closeAll: closeAll
+});
+
 var components = {
 	SwitchItem: {
 		updater: true,
-		filter: "SwitchItem"
+		filter: "SwitchItem",
+		settings: true
 	}
 };
 
@@ -1672,13 +1775,13 @@ function _extends() {
 	};
 	return _extends.apply(this, arguments);
 }
-function RadioGroup({children, note, value: value1, onChange, ...props}) {
+function RadioGroup({children, note, value, onChange, ...props}) {
 	const {React: React1, Forms} = DiscordModules;
 	const RadioGroup1 = Components$1.get("RadioGroup");
 	console.log({
-		value: value1
+		value
 	});
-	const [state, setValue] = React1.useState(value1);
+	const [state, setValue] = React1.useState(value);
 	return ( /*#__PURE__*/ React.createElement(Forms.FormItem, {
 		title: children
 	}, note && /*#__PURE__*/ React.createElement(Forms.FormText, {
@@ -1690,15 +1793,70 @@ function RadioGroup({children, note, value: value1, onChange, ...props}) {
 		}))));
 }
 
+const WebpackPromise = Webpack.wait();
+const Modal = {
+};
+WebpackPromise.then(() => {
+	const ModalComponents = Webpack.findByProps("ModalRoot");
+	const keys = omit(Object.keys(ModalComponents), "default", "ModalRoot");
+	const props = Object.fromEntries(keys.map((key) => [
+		key === "ModalSize" ? "Sizes" : key.slice("Modal".length),
+		ModalComponents[key]
+	]
+	));
+	const BindProps = (ModalComponent) => (props) => {
+		const modalProps = React.useContext(ModalContext);
+		return React.createElement(ModalComponent, Object.assign({
+		}, modalProps, props));
+	};
+	Object.assign(Modal, props, {
+		Confirm: Object.assign(BindProps(Webpack.findByDisplayName("ConfirmModal")), {
+			displayName: "PowercordModal"
+		}),
+		Modal: Object.assign(BindProps(ModalComponents.ModalRoot), {
+			displayName: "PowercordModal"
+		}, props)
+	});
+});
+
+function Category({children, opened, onChange, name, description}) {
+	const Caret = Components$1.get("Caret");
+	return ( /*#__PURE__*/ React.createElement("div", {
+		className: joinClassNames("pc-category", [
+			opened,
+			"pc-category-opened"
+		])
+	}, /*#__PURE__*/ React.createElement("div", {
+		className: "pc-category-header",
+		onClick: onChange
+	}, /*#__PURE__*/ React.createElement("div", {
+		className: "pc-category-label"
+	}, name), /*#__PURE__*/ React.createElement("div", {
+		className: "pc-category-stroke"
+	}), /*#__PURE__*/ React.createElement(Caret, {
+		direction: opened ? Caret.Directions.DOWN : Caret.Directions.LEFT,
+		className: "pc-category-caret"
+	})), /*#__PURE__*/ React.createElement("div", {
+		className: "pc-category-content"
+	}, opened && children), /*#__PURE__*/ React.createElement("div", {
+		className: "pc-category-description"
+	}, description)));
+}
+
 let Components = {
-	TextInput,
-	RadioGroup
+	settings: {
+		TextInput,
+		RadioGroup,
+		Category
+	},
+	AsyncComponent,
+	modal: Modal
 };
 (() => {
 	const cache = new Map();
 	for (const id in components) {
 		const options = components[id];
-		Components[id] = (props) => {
+		(options.settings ? Components.settings : Components)[id] = (props) => {
 			if (!cache.has(id)) {
 				const module = typeof options.filter === "function" ? Webpack.findModule(options.filter) : typeof options.filter === "string" ? Webpack.findByDisplayName(options.filter) : Array.isArray(options.filter) ? Webpack.findByProps(options.filter) : null;
 				if (!module) return null;
@@ -1708,11 +1866,11 @@ let Components = {
 			return DiscordModules.React.createElement(Component, props);
 		};
 	}
+	Webpack.wait(() => {
+		const Forms = Webpack.findByProps("FormItem");
+		Object.assign(Components, Forms);
+	});
 })();
-var index$1 = {
-	settings: Components,
-	AsyncComponent
-};
 
 var modules = {
 	messages: [
@@ -1872,10 +2030,11 @@ const injector = {
 var powercord$1 = /*#__PURE__*/ Object.freeze({
 	__proto__: null,
 	entities: entities,
-	managers: index$3,
-	api: index$2,
+	managers: index$2,
+	api: index$1,
 	util: util,
-	components: index$1,
+	modal: modal,
+	components: Components,
 	webpack: webpack,
 	injector: injector
 });
@@ -1948,17 +2107,17 @@ class Module {
         })`);
 		wrapped(this.require, this, this.exports, this.filename, this.path, window);
 	}
-	constructor(id, parent1, require1) {
+	constructor(id, parent, require) {
 		this.id = id;
 		this.path = path.dirname(id);
 		this.exports = {
 		};
-		this.parent = parent1;
+		this.parent = parent;
 		this.filename = id;
 		this.loaded = false;
 		this.children = [];
-		this.require = require1;
-		if (parent1) parent1.children.push(this);
+		this.require = require;
+		if (parent) parent.children.push(this);
 	}
 }
 function resolve(path) {
@@ -1984,9 +2143,9 @@ function createRequire(_path) {
 				return NodeModule;
 			default: {
 				if (mod.startsWith("powercord/")) {
-					const value1 = mod.split("/").slice(1).reduce((value, key) => value[key]
+					const value = mod.split("/").slice(1).reduce((value, key) => value[key]
 						, powercord$1);
-					if (value1) return value1;
+					if (value) return value;
 				}
 				return load(_path, mod);
 			}

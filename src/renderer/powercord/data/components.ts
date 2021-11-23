@@ -1,6 +1,7 @@
 export default {
     SwitchItem: {
         updater: true,
-        filter: "SwitchItem"
+        filter: "SwitchItem",
+        settings: true
     }
 };

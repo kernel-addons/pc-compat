@@ -76,6 +76,9 @@ const nodeModulesPath = path__default["default"].resolve(process.cwd(), "resourc
 // @ts-ignore - Push modules
 if (!Module__default["default"].globalPaths.includes(nodeModulesPath)) Module__default["default"].globalPaths.push(nodeModulesPath);
 const API = {
+	getAppPath() {
+		return;
+	},
 	executeJS(js) {
 		return eval(js);
 	},

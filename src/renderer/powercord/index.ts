@@ -5,3 +5,4 @@ export * as entities from "./entities";
 export * as managers from "./managers/index"
 export * as api from "./api/index";
 export * as util from "./util";
+export * as modal from "./modal";

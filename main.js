@@ -28,16 +28,17 @@ if (process.argv.join("").includes("--debug")) {
 // Main
 const COMPILE_SASS = "pccompat-compile-sass";
 const COMPILE_JSX = "pccompat-compile-jsx";
+const GET_APP_PATH = "pccompat-get-app-path";
 
+electron.ipcMain.on(GET_APP_PATH, (event) => {
+	event.returnValue = electron.app.getAppPath();
+});
 electron.ipcMain.on(COMPILE_SASS, (event, file) => {
 	let result = "";
 	try {
 		// @ts-ignore
 		let abc = sass__default["default"].renderSync({
 			file
-		});
-		console.log({
-			abc
 		});
 		result = abc.css.toString();
 	} catch (error) {

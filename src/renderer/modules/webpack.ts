@@ -17,7 +17,7 @@ export const Events = {
     LOADED: "LOADED"
 };
 
-const Webpack = window.Webpack ?? (window.Webpack = new class Webpack {
+export class WebpackModule {
     #events = Object.fromEntries(Object.keys(Events).map(key => [key, new Set()]));
     #cache = null;
     get Events() {return Events;}
@@ -194,7 +194,7 @@ const Webpack = window.Webpack ?? (window.Webpack = new class Webpack {
                 : this.findModule(filter.bind(null, displayNames[0]), false, cache);
     }
 
-    async wait(callback) {
+    async wait(callback = null) {
         return new Promise(resolve => {
             this.once(Events.LOADED, () => {
                 resolve();
@@ -208,6 +208,8 @@ const Webpack = window.Webpack ?? (window.Webpack = new class Webpack {
             this.once(Events.CREATE, resolve);
         });
     }
-});
+}
+
+const Webpack: WebpackModule = window.Webpack ?? (window.Webpack = new WebpackModule);
 
 export default Webpack;

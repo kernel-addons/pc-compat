@@ -5,6 +5,8 @@ import Webpack from "../modules/webpack.js";
 export default class Modals {
     static get ModalsAPI() {return memoize(this, "ModalsAPI", () => Webpack.findByProps("openModal", "useModalsStore"));}
 
+    static get ModalStack() {return memoize(this, "ModalStack", () => Webpack.findByProps("push", "popAll"));}
+
     static get ModalComponents() {return memoize(this, "ModalComponents", () => Webpack.findByProps("ModalRoot", "ModalHeader"));}
 
     static get Forms() {return memoize(this, "Forms", () => Webpack.findByProps("FormTitle", "FormItem"));}
