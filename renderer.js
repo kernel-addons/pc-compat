@@ -1,1 +1,3 @@
-import("./dist/renderer.js");
+import Renderer from "./dist/renderer.js";
+
+export default Renderer;

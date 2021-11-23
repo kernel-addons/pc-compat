@@ -1,5 +1,5 @@
 import IPC, {events} from "./ipc";
-import {contextBridge} from "electron";
+import {contextBridge, ipcRenderer} from "electron";
 import {cloneObject} from "../common/util";
 import Module from "module";
 import path from "path";
@@ -11,7 +11,10 @@ if (!Module.globalPaths.includes(nodeModulesPath)) Module.globalPaths.push(nodeM
 
 const API = {
     getAppPath() {
-        return 
+        return ipcRenderer.sendSync(IPCEvents.GET_APP_PATH);
+    },
+    getBasePath() {
+        return path.resolve(__dirname, "..");
     },
     executeJS(js: string) {
         return eval(js);

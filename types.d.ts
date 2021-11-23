@@ -1,6 +1,7 @@
 declare const PCCompatNative: {
     executeJS(js: string): any;
     getAppPath(): string;
+    getBasePath(): string;
     IPC: {
         on(event: string, callback: Function): () => void;
         off(event: string, callback: Function): void;

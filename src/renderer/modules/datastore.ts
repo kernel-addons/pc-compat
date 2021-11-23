@@ -5,7 +5,7 @@ import Logger from "./logger";
 import {getProps, setProps} from "./utilities";
 
 const DataStore = new class DataStore extends Store<"misc" | "data-update"> {
-    baseDir: string = path.resolve(PCCompatNative.executeJS("__dirname"));
+    baseDir: string = path.resolve(PCCompatNative.getBasePath());
 
     configFolder = path.resolve(this.baseDir, "config");
 

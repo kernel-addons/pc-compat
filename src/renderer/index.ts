@@ -27,7 +27,7 @@ export default new class PCCompat {
             writable: false
         });
 
-        DOM.injectCSS("core", Require(path.resolve(PCCompatNative.executeJS("__dirname"), "src/renderer/styles", "index.scss")));
+        DOM.injectCSS("core", Require(path.resolve(PCCompatNative.getBasePath(), "src/renderer/styles", "index.scss")));
 
         SettingsRenderer.patchSettingsView();
         PluginManager.initialize();
