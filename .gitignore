@@ -4,7 +4,9 @@ _plugins
 themes
 config
 node_modules
+dist
 # Add to whitelist
 !plugins/.gitkeep
 !themes/.gitkeep
 !config/.gitkeep
+!dist/.gitkeep

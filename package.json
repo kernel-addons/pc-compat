@@ -4,7 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build-renderer": "rollup -c --mode=renderer",
+    "build-main": "rollup -c --mode=main",
+    "build-preload": "rollup -c --mode=preload",
+    "dist": "npm run build-renderer && npm run build-main && npm run build-preload"
   },
   "keywords": [],
   "author": "",

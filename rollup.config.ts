@@ -14,7 +14,7 @@ export default args => {
         external: ["electron", "fs", "path", "module", "sucrase", "sass", "inspector"],
         output: {
             format: mode === "renderer" ? "esm" : "commonjs",
-            file: `${mode}.js`
+            file: `./dist/${mode}.js`
         },
 
         plugins: [
