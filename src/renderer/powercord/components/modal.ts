@@ -2,11 +2,9 @@ import {omit} from "../../modules/utilities";
 import Webpack from "../../modules/webpack";
 import * as ModalActions from "../modal";
 
-const WebpackPromise = Webpack.wait();
-
 const Modal = {};
 
-WebpackPromise.then(() => {
+Webpack.whenReady.then(() => {
     const ModalComponents = Webpack.findByProps("ModalRoot");
     const keys = omit(Object.keys(ModalComponents), "default", "ModalRoot");
     const props = Object.fromEntries(

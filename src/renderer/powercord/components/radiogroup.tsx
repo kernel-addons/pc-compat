@@ -4,7 +4,6 @@ import Components from "../../modules/components";
 export default function RadioGroup({children, note, value, onChange, ...props}) {
     const {React, Forms} = DiscordModules;
     const RadioGroup = Components.get("RadioGroup");
-    console.log({value});
     const [state, setValue] = React.useState(value);
 
     return (

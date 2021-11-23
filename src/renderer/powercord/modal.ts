@@ -3,7 +3,7 @@ import Modals from "../ui/modals";
 
 export let ModalContext = null;
 
-Webpack.wait(() => {
+Webpack.whenReady.then(() => {
     ModalContext = React.createContext(null);
 });
 

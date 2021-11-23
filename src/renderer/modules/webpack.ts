@@ -18,6 +18,7 @@ export const Events = {
 };
 
 export class WebpackModule {
+    whenReady: Promise<void>;
     #events = Object.fromEntries(Object.keys(Events).map(key => [key, new Set()]));
     #cache = null;
     get Events() {return Events;}
@@ -211,5 +212,5 @@ export class WebpackModule {
 }
 
 const Webpack: WebpackModule = window.Webpack ?? (window.Webpack = new WebpackModule);
-
+if (!Webpack.whenReady) Webpack.whenReady = Webpack.wait();
 export default Webpack;

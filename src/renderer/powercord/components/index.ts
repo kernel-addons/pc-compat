@@ -44,7 +44,7 @@ let Components = {
         }
     }
 
-    Webpack.wait(() => {
+    Webpack.whenReady.then(() => {
         const Forms = Webpack.findByProps("FormItem");
 
         Object.assign(Components, Forms);

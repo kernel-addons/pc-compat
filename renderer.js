@@ -261,6 +261,8 @@ function parseOptions(args, filter = (thing) => typeof thing === "object" && thi
 }
 var _Webpack;
 const Webpack = (_Webpack = window.Webpack) !== null && _Webpack !== void 0 ? _Webpack : window.Webpack = new WebpackModule;
+if (!Webpack.whenReady)
+	Webpack.whenReady = Webpack.wait();
 
 // Main
 const COMPILE_SASS = "pccompat-compile-sass";
@@ -1669,7 +1671,7 @@ var util = /*#__PURE__*/ Object.freeze({
 });
 
 let ModalContext = null;
-Webpack.wait(() => {
+Webpack.whenReady.then(() => {
 	ModalContext = React.createContext(null);
 });
 function open(Component) {
@@ -1784,9 +1786,6 @@ function _extends() {
 function RadioGroup({children, note, value, onChange, ...props}) {
 	const {React: React1, Forms} = DiscordModules;
 	const RadioGroup1 = Components$1.get("RadioGroup");
-	console.log({
-		value
-	});
 	const [state, setValue] = React1.useState(value);
 	return ( /*#__PURE__*/ React.createElement(Forms.FormItem, {
 		title: children
@@ -1799,10 +1798,9 @@ function RadioGroup({children, note, value, onChange, ...props}) {
 		}))));
 }
 
-const WebpackPromise$1 = Webpack.wait();
 const Modal = {
 };
-WebpackPromise$1.then(() => {
+Webpack.whenReady.then(() => {
 	const ModalComponents = Webpack.findByProps("ModalRoot");
 	const keys = omit(Object.keys(ModalComponents), "default", "ModalRoot");
 	const props = Object.fromEntries(keys.map((key) => [
@@ -1872,7 +1870,7 @@ let Components = {
 			return DiscordModules.React.createElement(Component, props);
 		};
 	}
-	Webpack.wait(() => {
+	Webpack.whenReady.then(() => {
 		const Forms = Webpack.findByProps("FormItem");
 		Object.assign(Components, Forms);
 	});
@@ -2034,14 +2032,13 @@ const injector = {
 };
 
 let initialized = false;
-const WebpackPromise = Webpack.wait();
-WebpackPromise.then(() => {
+Webpack.whenReady.then(() => {
 	initialized = true;
 });
 function once(event, callback) {
 	switch (event) {
 		case "loaded": {
-			return WebpackPromise.then(callback);
+			return Webpack.whenReady.then(callback);
 		}
 	}
 }

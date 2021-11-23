@@ -11,16 +11,14 @@ export * as modal from "./modal";
 
 export let initialized = false;
 
-const WebpackPromise = Webpack.wait();
-
-WebpackPromise.then(() => {
+Webpack.whenReady.then(() => {
     initialized = true;
 });
 
 export function once(event: string, callback: Function) {
     switch (event) {
         case "loaded": {
-            return WebpackPromise.then(callback as unknown as any);
+            return Webpack.whenReady.then(callback as unknown as any);
         }
     }
 }
