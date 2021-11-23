@@ -547,9 +547,15 @@ const ipcRenderer = PCCompatNative.executeJS(`Object.keys(require("electron").ip
 }, {
 });
 const shell = PCCompatNative.executeJS(`require("electron").shell`);
+const contextBridge = {
+	exposeInMainWorld(name, value) {
+		window[name] = value;
+	}
+};
 const electron = {
 	ipcRenderer,
-	shell
+	shell,
+	contextBridge
 };
 
 const DataStore1 = new class DataStore extends Store {
@@ -1793,10 +1799,10 @@ function RadioGroup({children, note, value, onChange, ...props}) {
 		}))));
 }
 
-const WebpackPromise = Webpack.wait();
+const WebpackPromise$1 = Webpack.wait();
 const Modal = {
 };
-WebpackPromise.then(() => {
+WebpackPromise$1.then(() => {
 	const ModalComponents = Webpack.findByProps("ModalRoot");
 	const keys = omit(Object.keys(ModalComponents), "default", "ModalRoot");
 	const props = Object.fromEntries(keys.map((key) => [
@@ -2027,6 +2033,19 @@ const injector = {
 	isInjected
 };
 
+let initialized = false;
+const WebpackPromise = Webpack.wait();
+WebpackPromise.then(() => {
+	initialized = true;
+});
+function once(event, callback) {
+	switch (event) {
+		case "loaded": {
+			return WebpackPromise.then(callback);
+		}
+	}
+}
+
 var powercord$1 = /*#__PURE__*/ Object.freeze({
 	__proto__: null,
 	entities: entities,
@@ -2034,6 +2053,10 @@ var powercord$1 = /*#__PURE__*/ Object.freeze({
 	api: index$1,
 	util: util,
 	modal: modal,
+	get initialized() {
+		return initialized;
+	},
+	once: once,
 	components: Components,
 	webpack: webpack,
 	injector: injector
@@ -2141,6 +2164,8 @@ function createRequire(_path) {
 				return fs;
 			case "module":
 				return NodeModule;
+			case "electron":
+				return electron;
 			default: {
 				if (mod.startsWith("powercord/")) {
 					const value = mod.split("/").slice(1).reduce((value, key) => value[key]

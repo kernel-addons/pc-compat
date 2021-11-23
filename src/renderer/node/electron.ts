@@ -5,7 +5,12 @@ const ipcRenderer: typeof import("electron/renderer").ipcRenderer = PCCompatNati
 }, {});
 
 const shell: typeof import("electron").shell = PCCompatNative.executeJS(`require("electron").shell`);
+const contextBridge: typeof import("electron").contextBridge = {
+    exposeInMainWorld(name: string, value: any) {
+        window[name] = value;
+    }
+};
 
-const electron = {ipcRenderer, shell};
+const electron = {ipcRenderer, shell, contextBridge};
 
 export default electron;

@@ -2,6 +2,7 @@ import fs from "./fs";
 import path from "./path";
 import * as powercord from "../powercord/index";
 import {JSX, SASS} from "../powercord/compilers";
+import electron from "./electron";
 
 export const cache = {};
 export const extensions = {
@@ -105,6 +106,7 @@ export function createRequire(_path: string): Require {
             case "path": return path;
             case "fs": return fs;
             case "module": return NodeModule;
+            case "electron": return electron;
 
             default: {
                 if (mod.startsWith("powercord/")) {
