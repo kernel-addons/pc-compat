@@ -13,14 +13,14 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/lodash": "^4.14.176"
+  },
+  "dependencies": {
     "@rollup/plugin-node-resolve": "^13.0.6",
-    "@types/lodash": "^4.14.176",
     "esformatter-quotes": "^1.1.0",
     "rollup": "^2.59.0",
     "rollup-plugin-esformatter": "^2.0.1",
-    "rollup-plugin-swc": "^0.2.0"
-  },
-  "dependencies": {
+    "rollup-plugin-swc": "^0.2.0",
     "@types/react": "^17.0.34",
     "@types/react-dom": "^17.0.11",
     "sass": "^1.43.4",
