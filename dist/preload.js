@@ -15,6 +15,7 @@ var path__default = /*#__PURE__*/ _interopDefaultLegacy(path);
 
 // Main
 const MAIN_EVENT = "pccompat-main-event";
+const GET_APP_PATH = "pccompat-get-app-path";
 // Preload
 const EXPOSE_PROCESS_GLOBAL = "pccompat-expose-process-global";
 
@@ -77,7 +78,10 @@ const nodeModulesPath = path__default["default"].resolve(process.cwd(), "resourc
 if (!Module__default["default"].globalPaths.includes(nodeModulesPath)) Module__default["default"].globalPaths.push(nodeModulesPath);
 const API = {
 	getAppPath() {
-		return;
+		return electron.ipcRenderer.sendSync(GET_APP_PATH);
+	},
+	getBasePath() {
+		return path__default["default"].resolve(__dirname, "..");
 	},
 	executeJS(js) {
 		return eval(js);

@@ -590,7 +590,7 @@ const DataStore = new class DataStore extends Store {
 	}
 	constructor(...args) {
 		super(...args);
-		this.baseDir = path.resolve(PCCompatNative.executeJS("__dirname"));
+		this.baseDir = path.resolve(PCCompatNative.getBasePath());
 		this.configFolder = path.resolve(this.baseDir, "config");
 	}
 };
@@ -2226,7 +2226,7 @@ const NodeModule = {
 	globalPaths: []
 };
 
-var Require = createRequire(path.resolve(PCCompatNative.executeJS("__dirname"), "plugins"));
+var Require = createRequire(path.resolve(PCCompatNative.getBasePath(), "plugins"));
 
 if (!("process" in window)) {
 	PCCompatNative.IPC.dispatch(EXPOSE_PROCESS_GLOBAL);
@@ -2245,7 +2245,7 @@ var index = new class PCCompat {
 			configurable: false,
 			writable: false
 		});
-		DOM.injectCSS("core", Require(path.resolve(PCCompatNative.executeJS("__dirname"), "src/renderer/styles", "index.scss")));
+		DOM.injectCSS("core", Require(path.resolve(PCCompatNative.getBasePath(), "src/renderer/styles", "index.scss")));
 		SettingsRenderer.patchSettingsView();
 		PluginManager.initialize();
 	}
