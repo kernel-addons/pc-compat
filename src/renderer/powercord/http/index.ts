@@ -1,6 +1,6 @@
 import { default as GenericRequest } from "./GenericRequest";
 
-export const http = {
+export default {
   get (url) {
     return new GenericRequest("GET", url);
   },
