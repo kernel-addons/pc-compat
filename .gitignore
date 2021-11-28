@@ -1,13 +1,12 @@
 # Ignore those
 plugins
-_plugins
 themes
 config
 node_modules
 dist
 pnpm-lock.yaml
 # Add to whitelist
-!plugins/.gitkeep
-!themes/.gitkeep
-!config/.gitkeep
-!dist/.gitkeep
+!./plugins/.gitkeep
+!./themes/.gitkeep
+!./config/.gitkeep
+!./dist/.gitkeep

@@ -1,3 +1,4 @@
+import {DiscordModules, DOM} from "./modules";
 import Webpack from "./modules/webpack";
 import * as IPCEvents from "../common/ipcevents";
 import Require from "./node/require";
@@ -5,7 +6,6 @@ import {init as initializeWebpack} from "./powercord/webpack";
 import PluginManager from "./powercord/pluginmanager";
 import SettingsRenderer from "./modules/settings";
 import {path} from "./node";
-import {DiscordModules, DOM} from "./modules";
 
 if (!("process" in window)) {
     PCCompatNative.IPC.dispatch(IPCEvents.EXPOSE_PROCESS_GLOBAL);

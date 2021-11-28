@@ -5,6 +5,18 @@ import Logger from "./logger";
 import {getProps, setProps} from "./utilities";
 
 const DataStore = new class DataStore extends Store<"misc" | "data-update"> {
+    constructor() {
+        super();
+
+        if (!fs.existsSync(this.configFolder)) {
+            try {
+                fs.mkdirSync(this.configFolder);
+            } catch (error) {
+                Logger.error("Failed to create config folder:", error);
+            }
+        }
+    }
+
     baseDir: string = path.resolve(PCCompatNative.getBasePath());
 
     configFolder = path.resolve(this.baseDir, "config");

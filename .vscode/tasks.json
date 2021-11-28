@@ -1,0 +1,25 @@
+{
+    "version": "2.0.0",
+    "command": "pnpx",
+    "tasks": [
+        {
+            "label": "Build Context",
+            "type": "shell",
+            "problemMatcher": [],
+            "command": "pnpx rollup -c --mode=${input:context}"
+        },
+        {
+            "label": "Watch Context",
+            "type": "shell",
+            "problemMatcher": [],
+            "command": "pnpx rollup -c --mode=${input:context} --watch"
+        }
+    ],
+    "inputs": [
+        {
+            "id": "context",
+            "description": "The context you want to build.",
+            "type": "promptString"
+        }
+    ]
+}

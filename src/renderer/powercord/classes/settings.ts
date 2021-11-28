@@ -1,8 +1,9 @@
-import {DataStore, DiscordModules, Webpack} from "../../modules";
+import {DataStore, Webpack} from "../../modules";
+import DiscordModules, {promise} from "../../modules/discord";
 
-export let SettingsModule;
+let SettingsModule;
 
-Webpack.once("LOADED", () => {
+Promise.all([Webpack.whenReady, promise]).then(() => {
     SettingsModule = class SettingsModule<T = any> extends DiscordModules.Flux.Store {
         settings: any;
     
