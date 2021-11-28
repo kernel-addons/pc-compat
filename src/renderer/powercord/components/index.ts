@@ -1,6 +1,6 @@
 import { Webpack } from "../../modules";
 import components from "../data/components";
-import DiscordModules from '../../modules/discord';
+import DiscordModules, {promise} from '../../modules/discord';
 import { createUpdateWrapper } from '../../modules/utilities';
 
 import TextInput from "./textinput";
@@ -22,39 +22,36 @@ let Components = {
     Icons
 };
 
-(() => {
-    const cache = new Map();
-
+promise.then(async () => {
     for (const id in components) {
         const options = components[id];
 
-        (options.settings ? Components.settings : Components)[id] = (props) => {
-            if (!cache.has(id)) {
-                let mdl = typeof (options.filter) === "function"
-                    ? Webpack.findModule(options.filter)
-                    : typeof (options.filter) === "string"
-                        ? Webpack.findByDisplayName(options.filter)
-                        : Array.isArray(options.filter)
-                            ? Webpack.findByProps(options.filter)
-                            : null;
-                if (!mdl) return null;
-
-                if (options.prop && Array.isArray(options.prop)) {
-                    const mdls = {};
-                    options.prop.forEach(p => mdls[p] = mdl[p]);
-                    mdl = mdls;
-                } else if (options.prop && typeof options.prop == 'string') {
-                    mdl = mdl[options.prop];
-                }
-
-                cache.set(id, createUpdateWrapper(mdl, void 0, void 0, options.valueProps));
+        let component: any = (() => {
+            if (typeof (options.filter) === "function") {
+                return Webpack.findModule(options.filter);
             }
 
-            const Component = cache.get(id);
+            if (typeof (options.filter) === "string") {
+                return Webpack.findByDisplayName(options.filter);
+            }
 
-            return DiscordModules.React.createElement(Component, props);
-        };
+            if (Array.isArray(options.filter)) {
+                return Webpack.findByProps(...options.filter);
+            }
+        })();
+
+        if (options.updater) {
+            const temp = component;
+            component = createUpdateWrapper(component, void 0, void 0, options.valueProps);
+            Object.assign(component, temp);
+        }
+
+        if (options.settings) {
+            Components.settings[id] = component;   
+        } else {
+            Components[id] = component;
+        }
     }
-})();
+});
 
 export default Components;

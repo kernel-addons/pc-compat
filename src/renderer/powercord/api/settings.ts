@@ -1,6 +1,15 @@
 import {DiscordModules} from "../../modules";
+import {promise} from "../../modules/discord";
 import SettingsRenderer from "../../modules/settings";
 import {cache, getSettings} from "../classes/settings";
+
+export let store = null;
+
+promise.then(() => {
+    setImmediate(() => {
+        store = getSettings("powercord");
+    });
+});
 
 export function registerSettings(id: string, options: any) {
     SettingsRenderer.registerPanel(id, {
