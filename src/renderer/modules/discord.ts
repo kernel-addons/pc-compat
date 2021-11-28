@@ -42,6 +42,11 @@ const filters = new Promise<any[]>(resolve => {
             filter = (mod: any) => (mod.displayName === module.name) && current(mod);
         }
 
+        if (typeof(module.ensure) === "function") {
+            const current = filter;
+            filter = (mod: any) => current(mod) && module.ensure(mod);
+        }
+
         if (typeof (filter) !== "function") continue;
 
         result.push({filter, map, id: moduleId});

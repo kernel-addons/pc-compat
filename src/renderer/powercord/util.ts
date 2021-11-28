@@ -56,3 +56,22 @@ export function forceUpdateElement(selector: string) {
     const instance = getOwnerInstance(document.querySelector(selector));
     if (instance) instance.forceUpdate();
 };
+
+export function waitFor(selector: string) {
+    return new Promise(resolve => {
+        new MutationObserver((mutations, observer) => {
+            for (let m = 0; m < mutations.length; m++) {
+                for (let i = 0; i < mutations[m].addedNodes.length; i++) {
+                    const mutation = mutations[m].addedNodes[i];
+                    if (mutation.nodeType === 3) continue; // ignore text
+                    const directMatch = mutation.matches(selector) && mutation;
+                    const childrenMatch = mutation.querySelector(selector);
+                    if (directMatch || childrenMatch) {
+                        observer.disconnect();
+                        return resolve(directMatch ?? childrenMatch);
+                    }
+                }
+            }
+        }).observe(document, {childList: true, subtree: true});
+    });
+};

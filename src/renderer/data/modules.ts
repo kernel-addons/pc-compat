@@ -58,5 +58,14 @@ export default {
         type: "DEFAULT",
         name: "Markdown",
         props: ["rules"]
+    },
+    LocaleManager: {
+        type: "DEFAULT",
+        props: ["Messages", "getAvailableLocales"],
+        ensure: (mod: any) => mod.Messages.CLOSE
+    },
+    Constants: {
+        type: "DEFAULT",
+        props: ["API_HOST", "ActionTypes"]
     }
 }

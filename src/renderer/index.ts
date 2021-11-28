@@ -1,3 +1,5 @@
+/// <reference path="../../types.d.ts" />
+
 import {DiscordModules, DOM} from "./modules";
 import Webpack from "./modules/webpack";
 import * as IPCEvents from "../common/ipcevents";
@@ -6,19 +8,20 @@ import {init as initializeWebpack} from "./powercord/webpack";
 import PluginManager from "./powercord/pluginmanager";
 import SettingsRenderer from "./modules/settings";
 import {path} from "./node";
+import {promise} from "./modules/discord";
 
 if (!("process" in window)) {
     PCCompatNative.IPC.dispatch(IPCEvents.EXPOSE_PROCESS_GLOBAL);
 }
 
 export default new class PCCompat {
-    start() {Webpack.wait(this.onStart.bind(this));}
+    start() {promise.then(this.onStart.bind(this));}
 
     async onStart() {
         this.expose("React", DiscordModules.React);
         this.expose("powercord", Require("powercord"));
         await initializeWebpack();
-
+        console.log({DiscordModules});
         powercord.api.commands.initialize();
 
         Object.defineProperty(window, "powercord_require", {
