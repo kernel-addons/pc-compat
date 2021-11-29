@@ -1,11 +1,14 @@
 import { Webpack } from "../../modules";
 import components from "../data/components";
-import DiscordModules, {promise} from '../../modules/discord';
-import { createUpdateWrapper } from '../../modules/utilities';
+import {promise} from '../../modules/discord';
+import {createUpdateWrapper} from "../../modules/utilities";
 
 import TextInput from "./textinput";
 import RadioGroup from "./radiogroup";
 import Category from './category';
+import Divider from "./divider"
+import ColorPicker, {ColorPickerInput} from "./colorpicker";
+import SliderInput from "./slider";
 
 import AsyncComponent from "./asynccomponent";
 import Modal from "./modal";
@@ -15,11 +18,15 @@ let Components = {
     settings: {
         TextInput,
         RadioGroup,
-        Category
+        Category,
+        ColorPickerInput,
+        SliderInput
     },
     AsyncComponent,
     modal: Modal,
-    Icons
+    Icons,
+    ColorPicker,
+    Divider
 };
 
 promise.then(async () => {
@@ -46,11 +53,11 @@ promise.then(async () => {
             Object.assign(component, temp);
         }
 
-        if (options.settings) {
-            Components.settings[id] = component;   
-        } else {
-            Components[id] = component;
-        }
+        Object.assign((options.settings ? Components.settings : Components),
+            Array.isArray(options.prop)
+                ? Object.fromEntries(options.prop.map(prop => [prop, component[prop]]))
+                : {[id]: component}
+        );
     }
 });
 

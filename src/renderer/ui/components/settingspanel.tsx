@@ -1,4 +1,5 @@
 import DiscordModules from "../../modules/discord";
+import ErrorBoundary from "../../powercord/components/errorboundary";
 
 export default function SettingsPanel({store, name, children, header = null}) {
     const [, forceUpdate] = DiscordModules.React.useReducer(n => n + 1, 0);
@@ -12,12 +13,14 @@ export default function SettingsPanel({store, name, children, header = null}) {
     }, [store]);
 
     return (
-        <div className="pc-settings-panel">
-            <div className="pc-settings-title">
-                {name}
-                {header}
+        <ErrorBoundary>
+            <div className="pc-settings-panel">
+                <div className="pc-settings-title">
+                    {name}
+                    {header}
+                </div>
+                {children()}
             </div>
-            {children()}
-        </div>
+        </ErrorBoundary>
     );
 }

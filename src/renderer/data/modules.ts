@@ -46,6 +46,10 @@ export default {
         type: "DEFAULT",
         props: ["DropdownSizes"]
     },
+    Slider: {
+        type: "DEFAULT",
+        name: "Slider"
+    },
     ConfirmationModal: {
         type: "DEFAULT",
         name: "ConfirmModal"

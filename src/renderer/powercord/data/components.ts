@@ -6,82 +6,82 @@ export default {
     },
     Button: {
         updater: false,
-        filter: ['DropdownSizes'],
+        filter: ["DropdownSizes"],
         settings: false
     },
     FormNotice: {
         updater: false,
-        filter: 'FormNotice',
+        filter: "FormNotice",
         settings: false
     },
     Card: {
         updater: false,
-        filter: 'Card',
+        filter: "Card",
         settings: false
     },
     Clickable: {
         updater: false,
-        filter: 'Clickable',
+        filter: "Clickable",
         settings: false
     },
     Spinner: {
         updater: false,
-        filter: 'Spinner',
+        filter: "Spinner",
         settings: false
     },
     FormTitle: {
         updater: false,
-        filter: 'FormTitle',
+        filter: "FormTitle",
         settings: false
     },
     HeaderBar: {
         updater: false,
-        filter: 'HeaderBar',
+        filter: "HeaderBar",
         settings: false
     },
     TabBar: {
         updater: false,
-        filter: 'TabBar',
+        filter: "TabBar",
         settings: false
     },
     Text: {
         updater: false,
-        filter: 'Text',
+        filter: "Text",
         settings: false
     },
     Flex: {
         updater: false,
-        filter: 'Flex',
+        filter: "Flex",
         settings: false
     },
     Tooltip: {
         updater: false,
-        filter: ['TooltipContainer'],
-        prop: 'TooltipContainer',
+        filter: ["TooltipContainer"],
+        prop: "TooltipContainer",
         settings: false
     },
     AdvancedScrollerThin: {
         updater: false,
-        filter: ['AdvancedScrollerThin'],
-        prop: 'AdvancedScrollerThin',
+        filter: ["AdvancedScrollerThin"],
+        prop: "AdvancedScrollerThin",
         settings: false
     },
     AdvancedScrollerAuto: {
         updater: false,
-        filter: ['AdvancedScrollerAuto'],
-        prop: 'AdvancedScrollerAuto',
+        filter: ["AdvancedScrollerAuto"],
+        prop: "AdvancedScrollerAuto",
         settings: false
     },
     AdvancedScrollerNone: {
         updater: false,
-        filter: ['AdvancedScrollerNone'],
-        prop: 'AdvancedScrollerNone',
+        filter: ["AdvancedScrollerNone"],
+        prop: "AdvancedScrollerNone",
         settings: false
     },
     Menu: {
         updater: false,
-        filter: ['MenuGroup'],
-        prop: ['MenuCheckboxItem', 'MenuControlItem', 'MenuGroup', 'MenuItem', 'MenuRadioItem', 'MenuSeparator', 'MenuStyle'],
+        filter: ["MenuGroup"],
+        prop: ["MenuCheckboxItem", "MenuControlItem", "MenuGroup", "MenuItem", "MenuRadioItem", "MenuSeparator", "MenuStyle"],
         settings: false
     }
 };

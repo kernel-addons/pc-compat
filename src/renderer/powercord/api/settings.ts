@@ -6,9 +6,7 @@ import {cache, getSettings} from "../classes/settings";
 export let store = null;
 
 promise.then(() => {
-    setImmediate(() => {
-        store = getSettings("powercord");
-    });
+    store = getSettings("powercord");
 });
 
 export function registerSettings(id: string, options: any) {

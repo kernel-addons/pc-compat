@@ -13,12 +13,15 @@ export default function AsyncComponent({_provider, _fallback, ...props}) {
 };
 
 export function from(promise: Promise<any>, fallback?: any) {
-    return DiscordModules.React.memo(props => DiscordModules.React.createElement(AsyncComponent, {
+    return props => DiscordModules.React.createElement(AsyncComponent, {
         _provider: () => promise,
         _fallback: fallback,
         ...props
-    }))
+    });
 };
+
+// Alias
+export const fromPromise = from;
 // TODO: Finish AsyncComponent
 // export function fromDisplayName(displayName: string) {
 //     return from(get)

@@ -1,9 +1,8 @@
 import DiscordModules, {promise} from "../../modules/discord";
+import {fromPromise} from "./asynccomponent";
 
-let ErrorBoundary = () => null;
-
-promise.then(() => {
-    (ErrorBoundary as any) = class ErrorBoundary extends DiscordModules.React.Component {
+const ErrorBoundary = fromPromise(promise.then(() => {
+    return class ErrorBoundary extends DiscordModules.React.Component {
         state = {hasError: false}
 
         static getDerivedStateFromError(error) {
@@ -24,6 +23,6 @@ promise.then(() => {
             return this.props.children;
         }
     }
-});
+}));
 
 export default ErrorBoundary;

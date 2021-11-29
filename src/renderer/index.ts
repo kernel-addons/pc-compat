@@ -21,7 +21,7 @@ export default new class PCCompat {
         this.expose("React", DiscordModules.React);
         this.expose("powercord", Require("powercord"));
         await initializeWebpack();
-        console.log({DiscordModules});
+        
         powercord.api.commands.initialize();
 
         Object.defineProperty(window, "powercord_require", {
