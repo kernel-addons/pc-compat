@@ -36,7 +36,7 @@ const filters = new Promise<any[]>(resolve => {
                 };
             }
         }
-        
+
         if (module.name) {
             const current = filter;
             filter = (mod: any) => (mod.displayName === module.name) && current(mod);

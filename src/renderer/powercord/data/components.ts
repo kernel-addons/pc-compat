@@ -81,7 +81,7 @@ export default {
     Menu: {
         updater: false,
         filter: ["MenuGroup"],
-        prop: ["MenuCheckboxItem", "MenuControlItem", "MenuGroup", "MenuItem", "MenuRadioItem", "MenuSeparator", "MenuStyle"],
+        prop: [["Menu", "default"], "MenuCheckboxItem", "MenuControlItem", "MenuGroup", "MenuItem", "MenuRadioItem", "MenuSeparator", "MenuStyle"],
         settings: false
     }
 };

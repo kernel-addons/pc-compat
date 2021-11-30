@@ -9,6 +9,7 @@ import Category from './category';
 import Divider from "./divider"
 import ColorPicker, {ColorPickerInput} from "./colorpicker";
 import SliderInput from "./slider";
+import FormItem from './formitem';
 
 import AsyncComponent from "./asynccomponent";
 import Modal from "./modal";
@@ -20,7 +21,8 @@ let Components = {
         RadioGroup,
         Category,
         ColorPickerInput,
-        SliderInput
+        SliderInput,
+        FormItem
     },
     AsyncComponent,
     modal: Modal,
@@ -53,11 +55,18 @@ promise.then(async () => {
             Object.assign(component, temp);
         }
 
-        Object.assign((options.settings ? Components.settings : Components),
-            Array.isArray(options.prop)
-                ? Object.fromEntries(options.prop.map(prop => [prop, component[prop]]))
-                : {[id]: component}
-        );
+        let out;
+
+        if (Array.isArray(options.prop)) {
+            out = {};
+            options.prop.map(p => Array.isArray(p) ? out[p[0]] = component[p[1]] : out[p] = component[p])
+        } else if(typeof options.prop == 'string') {
+            out = component[options.prop]
+        } else {
+            out = component;
+        }
+
+        Object.assign((options.settings ? Components.settings : Components), {[id]: out});
     }
 });
 
