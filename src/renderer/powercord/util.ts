@@ -65,10 +65,9 @@ export function waitFor(selector: string) {
                     const mutation = mutations[m].addedNodes[i];
                     if (mutation.nodeType === 3) continue; // ignore text
                     const directMatch = mutation.matches(selector) && mutation;
-                    const childrenMatch = mutation.querySelector(selector);
-                    if (directMatch || childrenMatch) {
+                    if (directMatch) {
                         observer.disconnect();
-                        return resolve(directMatch ?? childrenMatch);
+                        return resolve(directMatch);
                     }
                 }
             }

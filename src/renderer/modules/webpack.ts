@@ -40,7 +40,7 @@ export class WebpackModule {
 
                     return Reflect.apply(originalPush, value, values);
                 };
-                
+
                 Object.defineProperty(window, this.chunkName, {
                     value,
                     configurable: true,
@@ -52,8 +52,6 @@ export class WebpackModule {
         });
 
         let listener = (shouldUnsubscribe, Dispatcher, ActionTypes, event) => {
-            if (event?.event !== "app_ui_viewed") return;
-            
             if (shouldUnsubscribe) {
                 Dispatcher.unsubscribe(ActionTypes.TRACK, listener);
             }
@@ -61,14 +59,14 @@ export class WebpackModule {
             this.dispatch(Events.LOADED);
         };
 
-        
+
         this.once(Events.CREATE, async () => {
             const [Dispatcher, Constants] = await this.findByProps(
                 ["dirtyDispatch"], ["API_HOST", "ActionTypes"],
                 {cache: false, bulk: true, wait: true}
             );
-            
-            Dispatcher.subscribe(Constants.ActionTypes.TRACK, listener = listener.bind(null, true, Dispatcher, Constants.ActionTypes));
+
+            Dispatcher.subscribe(Constants.ActionTypes.START_SESSION, listener = listener.bind(null, true, Dispatcher, Constants.ActionTypes));
         });
     }
 
@@ -173,7 +171,7 @@ export class WebpackModule {
     findByProps(...options) {
         const [props, {bulk = false, cache = true, wait = false}] = this.#parseOptions(options);
         const filter = (props, module) => module && props.every(prop => prop in module);
-        
+
         return bulk
             ? this.bulk(...props.map(props => filter.bind(null, props)).concat({cache, wait}))
             : wait
@@ -187,7 +185,7 @@ export class WebpackModule {
         const filter = (name, module) => defaultExport
             ? module?.default?.displayName === name
             : module?.displayName === name;
-        
+
         return bulk
             ? this.bulk(...displayNames.map(name => filter.bind(null, name)).concat({wait, cache}))
             : wait
