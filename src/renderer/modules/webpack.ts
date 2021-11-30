@@ -53,7 +53,7 @@ export class WebpackModule {
 
         let listener = (shouldUnsubscribe, Dispatcher, ActionTypes, event) => {
             if (shouldUnsubscribe) {
-                Dispatcher.unsubscribe(ActionTypes.TRACK, listener);
+                Dispatcher.unsubscribe(ActionTypes.START_SESSION, listener);
             }
 
             this.dispatch(Events.LOADED);
