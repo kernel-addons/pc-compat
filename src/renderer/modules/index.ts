@@ -4,3 +4,4 @@ export {default as memoize} from "./memoize";
 export * as Utilities from "./utilities";
 export {default as Webpack} from "./webpack";
 export {default as DataStore} from "./datastore";
+export * as ComponentPatcher from "./componentpatcher";
