@@ -55,18 +55,26 @@ promise.then(async () => {
             Object.assign(component, temp);
         }
 
-        let out;
+        let data = {};
 
         if (Array.isArray(options.prop)) {
-            out = {};
-            options.prop.map(p => Array.isArray(p) ? out[p[0]] = component[p[1]] : out[p] = component[p])
-        } else if(typeof options.prop == 'string') {
-            out = component[options.prop]
-        } else {
-            out = component;
+            Object.assign(data, Object.fromEntries(options.prop.map(prop => [prop, component[prop]])));
+        } else if (typeof (options.prop) === "string") {
+            data = component[options.prop]
         }
 
-        Object.assign((options.settings ? Components.settings : Components), {[id]: out});
+        if (Array.isArray(options.rename)) {
+            for (const {from, to} of options.rename) {
+                data[to] = component[from];
+            }
+        }
+
+        if (!Array.isArray(options.rename) && !options.prop) {
+            data = component;
+        }
+
+        const target = options.settings ? Components.settings : Components;
+        Object.assign(target, {[id]: data});
     }
 });
 

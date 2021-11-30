@@ -1,10 +1,12 @@
 export default {
+    // React, Modules & Constants
+    Constants: {
+        props: ["API_HOST", "ActionTypes"]
+    },
     React: {
-        type: "DEFAULT",
         props: ["createElement", "isValidElement"]
     },
     ReactDOM: {
-        type: "DEFAULT",
         props: ["render", "createPortal"]
     },
     Flux: {
@@ -15,61 +17,52 @@ export default {
         ]
     },
     Dispatcher: {
-        type: "DEFAULT",
         props: ["dirtyDispatch"]
     },
-    TextInput: {
-        type: "DEFAULT",
-        name: "TextInput"
-    },
-    Forms: {
-        type: "DEFAULT",
-        props: ["FormItem", "FormTitle"]
-    },
     ContextMenuActions: {
-        type: "DEFAULT",
         props: ["openContextMenu"]
     },
     ModalsApi: {
-        type: "DEFAULT",
         props: ["openModal", "useModalsStore"]
     },
     ModalStack: {
-        type: "DEFAULT",
         props: ["push", "popAll"]
     },
-    ModalComponents: {
-        type: "DEFAULT",
-        props: ["ModalRoot", "ModalHeader"]
-    },
-    Button: {
-        type: "DEFAULT",
-        props: ["DropdownSizes"]
-    },
-    Slider: {
-        type: "DEFAULT",
-        name: "Slider"
-    },
-    ConfirmationModal: {
-        type: "DEFAULT",
-        name: "ConfirmModal"
-    },
-    Text: {
-        type: "DEFAULT",
-        name: "Text"
-    },
-    Markdown: {
-        type: "DEFAULT",
-        name: "Markdown",
-        props: ["rules"]
-    },
     LocaleManager: {
-        type: "DEFAULT",
         props: ["Messages", "getAvailableLocales"],
         ensure: (mod: any) => mod.Messages.CLOSE
     },
-    Constants: {
-        type: "DEFAULT",
-        props: ["API_HOST", "ActionTypes"]
+    // Components
+    ModalComponents: {
+        props: ["ModalRoot", "ModalHeader"]
+    },
+    Button: {
+        props: ["DropdownSizes"]
+    },
+    Slider: {
+        name: "Slider"
+    },
+    ConfirmationModal: {
+        name: "ConfirmModal"
+    },
+    Text: {
+        name: "Text"
+    },
+    Markdown: {
+        name: "Markdown",
+        props: ["rules"]
+    },
+    TextInput: {
+        name: "TextInput"
+    },
+    Forms: {
+        props: ["FormItem", "FormTitle"]
+    },
+    Flex: {
+        name: "Flex"
+    },
+    // Classes
+    Margins: {
+        props: ["marginBottom20", "marginCenterHorz"]
     }
 }

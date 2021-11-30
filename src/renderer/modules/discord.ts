@@ -12,12 +12,6 @@ const filters = new Promise<any[]>(resolve => {
 
         if (Array.isArray(module.props)) {
             switch (module.type) {
-                case "DEFAULT": {
-                    filter = (m: any) => module.props.every((prop: string) => prop in m);
-
-                    break;
-                };
-
                 case "MERGE": {
                     let found = [];
 
@@ -34,6 +28,10 @@ const filters = new Promise<any[]>(resolve => {
 
                     break;
                 };
+                    
+                default: {
+                    filter = (m: any) => module.props.every((prop: string) => prop in m);
+                }
             }
         }
 
