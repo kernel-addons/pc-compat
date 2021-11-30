@@ -1,5 +1,5 @@
-import Webpack from "./webpack.js";
-import Modules from "../data/modules";
+import {Webpack} from "@modules";
+import {Modules} from "@data";
 
 const DiscordModules: {[key in keyof typeof Modules]: any} = {} as unknown as any;
 const NOOP_RET = _ => _;

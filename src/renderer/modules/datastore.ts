@@ -1,8 +1,7 @@
-import Store from "../classes/store";
-import {fs, path} from "../node";
-import {require as Require} from "../node";
-import Logger from "./logger";
-import {getProps, setProps} from "./utilities";
+import {Store} from "@classes";
+import {fs, path, require as Require} from "@node";
+import {getProps, setProps} from "@modules/utilities";
+import {Logger} from "@modules";
 
 const DataStore = new class DataStore extends Store<"misc" | "data-update"> {
     constructor() {

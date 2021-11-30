@@ -1,4 +1,4 @@
-import DiscordModules from "./discord";
+import DiscordModules from "@modules/discord";
 
 export default function createStore(state: any) {
     const {useEffect, useReducer} = DiscordModules.React;

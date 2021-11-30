@@ -1,4 +1,4 @@
-import memoize from "./memoize.js";
+import {memoize} from "@modules";
 
 export default class DOM {
     static elements = {};

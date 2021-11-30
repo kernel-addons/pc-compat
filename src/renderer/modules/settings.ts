@@ -1,8 +1,7 @@
-import Patcher from "./patcher";
-import Webpack from "./webpack";
-import DiscordModules from './discord';
-import SettingsPanel from "../ui/components/settingspanel";
-import {getSettings} from "../powercord/classes/settings";
+import {Patcher, Webpack} from "@modules";
+import DiscordModules from "@modules/discord";
+import SettingsPanel from "@ui/components/settingspanel";
+import {getSettings} from "@powercord/classes/settings";
 
 export default class SettingsRenderer {
     static panels: any[] = [

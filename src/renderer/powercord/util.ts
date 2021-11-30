@@ -1,4 +1,4 @@
-import {DiscordModules} from "../modules";
+import {DiscordModules} from "@modules";
 
 export function findInTree(tree = {}, filter = _ => _, {ignore = [], walkable = [], maxProperties = 100} = {}): any {
     let stack = [tree];

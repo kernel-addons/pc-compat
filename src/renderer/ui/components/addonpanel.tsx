@@ -1,5 +1,5 @@
-import {DataStore, DiscordModules} from "../../modules";
-import Components from "../../modules/components";
+import {DataStore, DiscordModules} from "@modules";
+import Components from "@modules/components";
 import AddonCard from "./addoncard";
 
 export type SearchOptions = {
@@ -15,7 +15,6 @@ const searchLabels = ["name", "author", "description"];
 const orderLabels = ["ascending", "descending"];
 
 export async function sortAddons(addons: any[], order: "ascending" | "descending", query: string, searchOptions: SearchOptions, sortBy: SortOption) {
-    console.log({order, query, searchOptions});
     return addons
         .filter(addon => {
             if (!query) return true;

@@ -1,5 +1,5 @@
-import DiscordModules from "../../modules/discord";
-import ErrorBoundary from "../../powercord/components/errorboundary";
+import DiscordModules from "@modules/discord";
+import ErrorBoundary from "@powercord/components/errorboundary";
 
 export default function SettingsPanel({store, name, children, header = null}) {
     const [, forceUpdate] = DiscordModules.React.useReducer(n => n + 1, 0);
