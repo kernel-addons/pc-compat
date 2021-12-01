@@ -60,7 +60,7 @@ export class WebpackModule {
         };
 
 
-        this.once(Events.CREATE, async () => {
+        this.once(Events.PUSH, async () => {
             const [Dispatcher, Constants] = await this.findByProps(
                 ["dirtyDispatch"], ["API_HOST", "ActionTypes"],
                 {cache: false, bulk: true, wait: true}
