@@ -59,7 +59,7 @@ export function forceUpdateElement(selector: string) {
 export function waitFor(selector: string) {
     return new Promise(resolve => {
         const element = document.querySelector(selector);
-        if (element) return Fresolve(element);
+        if (element) return resolve(element);
         new MutationObserver((mutations, observer) => {
             for (let m = 0; m < mutations.length; m++) {
                 for (let i = 0; i < mutations[m].addedNodes.length; i++) {
