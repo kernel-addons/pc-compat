@@ -1,5 +1,6 @@
 import Modals from "../modals";
 import Components from "../../modules/components";
+import DiscordModules from "@modules/discord";
 
 export function Icon({name, ...props}) {
     const Component = Components.get(name);
@@ -11,9 +12,8 @@ export function Icon({name, ...props}) {
 };
 
 export function ToolButton({label, icon, onClick, danger = false, disabled = false}) {
-    const Button = Components.byProps("DropdownSizes");
-    const Tooltip = Components.get("Tooltip");
-
+    const {Button, Tooltips: {Tooltip}} = DiscordModules;
+    
     return (
         <Tooltip text={label} position="top">
             {props => (
@@ -38,6 +38,7 @@ export function ButtonWrapper({value, onChange, disabled = false}) {
 
     return (
         <Switch
+            className="pc-settings-addons-switch"
             checked={isChecked}
             disabled={disabled}
             onChange={() => {
@@ -61,26 +62,26 @@ export default function AddonCard({addon, manager, openSettings, hasSettings, ty
     }, [addon, manager]);
 
     return (
-        <div style={{ "--plugin-color": addon.color }} className={"pc-settings-addon-card " + addon.manifest.name?.replace(/ /g, "-")}>
+        <div style={({"--plugin-color": addon.color} as any)} className={"pc-settings-addon-card " + addon.manifest.name?.replace(/ /g, "-")}>
             <div className="pc-settings-card-header">
                 <div className="pc-settings-card-field pc-settings-card-name">{addon.manifest.name}</div>
                 {"version" in addon.manifest && <div className="pc-settings-card-field">v{addon.manifest.version}</div>}
                 {"author" in addon.manifest && <div className="pc-settings-card-field"> by {addon.manifest.author}</div>}
                 <div className="pc-settings-card-controls">
-                  <ToolButton label="Reload" icon="Replay" disabled={!manager.isEnabled?.(addon) ?? true} onClick={() => manager.reload(addon)} />
-                  <ToolButton label="Open Path" icon="Folder" onClick={() => {
-                     PCCompatNative.executeJS(`require("electron").shell.showItemInFolder(${JSON.stringify(addon.path)})`);
-                  }} />
-                  <ToolButton label="Delete" icon="Trash" onClick={() => {
-                     Modals.showConfirmationModal("Are you sure?", `Are you sure that you want to delete the ${type} "${addon.manifest.name}"?`, {
-                           onConfirm: () => {
-                              PCCompatNative.executeJS(`require("electron").shell.trashItem(${JSON.stringify(addon.path)})`);
-                           }
-                     });
-                  }} />
-                  <ButtonWrapper value={manager.isEnabled?.(addon) ?? false} onChange={() => {
-                     manager.toggle(addon);
-                  }} />
+                    <ToolButton label="Reload" icon="Replay" disabled={!manager.isEnabled?.(addon) ?? true} onClick={() => manager.reload(addon)} />
+                    <ToolButton label="Open Path" icon="Folder" onClick={() => {
+                        PCCompatNative.executeJS(`require("electron").shell.showItemInFolder(${JSON.stringify(addon.path)})`);
+                    }} />
+                    <ToolButton label="Delete" icon="Trash" onClick={() => {
+                        Modals.showConfirmationModal("Are you sure?", `Are you sure that you want to delete the ${type} "${addon.manifest.name}"?`, {
+                            onConfirm: () => {
+                                PCCompatNative.executeJS(`require("electron").shell.trashItem(${JSON.stringify(addon.path)})`);
+                            }
+                        });
+                    }} />
+                    <ButtonWrapper value={manager.isEnabled?.(addon) ?? false} onChange={() => {
+                        manager.toggle(addon);
+                    }} />
                 </div>
             </div>
             {addon.manifest.description && (

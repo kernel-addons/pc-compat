@@ -4,6 +4,7 @@ import esFormatter from "rollup-plugin-esformatter";
 import resolve from "@rollup/plugin-node-resolve";
 import path from "path";
 import fs from "fs";
+import alias from "@rollup/plugin-alias";
 
 const IGNORED_WARNINGS = ["EVAL", "THIS_IS_UNDEFINED"];
 const extensions = [".ts", ".tsx", ".js", ".jsx"];
@@ -52,16 +53,16 @@ export default args => {
         },
 
         plugins: [
-            AliasLoader(),
-            // alias({
-            //     entries: mode === "rendrer" 
-            //         ? aliases
-            //         : void 0
-            // }),
+            // AliasLoader(),
+            alias({
+                entries: mode === "renderer" 
+                    ? aliases
+                    : void 0
+            }),
             resolve({
                 browser: mode === "renderer",
                 extensions: [".ts", ".tsx", ".js", ".jsx"],
-                preferBuiltins: false,
+                preferBuiltins: false,                
             }),
             esFormatter({
                 plugins: ["esformatter-quotes"],
@@ -83,9 +84,9 @@ export default args => {
                 }
             })
         ],
-        // onwarn: (message) => {
-        //     if (IGNORED_WARNINGS.includes(message.code)) return; // Hide this annoying thing
-        //     return console.error(message);
-        // }
+        onwarn: (message) => {
+            // if (IGNORED_WARNINGS.includes(message.code)) return; // Hide this annoying thing
+            return console.error(message.message);
+        }
     });
 };

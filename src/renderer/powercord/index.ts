@@ -1,4 +1,4 @@
-import {Webpack} from "../modules";
+import Webpack from "../modules/webpack";
 
 export {default as components} from "./components/index";
 export {default as webpack} from "./webpack";

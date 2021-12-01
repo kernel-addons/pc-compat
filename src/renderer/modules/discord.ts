@@ -1,4 +1,4 @@
-import {Webpack} from "@modules";
+import Webpack from "./webpack";
 import {Modules} from "@data";
 
 const DiscordModules: {[key in keyof typeof Modules]: any} = {} as unknown as any;
@@ -33,6 +33,20 @@ const filters = new Promise<any[]>(resolve => {
                     filter = (m: any) => module.props.every((prop: string) => prop in m);
                 }
             }
+        }
+
+        if (module.rename) {
+            const current = map ?? NOOP_RET;
+            map = (mod: any) => {
+                const cloned = {...mod};
+
+                for (const {from, to} of module.rename) {
+                    cloned[to] = mod[from];
+                    delete cloned[from];
+                }
+
+                return current(cloned);
+            };
         }
 
         if (module.name) {

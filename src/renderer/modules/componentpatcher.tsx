@@ -1,7 +1,7 @@
-import Webpack from "./webpack";
-import {promise} from "./discord";
 import Patcher from "./patcher";
-import { forceUpdateElement } from '../powercord/util';
+import Webpack from "./webpack"
+import {promise} from "./discord";
+import {forceUpdateElement} from "@powercord/util";
 
 promise.then(() => {
    /* Avatar Utility Classes */

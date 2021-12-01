@@ -1,5 +1,6 @@
-import {Patcher, Webpack} from "@modules";
-import DiscordModules from "@modules/discord";
+import Webpack from "./webpack";
+import Patcher from "./patcher";
+import DiscordModules from "./discord";
 import SettingsPanel from "@ui/components/settingspanel";
 import {getSettings} from "@powercord/classes/settings";
 

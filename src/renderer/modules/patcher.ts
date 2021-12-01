@@ -1,4 +1,4 @@
-import {Logger} from "@modules";
+import Logger from "./logger";
 
 export default class Patcher {
     static _patches = [];

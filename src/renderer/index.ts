@@ -1,5 +1,4 @@
 /// <reference path="../../types.d.ts" />
-import Webpack from "@modules/webpack";
 import {DiscordModules, DOM} from "@modules";
 import * as IPCEvents from "@common/ipcevents";
 import {require as Require, path} from "@node";
@@ -43,6 +42,5 @@ export default new class PCCompat {
     }
 
     stop() {
-        Webpack.chunkName;
     }
 }

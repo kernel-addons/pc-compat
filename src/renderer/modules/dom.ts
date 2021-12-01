@@ -1,4 +1,4 @@
-import {memoize} from "@modules";
+import memoize from "./memoize";
 
 export default class DOM {
     static elements = {};

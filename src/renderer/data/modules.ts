@@ -36,8 +36,19 @@ export default {
     ModalComponents: {
         props: ["ModalRoot", "ModalHeader"]
     },
+    Tooltips: {
+        props: ["TooltipContainer"],
+        rename: [
+            {from: "default", to: "Tooltip"},
+            {from: "TooltipContainer", to: "Container"},
+            {from: "TooltipColors", to: "Colors"},
+            {from: "TooltipPositions", to: "Positions"},
+            {from: "TooltipLayer", to: "Layer"},
+        ]
+    },
     Button: {
-        props: ["DropdownSizes"]
+        props: ["DropdownSizes"],
+        ensure: (m: any) => typeof (m) === "function"
     },
     Slider: {
         name: "Slider"

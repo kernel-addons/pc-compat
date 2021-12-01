@@ -6,4 +6,3 @@ export {default as Logger} from "./logger";
 export {default as Patcher} from "./patcher";
 export * as Utilities from "./utilities";
 export {default as DataStore} from "./datastore";
-export * as ComponentPatcher from "./componentpatcher";
