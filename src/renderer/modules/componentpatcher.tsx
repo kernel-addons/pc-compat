@@ -3,7 +3,7 @@ import Webpack from "./webpack"
 import {promise} from "./discord";
 import {forceUpdateElement} from "@powercord/util";
 
-promise.then(() => {
+export default promise.then(() => {
    /* Avatar Utility Classes */
    const Avatar = Webpack.findByProps("AnimatedAvatar");
    Patcher.after("pc-utility-classes-avatar", Avatar, "default", (_, args, res) => {
