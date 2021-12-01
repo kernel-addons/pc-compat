@@ -1,3 +1,4 @@
+import Webpack from "@modules/webpack";
 import {DiscordModules} from "../../modules";
 
 export default function AsyncComponent({_provider, _fallback, ...props}) {
@@ -19,10 +20,12 @@ export function from(promise: Promise<any>, fallback?: any) {
         ...props
     });
 };
+export const fromPromise = from; // Alias
 
-// Alias
-export const fromPromise = from;
-// TODO: Finish AsyncComponent
-// export function fromDisplayName(displayName: string) {
-//     return from(get)
-// }
+export function fromDisplayName(displayName: string, fallback?: any) {
+    return from(Webpack.findByDisplayName(displayName, {wait: true}), fallback);
+};
+
+Object.assign(AsyncComponent, {from, fromDisplayName});
+
+// TODO: Add fromModule and fromModuleProp
