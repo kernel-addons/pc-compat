@@ -1,14 +1,12 @@
-import {DiscordModules} from "../../modules";
-import Components from "../../modules/components";
+import Components from "@modules/components";
+import FormItem from "./formitem"
 
 export default function RadioGroup({children: title, note, required, ...props}) {
-    const {React, Forms} = DiscordModules;
     const RadioGroup = Components.get("RadioGroup");
 
     return (
-        <Forms.FormItem title={title} required={required}>
-            {note && <Forms.FormText type="description">{note}</Forms.FormText>}
+        <FormItem title={title} note={note} required={required}>
             <RadioGroup {...props} />
-        </Forms.FormItem>
+        </FormItem>
     );
 };

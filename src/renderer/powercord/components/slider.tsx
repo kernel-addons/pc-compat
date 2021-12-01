@@ -1,19 +1,22 @@
 import DiscordModules, {promise} from "../../modules/discord";
 import {fromPromise} from "./asynccomponent";
+import FormItem from './formitem';
 
 const SliderInput = fromPromise(promise.then(() => {
-    const {Slider, Forms} = DiscordModules;
+    const {Slider} = DiscordModules;
 
-    return function SliderInput({children: name, note, required, ...props}) {
+    return function SliderInput(props) {
+        const { children: title, note, required } = props
+        delete props.children;
+
         return (
-            <Forms.FormItem>
+            <FormItem title={title} note={note} required={required}>
                 <Slider
-                    {...Object.assign({}, props, {
+                    {...Object.assign({},  props, {
                         className: [props.className, "pc-margin-top-20"].filter(n => n).join(" ")
                     })}
                 />
-                {note && <Forms.FormText type="description">{note}</Forms.FormText>}
-            </Forms.FormItem>
+            </FormItem>
         );
     };
 }));

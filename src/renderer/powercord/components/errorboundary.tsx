@@ -1,12 +1,16 @@
-import DiscordModules, {promise} from "../../modules/discord";
+import DiscordModules, {promise} from "@modules/discord";
 import {fromPromise} from "./asynccomponent";
+import ErrorState from "./errorstate";
 
 const ErrorBoundary = fromPromise(promise.then(() => {
     return class ErrorBoundary extends DiscordModules.React.Component {
-        state = {hasError: false}
+        state = {hasError: false, error: null}
 
         static getDerivedStateFromError(error) {
-            return {hasError: true};
+            return {
+                hasError: true,
+                error: error.message
+            };
         }
 
         componentDidCatch(error, errorInfo) {
@@ -16,7 +20,7 @@ const ErrorBoundary = fromPromise(promise.then(() => {
         render() {
             if (this.state.hasError) {
                 return (
-                    <p style={{color: "#ed4245"}}>Component Error</p>
+                    <ErrorState>{this.state.error}</ErrorState>
                 );
             }
 

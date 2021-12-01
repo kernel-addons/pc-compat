@@ -9,7 +9,8 @@ import Category from './category';
 import Divider from "./divider"
 import ColorPicker, {ColorPickerInput} from "./colorpicker";
 import SliderInput from "./slider";
-import FormItem from './formitem';
+import FormItem from "./formitem";
+import Icon from "./Icon";
 
 import AsyncComponent from "./asynccomponent";
 import Modal from "./modal";
@@ -24,6 +25,7 @@ let Components = {
         SliderInput,
         FormItem
     },
+    Icon,
     AsyncComponent,
     modal: Modal,
     Icons,

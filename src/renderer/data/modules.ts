@@ -74,6 +74,9 @@ export default {
     },
     // Classes
     Margins: {
-        props: ["marginBottom20", "marginCenterHorz"]
+        props: ["marginXLarge"]
+    },
+    FormClasses: {
+        props: ["formText", "description"]
     }
 }

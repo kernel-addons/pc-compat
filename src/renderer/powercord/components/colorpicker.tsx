@@ -3,6 +3,7 @@ import Logger from "../../modules/logger";
 import {findInReactTree} from "../util";
 import {fromPromise} from "./asynccomponent";
 import ErrorBoundary from "./errorboundary";
+import FormItem from "./formitem"
 
 const ColorPicker = fromPromise(Webpack.whenReady.then(() => {
     try {
@@ -24,11 +25,12 @@ const ColorPicker = fromPromise(Webpack.whenReady.then(() => {
 }));
 
 export function ColorPickerInput(props) {
-    const {Forms, Constants: {DEFAULT_ROLE_COLOR, ROLE_COLORS}} = DiscordModules;
-    const {children: name, note, required, default: defaultValue, defaultColors = ROLE_COLORS, value, disabled, onChange} = props;
+    const {Constants: {DEFAULT_ROLE_COLOR, ROLE_COLORS}} = DiscordModules;
+    const {children: title, note, required, default: defaultValue, defaultColors = ROLE_COLORS, value, disabled, onChange} = props;
+    delete props.children;
 
     return (
-        <Forms.FormItem title={name} required={required} >
+        <FormItem title={title} required={required} note={note}>
             <ColorPicker
                 colors={defaultColors}
                 defaultColor={typeof (defaultValue) === "number" ? defaultValue : DEFAULT_ROLE_COLOR}
@@ -36,9 +38,8 @@ export function ColorPickerInput(props) {
                 disabled={disabled}
                 value={value}
             />
-            {note && <Forms.FormText type="description">{note}</Forms.FormText>}
-        </Forms.FormItem>
+        </FormItem>
     );
-} 
+}
 
 export default ColorPicker;
