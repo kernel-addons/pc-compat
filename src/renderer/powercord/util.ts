@@ -53,12 +53,13 @@ export function getOwnerInstance(node: any) {
 }
 
 export function forceUpdateElement(selector: string) {
-    const instance = getOwnerInstance(document.querySelector(selector));
-    if (instance) instance.forceUpdate();
+    getOwnerInstance(document.querySelector(selector))?.forceUpdate();
 };
 
 export function waitFor(selector: string) {
     return new Promise(resolve => {
+        const element = document.querySelector(selector);
+        if (element) return Fresolve(element);
         new MutationObserver((mutations, observer) => {
             for (let m = 0; m < mutations.length; m++) {
                 for (let i = 0; i < mutations[m].addedNodes.length; i++) {
