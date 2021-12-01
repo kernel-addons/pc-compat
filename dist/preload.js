@@ -73,6 +73,7 @@ function cloneObject(target, newObject = {
 	}, newObject);
 }
 
+var ref1;
 const nodeModulesPath = path__default["default"].resolve(process.cwd(), "resources", "app-original.asar", "node_modules");
 // @ts-ignore - Push modules
 if (!Module__default["default"].globalPaths.includes(nodeModulesPath)) Module__default["default"].globalPaths.push(nodeModulesPath);
@@ -101,10 +102,23 @@ Object.defineProperties(window, {
 		writable: false
 	}
 });
-electron.contextBridge.exposeInMainWorld("PCCompatNative", API);
+if ((electron.webFrame === null || electron.webFrame === void 0 ? void 0 : (ref1 = electron.webFrame.top) === null || ref1 === void 0 ? void 0 : ref1.context) != null) {
+	electron.webFrame.top.context.window.PCCompatNative = API;
+	electron.webFrame.top.context.window.require = require;
+	electron.webFrame.top.context.window.Buffer = Buffer;
+} else {
+	electron.contextBridge.exposeInMainWorld("PCCompatNative", API);
+}
 IPC.on(EXPOSE_PROCESS_GLOBAL, () => {
 	try {
-		electron.contextBridge.exposeInMainWorld("process", cloneObject(process));
+		var ref;
+		if (!process.contextIsolated) {
+			window.process = cloneObject(process);
+		} else if ((electron.webFrame === null || electron.webFrame === void 0 ? void 0 : (ref = electron.webFrame.top) === null || ref === void 0 ? void 0 : ref.context) != null) {
+			electron.webFrame.top.context.window.process = cloneObject(process);
+		} else {
+			electron.contextBridge.exposeInMainWorld("process", cloneObject(process));
+		}
 	} catch (error) {
 		error.name = "NativeError";
 		console.error("Failed to expose process global:", error);

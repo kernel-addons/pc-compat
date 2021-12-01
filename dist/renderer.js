@@ -48,44 +48,47 @@ class WebpackModule {
 	get id() {
 		return "kernel-req" + Math.random().toString().slice(2, 5);
 	}
-	dispatch(event, ...args) {
+	dispatch(event, ...args1) {
 		if (!(event in _classPrivateFieldGet(this, _events)))
 			throw new Error(`Unknown Event: ${event}`);
 		for (const callback of _classPrivateFieldGet(this, _events)[event]) {
 			try {
-				callback(...args);
+				callback(...args1);
 			} catch (err) {
 				console.error(err);
 			}
 		}
 	}
-	on(event, callback) {
-		if (!(event in _classPrivateFieldGet(this, _events)))
-			throw new Error(`Unknown Event: ${event}`);
-		return _classPrivateFieldGet(this, _events)[event].add(callback), () => this.off(event, callback);
+	on(event1, callback) {
+		if (!(event1 in _classPrivateFieldGet(this, _events)))
+			throw new Error(`Unknown Event: ${event1}`);
+		return _classPrivateFieldGet(this, _events)[event1].add(callback), () => this.off(event1, callback);
 	}
-	off(event, callback) {
-		if (!(event in _classPrivateFieldGet(this, _events)))
-			throw new Error(`Unknown Event: ${event}`);
-		return _classPrivateFieldGet(this, _events)[event].delete(callback);
+	off(event2, callback1) {
+		if (!(event2 in _classPrivateFieldGet(this, _events)))
+			throw new Error(`Unknown Event: ${event2}`);
+		return _classPrivateFieldGet(this, _events)[event2].delete(callback1);
 	}
-	once(event, callback) {
-		const unlisten = this.on(event, (...args) => {
+	once(event3, callback2) {
+		const unlisten = this.on(event3, (...args) => {
 			unlisten();
-			callback(...args);
+			callback2(...args);
 		});
 	}
-	async waitFor(filter, {retries =100, all, delay =50} = {
+	async waitFor(filter3, {retries =100, all =false, delay =50} = {
 		}) {
 		for (let i = 0; i < retries; i++) {
-			const module = this.findModule(filter, all, false);
+			const module = this.findModule(filter3, {
+				all,
+				cache: false
+			});
 			if (module) return module;
 			await new Promise((res) => setTimeout(res, delay)
 			);
 		}
 	}
-	request(cache = true) {
-		if (cache && _classPrivateFieldGet(this, _cache)) return _classPrivateFieldGet(this, _cache);
+	request(cache2 = true) {
+		if (cache2 && _classPrivateFieldGet(this, _cache)) return _classPrivateFieldGet(this, _cache);
 		let req = void 0;
 		if ("webpackChunkdiscord_app" in window && webpackChunkdiscord_app != null) {
 			const chunk = [
@@ -102,34 +105,59 @@ class WebpackModule {
 		_classPrivateFieldSet(this, _cache, req);
 		return req;
 	}
-	findModule(filter, {all =false, cache =true} = {
+	findModule(filter1, {all: all1 = false, cache: cache1 = true, force =false} = {
 		}) {
-		const __webpack_require__ = this.request(cache);
+		if (typeof filter1 !== "function") return void 0;
+		const __webpack_require__ = this.request(cache1);
 		const found = [];
-		const wrapFilter = (module) => {
+		const wrapFilter = function(module) {
 			try {
-				return filter(module);
+				return filter1(module);
 			} catch (e) {
 				return false;
 			}
 		};
-		for (let i in __webpack_require__.c) {
-			var m = __webpack_require__.c[i].exports;
-			if ((typeof m == "object" || typeof m == "function") && wrapFilter(m)) found.push(m);
-			if (m === null || m === void 0 ? void 0 : m.__esModule) {
-				for (let j in m)
-					if ((typeof m[j] == "object" || typeof m[j] == "function") && wrapFilter(m[j])) found.push(m[j]);
+		for (const id in __webpack_require__.c) {
+			var module1 = __webpack_require__.c[id].exports;
+			if (!module1) continue;
+			switch (typeof module1) {
+				case "object": {
+					if (wrapFilter(module1)) {
+						if (!all1) return module1;
+						found.push(module1);
+					}
+					if (module1.__esModule && module1.default != null && wrapFilter(module1.default)) {
+						if (!all1) return module1.default;
+						found.push(module1.default);
+					}
+					if (force && module1.__esModule)
+						for (const key in module1) {
+							if (!module1[key]) continue;
+							if (wrapFilter(module1[key])) {
+								if (!all1) return module1[key];
+								found.push(module1[key]);
+							}
+					}
+					break;
+				}
+				case "function": {
+					if (wrapFilter(module1)) {
+						if (!all1) return module1;
+						found.push(module1);
+					}
+					break;
+				}
 			}
 		}
-		return all ? found : found.at(0);
+		return all1 ? found : found[0];
 	}
-	findModules(filter) {
-		return this.findModule(filter, {
+	findModules(filter2) {
+		return this.findModule(filter2, {
 			all: true
 		});
 	}
 	bulk(...options) {
-		const [filters, {cache =true, wait =false}] = _classPrivateMethodGet(this, _parseOptions, parseOptions).call(this, options);
+		const [filters, {wait =false, ...rest}] = _classPrivateMethodGet(this, _parseOptions, parseOptions).call(this, options);
 		const found = new Array(filters.length);
 		const searchFunction = wait ? this.waitFor : this.findModule;
 		const returnValue = searchFunction.call(this, (module) => {
@@ -141,30 +169,27 @@ class WebpackModule {
 				}
 			});
 			if (!matches.length) return false;
-			for (const filter of matches) {
-				found[filters.indexOf(filter)] = module;
+			for (const filter4 of matches) {
+				found[filters.indexOf(filter4)] = module;
 			}
-			return true;
-		}, {
-			all: true,
-			cache
-		});
+			return found.filter(Boolean).length === filters.length;
+		}, rest);
 		if (wait) return returnValue.then(() => found
 			);
 		return found;
 	}
-	findByProps(...options) {
-		const [props, {bulk =false, cache =true, wait =false}] = _classPrivateMethodGet(this, _parseOptions, parseOptions).call(this, options);
+	findByProps(...options1) {
+		const [props1, {bulk =false, wait =false, ...rest}] = _classPrivateMethodGet(this, _parseOptions, parseOptions).call(this, options1);
 		const filter = (props, module) => module && props.every((prop) => prop in module
 		);
-		return bulk ? this.bulk(...props.map((props) => filter.bind(null, props)
+		return bulk ? this.bulk(...props1.map((props) => filter.bind(null, props)
 		).concat({
-			cache,
-			wait
-		})) : wait ? this.waitFor(filter.bind(null, props)) : this.findModule(filter.bind(null, props), false, cache);
+			wait,
+			...rest
+		})) : wait ? this.waitFor(filter.bind(null, props1)) : this.findModule(filter.bind(null, props1), rest);
 	}
-	findByDisplayName(...options) {
-		const [displayNames, {all =false, bulk =false, default: defaultExport = false, cache =true, wait =false}] = _classPrivateMethodGet(this, _parseOptions, parseOptions).call(this, options);
+	findByDisplayName(...options2) {
+		const [displayNames, {bulk =false, default: defaultExport = false, wait =false, ...rest}] = _classPrivateMethodGet(this, _parseOptions, parseOptions).call(this, options2);
 		const filter = (name, module) => {
 			var ref;
 			return defaultExport ? (module === null || module === void 0 ? void 0 : (ref = module.default) === null || ref === void 0 ? void 0 : ref.displayName) === name : (module === null || module === void 0 ? void 0 : module.displayName) === name;
@@ -173,15 +198,13 @@ class WebpackModule {
 		).concat({
 			wait,
 			cache
-		})) : wait ? this.waitFor(filter.bind(null, displayNames[0]), {
-			all
-		}) : this.findModule(filter.bind(null, displayNames[0]), false, cache);
+		})) : wait ? this.waitFor(filter.bind(null, displayNames[0]), rest) : this.findModule(filter.bind(null, displayNames[0]), rest);
 	}
-	async wait(callback = null) {
+	async wait(callback3 = null) {
 		return new Promise((resolve) => {
 			this.once(Events.LOADED, () => {
 				resolve();
-				typeof callback === "function" && callback();
+				typeof callback3 === "function" && callback3();
 			});
 		});
 	}
@@ -204,6 +227,7 @@ class WebpackModule {
 			value: null
 		});
 		_parseOptions.add(this);
+		this.whenReady = null;
 		Object.defineProperty(window, this.chunkName, {
 			get() {
 				return void 0;
@@ -228,13 +252,12 @@ class WebpackModule {
 			configurable: true
 		});
 		let listener = (shouldUnsubscribe, Dispatcher, ActionTypes, event) => {
-			if ((event === null || event === void 0 ? void 0 : event.event) !== "app_ui_viewed") return;
 			if (shouldUnsubscribe) {
-				Dispatcher.unsubscribe(ActionTypes.TRACK, listener);
+				Dispatcher.unsubscribe(ActionTypes.START_SESSION, listener);
 			}
 			this.dispatch(Events.LOADED);
 		};
-		this.once(Events.CREATE, async () => {
+		this.once(Events.PUSH, async () => {
 			const [Dispatcher, Constants] = await this.findByProps([
 				"dirtyDispatch"
 			], [
@@ -245,7 +268,7 @@ class WebpackModule {
 				bulk: true,
 				wait: true
 			});
-			Dispatcher.subscribe(Constants.ActionTypes.TRACK, listener = listener.bind(null, true, Dispatcher, Constants.ActionTypes));
+			Dispatcher.subscribe(Constants.ActionTypes.START_SESSION, listener = listener.bind(null, true, Dispatcher, Constants.ActionTypes));
 		});
 	}
 }
@@ -265,15 +288,20 @@ if (!Webpack.whenReady)
 	Webpack.whenReady = Webpack.wait();
 
 var Modules = {
+	// React, Modules & Constants
+	Constants: {
+		props: [
+			"API_HOST",
+			"ActionTypes"
+		]
+	},
 	React: {
-		type: "DEFAULT",
 		props: [
 			"createElement",
 			"isValidElement"
 		]
 	},
 	ReactDOM: {
-		type: "DEFAULT",
 		props: [
 			"render",
 			"createPortal"
@@ -292,83 +320,111 @@ var Modules = {
 		]
 	},
 	Dispatcher: {
-		type: "DEFAULT",
 		props: [
 			"dirtyDispatch"
 		]
 	},
-	TextInput: {
-		type: "DEFAULT",
-		name: "TextInput"
-	},
-	Forms: {
-		type: "DEFAULT",
-		props: [
-			"FormItem",
-			"FormTitle"
-		]
-	},
 	ContextMenuActions: {
-		type: "DEFAULT",
 		props: [
 			"openContextMenu"
 		]
 	},
 	ModalsApi: {
-		type: "DEFAULT",
 		props: [
 			"openModal",
 			"useModalsStore"
 		]
 	},
 	ModalStack: {
-		type: "DEFAULT",
 		props: [
 			"push",
 			"popAll"
 		]
 	},
-	ModalComponents: {
-		type: "DEFAULT",
-		props: [
-			"ModalRoot",
-			"ModalHeader"
-		]
-	},
-	Button: {
-		type: "DEFAULT",
-		props: [
-			"DropdownSizes"
-		]
-	},
-	ConfirmationModal: {
-		type: "DEFAULT",
-		name: "ConfirmModal"
-	},
-	Text: {
-		type: "DEFAULT",
-		name: "Text"
-	},
-	Markdown: {
-		type: "DEFAULT",
-		name: "Markdown",
-		props: [
-			"rules"
-		]
-	},
 	LocaleManager: {
-		type: "DEFAULT",
 		props: [
 			"Messages",
 			"getAvailableLocales"
 		],
 		ensure: (mod) => mod.Messages.CLOSE
 	},
-	Constants: {
-		type: "DEFAULT",
+	// Components
+	ModalComponents: {
 		props: [
-			"API_HOST",
-			"ActionTypes"
+			"ModalRoot",
+			"ModalHeader"
+		]
+	},
+	Tooltips: {
+		props: [
+			"TooltipContainer"
+		],
+		rename: [
+			{
+				from: "default",
+				to: "Tooltip"
+			},
+			{
+				from: "TooltipContainer",
+				to: "Container"
+			},
+			{
+				from: "TooltipColors",
+				to: "Colors"
+			},
+			{
+				from: "TooltipPositions",
+				to: "Positions"
+			},
+			{
+				from: "TooltipLayer",
+				to: "Layer"
+			},
+		]
+	},
+	Button: {
+		props: [
+			"DropdownSizes"
+		],
+		ensure: (m) => typeof m === "function"
+	},
+	Slider: {
+		name: "Slider"
+	},
+	ConfirmationModal: {
+		name: "ConfirmModal"
+	},
+	Text: {
+		name: "Text"
+	},
+	Markdown: {
+		name: "Markdown",
+		props: [
+			"rules"
+		]
+	},
+	TextInput: {
+		name: "TextInput"
+	},
+	Forms: {
+		props: [
+			"FormItem",
+			"FormTitle"
+		]
+	},
+	Flex: {
+		name: "Flex"
+	},
+	// Classes
+	Margins: {
+		props: [
+			"marginXLarge"
+		]
+	},
+	FormClasses: {
+		props: [
+			"formText",
+			"description"
 		]
 	}
 };
@@ -376,7 +432,7 @@ var Modules = {
 const DiscordModules = {
 };
 const NOOP_RET = (_) => _;
-const filters = new Promise((resolve) => {
+const filters1 = new Promise((resolve) => {
 	const result = [];
 	for (let moduleId in Modules) {
 		const module = Modules[moduleId];
@@ -384,12 +440,6 @@ const filters = new Promise((resolve) => {
 			map = null;
 		if (Array.isArray(module.props)) {
 			switch (module.type) {
-				case "DEFAULT": {
-					filter = (m) => module.props.every((prop) => prop in m
-					)
-					;
-					break;
-				}
 				case "MERGE": {
 					let found = [];
 					filter = (m) => {
@@ -405,7 +455,25 @@ const filters = new Promise((resolve) => {
 					};
 					break;
 				}
+				default: {
+					filter = (m) => module.props.every((prop) => prop in m
+					)
+					;
+				}
 			}
+		}
+		if (module.rename) {
+			const current = map !== null && map !== void 0 ? map : NOOP_RET;
+			map = (mod) => {
+				const cloned = {
+					...mod
+				};
+				for (const {from, to} of module.rename) {
+					cloned[to] = mod[from];
+					delete cloned[from];
+				}
+				return current(cloned);
+			};
 		}
 		if (module.name) {
 			const current = filter;
@@ -427,7 +495,7 @@ const filters = new Promise((resolve) => {
 	resolve(result);
 });
 const promise = Promise.all([
-	filters,
+	filters1,
 	Webpack.whenReady
 ]).then(([filters]) => {
 	const result = Webpack.bulk(...filters.map(({filter}) => filter
@@ -453,10 +521,10 @@ function getProps(obj, path) {
 		, obj);
 }
 const createUpdateWrapper = (Component, valueProp = "value", changeProp = "onChange", valueProps = "0", valueIndex = 0) => (props) => {
-	const [value, setValue] = DiscordModules.React.useState(props[valueProp]);
+	const [value1, setValue] = DiscordModules.React.useState(props[valueProp]);
 	return DiscordModules.React.createElement(Component, {
 		...props,
-		[valueProp]: value,
+		[valueProp]: value1,
 		[changeProp]: (...args) => {
 			const value = getProps(args, valueProps);
 			if (typeof props[changeProp] === "function") props[changeProp](args[valueIndex]);
@@ -469,13 +537,13 @@ function omit(thing, ...things) {
 		return thing.reduce((clone, key) => things.includes(key) ? clone : clone.concat(key)
 			, []);
 	}
-	const clone = {
+	const clone1 = {
 	};
-	for (const key in thing) {
-		if (things.includes(key)) continue;
-		clone[key] = thing[key];
+	for (const key1 in thing) {
+		if (things.includes(key1)) continue;
+		clone1[key1] = thing[key1];
 	}
-	return clone;
+	return clone1;
 }
 function joinClassNames(...classNames) {
 	let className = [];
@@ -493,45 +561,6 @@ function joinClassNames(...classNames) {
 	return className.join(" ");
 }
 
-function memoize(target, key, value) {
-	Object.defineProperty(target, key, {
-		value: value,
-		configurable: true
-	});
-	return value;
-}
-
-class DOM {
-	static get head() {
-		return memoize(this, "head", document.head.appendChild(this.createElement("pc-head")));
-	}
-	static createElement(type, options = {
-		}, ...children) {
-		const node = Object.assign(document.createElement(type), options);
-		node.append(...children);
-		return node;
-	}
-	static injectCSS(id, css) {
-		const element = this.createElement("style", {
-			id,
-			textContent: css
-		});
-		this.head.appendChild(element);
-		this.elements[id] = element;
-		return element;
-	}
-	static getElement(id) {
-		return this.elements[id] || this.head.querySelector(`style[id="${id}"]`);
-	}
-	static clearCSS(id) {
-		const element = this.getElement(id);
-		if (element) element.remove();
-		delete this.elements[id];
-	}
-}
-DOM.elements = {
-};
-
 function _classStaticPrivateMethodGet(receiver, classConstructor, method) {
 	_classCheckPrivateStaticAccess(receiver, classConstructor);
 	return method;
@@ -542,20 +571,20 @@ function _classCheckPrivateStaticAccess(receiver, classConstructor) {
 	}
 }
 class Logger {
-	static _log(type, module, ...message) {
-		console[_classStaticPrivateMethodGet(this, Logger, parseType).call(Logger, type)](`%c[Powercord:${module}]%c`, "color: #7289da; font-weight: 700;", "", ...message);
+	static _log(type1, module, ...message) {
+		console[_classStaticPrivateMethodGet(this, Logger, parseType).call(Logger, type1)](`%c[Powercord:${module}]%c`, "color: #7289da; font-weight: 700;", "", ...message);
 	}
-	static log(module, ...message) {
-		this._log("log", module, ...message);
+	static log(module1, ...message1) {
+		this._log("log", module1, ...message1);
 	}
-	static info(module, ...message) {
-		this._log("info", module, ...message);
+	static info(module2, ...message2) {
+		this._log("info", module2, ...message2);
 	}
-	static warn(module, ...message) {
-		this._log("warn", module, ...message);
+	static warn(module3, ...message3) {
+		this._log("warn", module3, ...message3);
 	}
-	static error(module, ...message) {
-		this._log("error", module, ...message);
+	static error(module4, ...message4) {
+		this._log("error", module4, ...message4);
 	}
 }
 function parseType(type) {
@@ -567,493 +596,6 @@ function parseType(type) {
 		default:
 			return "log";
 	}
-}
-
-class Store {
-	has(event) {
-		return event in this.events;
-	}
-	on(event, listener) {
-		if (!this.has(event))
-			this.events[event] = new Set();
-		this.events[event].add(listener);
-		return () => void this.off(event, listener);
-	}
-	off(event, listener) {
-		if (!this.has(event)) return;
-		return this.events[event].delete(listener);
-	}
-	emit(event, ...args) {
-		if (!this.has(event)) return;
-		for (const listener of this.events[event]) {
-			try {
-				listener(...args);
-			} catch (error) {
-				Logger.error(`Store:${this.constructor.name}`, error);
-			}
-		}
-	}
-	useEvent(event, listener) {
-		const [state, setState] = DiscordModules.React.useState(listener());
-		DiscordModules.React.useEffect(() => {
-			return this.on(event, () => setState(listener())
-			);
-		}, [
-			event,
-			listener
-		]);
-		return state;
-	}
-	constructor() {
-		this.events = {
-		};
-	}
-}
-
-const ipcRenderer = PCCompatNative.executeJS(`Object.keys(require("electron").ipcRenderer)`).slice(3).reduce((newElectron, key) => {
-	newElectron[key] = PCCompatNative.executeJS(`require("electron").ipcRenderer[${JSON.stringify(key)}].bind(require("electron").ipcRenderer)`);
-	return newElectron;
-}, {
-});
-const shell = PCCompatNative.executeJS(`require("electron").shell`);
-const contextBridge = {
-	exposeInMainWorld(name, value) {
-		window[name] = value;
-	}
-};
-const electron = {
-	ipcRenderer,
-	shell,
-	contextBridge
-};
-
-const path = PCCompatNative.executeJS(`require("path")`);
-
-class fs {
-	static readFileSync(path, options = "utf8") {
-		return PCCompatNative.executeJS(`require("fs").readFileSync(${JSON.stringify(path)}, ${JSON.stringify(options)});`);
-	}
-	static writeFileSync(path, data, options) {
-		return PCCompatNative.executeJS(`require("fs").writeFileSync(${JSON.stringify(path)}, ${JSON.stringify(data)}, ${JSON.stringify(options)})`);
-	}
-	static writeFile(path, data, options, callback) {
-		if (typeof options === "function") {
-			callback = options;
-			options = null;
-		}
-		const ret = {
-			error: null
-		};
-		try {
-			this.writeFileSync(path, data, options);
-		} catch (error) {
-			ret.error = error;
-		}
-		callback(ret.error);
-	}
-	static readdirSync(path, options) {
-		return PCCompatNative.executeJS(`require("fs").readdirSync(${JSON.stringify(path)}, ${JSON.stringify(options)});`);
-	}
-	static existsSync(path) {
-		return PCCompatNative.executeJS(`require("fs").existsSync(${JSON.stringify(path)});`);
-	}
-	static mkdirSync(path, options) {
-		return PCCompatNative.executeJS(`require("fs").mkdirSync(${JSON.stringify(path)}, ${JSON.stringify(options)});`);
-	}
-	static statSync(path, options) {
-		return PCCompatNative.executeJS(`
-            const stats = require("fs").statSync(${JSON.stringify(path)}, ${JSON.stringify(options)});
-            const ret = {
-                ...stats,
-                isFile: () => stats.isFile(),
-                isDirectory: () => stats.isDirectory()
-            };
-            ret
-        `);
-	}
-	static watch(path, options, callback) {
-		if (typeof options === "function") {
-			callback = options;
-			options = null;
-		}
-		const eventId = "bdcompat-watcher-" + Math.random().toString(36).slice(2, 10);
-		PCCompatNative.IPC.on(eventId, (event, filename) => {
-			callback(event, filename);
-		});
-		return PCCompatNative.executeJS(`
-            require("fs").watch(${JSON.stringify(path)}, ${JSON.stringify(options)}, (event, filename) => {
-                PCCompatNative.IPC.dispatch(${JSON.stringify(eventId)}, event, filename);
-            });
-        `);
-	}
-}
-
-function _classStaticPrivateFieldSpecGet(receiver, classConstructor, descriptor) {
-	if (receiver !== classConstructor) {
-		throw new TypeError("Private static access of wrong provenance");
-	}
-	return descriptor.value;
-}
-class Components$1 {
-	static byProps(...props) {
-		const name = props.join(":");
-		if (_classStaticPrivateFieldSpecGet(this, Components$1, __cache)[name]) return _classStaticPrivateFieldSpecGet(this, Components$1, __cache)[name];
-		_classStaticPrivateFieldSpecGet(this, Components$1, __cache)[name] = Webpack.findModule((m) => props.every((p) => p in m
-			) && ("default" in m ? true : typeof m === "function")
-		);
-		return _classStaticPrivateFieldSpecGet(this, Components$1, __cache)[name];
-	}
-	static get(name, filter = (_) => _
-	) {
-		if (_classStaticPrivateFieldSpecGet(this, Components$1, __cache)[name]) return _classStaticPrivateFieldSpecGet(this, Components$1, __cache)[name];
-		_classStaticPrivateFieldSpecGet(this, Components$1, __cache)[name] = Webpack.findModule((m) => m.displayName === name && filter(m)
-		);
-		return _classStaticPrivateFieldSpecGet(this, Components$1, __cache)[name];
-	}
-}
-var __cache = {
-	writable: true,
-	value: {
-	}
-};
-
-class Modals {
-	static showConfirmationModal(title, content, options = {
-		}) {
-		const {confirmText ="Okay", cancelText ="Cancel", onConfirm =() => {}, onCancel =() => {}} = options;
-		const {ModalsApi, ConfirmationModal, React, Markdown} = DiscordModules;
-		return ModalsApi.openModal((props) => {
-			React.createElement(ConfirmationModal, Object.assign({
-				header: title,
-				confirmText: confirmText,
-				cancelText: cancelText,
-				onConfirm,
-				onCancel
-			}, props), React.createElement(Markdown, null, content));
-		});
-	}
-	static alert(title, content) {
-		return this.showConfirmationModal(title, content, {
-			cancelText: null
-		});
-	}
-}
-
-function _extends$F() {
-	_extends$F = Object.assign || function(target) {
-		for (var i = 1; i < arguments.length; i++) {
-			var source = arguments[i];
-			for (var key in source) {
-				if (Object.prototype.hasOwnProperty.call(source, key)) {
-					target[key] = source[key];
-				}
-			}
-		}
-		return target;
-	};
-	return _extends$F.apply(this, arguments);
-}
-function Icon({name, ...props}) {
-	const Component = Components$1.get(name);
-	if (!Components$1) return null;
-	return ( /*#__PURE__*/ React.createElement(Component, _extends$F({
-	}, props)));
-}
-function ToolButton({label, icon, onClick, danger =false, disabled =false}) {
-	const Button = Components$1.byProps("DropdownSizes");
-	const Tooltip = Components$1.get("Tooltip");
-	return ( /*#__PURE__*/ React.createElement(Tooltip, {
-		text: label,
-		position: "top"
-	}, (props) => /*#__PURE__*/ React.createElement(Button, _extends$F({
-	}, props, {
-		className: "pc-settings-toolbutton",
-		look: Button.Looks.BLANK,
-		size: Button.Sizes.NONE,
-		onClick: onClick,
-		disabled: disabled
-	}), /*#__PURE__*/ React.createElement(Icon, {
-		name: icon,
-		color: danger ? "#ed4245" : void 0,
-		width: "20",
-		height: "20"
-	}))
-	));
-}
-function ButtonWrapper({value, onChange, disabled =false}) {
-	const [isChecked, setChecked] = React.useState(value);
-	const Switch = Components$1.get("Switch");
-	return ( /*#__PURE__*/ React.createElement(Switch, {
-		checked: isChecked,
-		disabled: disabled,
-		onChange: () => {
-			onChange(!isChecked);
-			setChecked(!isChecked);
-		}
-	}));
-}
-function AddonCard({addon, manager, openSettings, hasSettings, type}) {
-	var ref,
-		ref1;
-	const Markdown = Components$1.get("Markdown", (e) => "rules" in e
-	);
-	const [, forceUpdate] = React.useReducer((n) => n + 1
-		, 0);
-	React.useEffect(() => {
-		manager.on("toggle", (name) => {
-			if (name !== addon.entityID) return;
-			forceUpdate();
-		});
-	}, [
-		addon,
-		manager
-	]);
-	var ref2;
-	return ( /*#__PURE__*/ React.createElement("div", {
-		className: "pc-settings-addon-card " + ((ref = addon.manifest.name) === null || ref === void 0 ? void 0 : ref.replace(/ /g, "-"))
-	}, /*#__PURE__*/ React.createElement("div", {
-		className: "pc-settings-card-tools"
-	}, /*#__PURE__*/ React.createElement(ToolButton, {
-		label: "Reload",
-		icon: "Replay",
-		onClick: () => manager.reload(addon),
-		disabled: true
-	}), /*#__PURE__*/ React.createElement(ToolButton, {
-		label: "Open Path",
-		icon: "Folder",
-		onClick: () => {
-			PCCompatNative.executeJS(`require("electron").shell.showItemInFolder(${JSON.stringify(addon.path)})`);
-		},
-		disabled: true
-	}), /*#__PURE__*/ React.createElement(ToolButton, {
-		label: "Delete",
-		icon: "Trash",
-		danger: true,
-		onClick: () => {
-			Modals.showConfirmationModal("Are you sure?", `Are you sure that you want to delete the ${type} "${addon.manifest.name}"?`, {
-				onConfirm: () => {
-					PCCompatNative.executeJS(`require("electron").shell.trashItem(${JSON.stringify(addon.path)})`);
-				}
-			});
-		}
-	})), /*#__PURE__*/ React.createElement("div", {
-		className: "pc-settings-card-header"
-	}, /*#__PURE__*/ React.createElement("div", {
-		className: "pc-settings-card-field pc-settings-card-name"
-	}, addon.manifest.name), "version" in addon.manifest && /*#__PURE__*/ React.createElement("div", {
-			className: "pc-settings-card-field"
-		}, "v", addon.manifest.version), "author" in addon.manifest && /*#__PURE__*/ React.createElement("div", {
-			className: "pc-settings-card-field"
-		}, " by ", addon.manifest.author)), addon.manifest.description && /*#__PURE__*/ React.createElement("div", {
-			className: "pc-settings-card-desc"
-		}, /*#__PURE__*/ React.createElement(Markdown, null, addon.manifest.description)), /*#__PURE__*/ React.createElement("div", {
-			className: "pc-settings-card-footer"
-		}, /*#__PURE__*/ React.createElement(ButtonWrapper, {
-			value: (ref2 = (ref1 = manager.isEnabled) === null || ref1 === void 0 ? void 0 : ref1.call(manager, addon)) !== null && ref2 !== void 0 ? ref2 : false,
-			onChange: () => {
-				manager.toggle(addon);
-			}
-		}))));
-}
-
-function _extends$E() {
-	_extends$E = Object.assign || function(target) {
-		for (var i = 1; i < arguments.length; i++) {
-			var source = arguments[i];
-			for (var key in source) {
-				if (Object.prototype.hasOwnProperty.call(source, key)) {
-					target[key] = source[key];
-				}
-			}
-		}
-		return target;
-	};
-	return _extends$E.apply(this, arguments);
-}
-const sortLabels = [
-	"name",
-	"author",
-	"version",
-	"description",
-	"added"
-];
-const searchLabels = [
-	"name",
-	"author",
-	"description"
-];
-const orderLabels = [
-	"ascending",
-	"descending"
-];
-async function sortAddons(addons, order, query, searchOptions, sortBy) {
-	console.log({
-		order,
-		query,
-		searchOptions
-	});
-	return addons.filter((addon) => {
-		if (!query) return true;
-		const {manifest} = addon;
-		var _type;
-		// Use String() wrapper for clever escaping
-		return [
-			"name",
-			"author",
-			"description"
-		].some((type) => searchOptions[type] && ~String((_type = manifest[type]) !== null && _type !== void 0 ? _type : "").toLowerCase().indexOf(query)
-		);
-	}).sort((a, b) => {
-		var _sortBy;
-		const first = (_sortBy = a.manifest[sortBy]) !== null && _sortBy !== void 0 ? _sortBy : "";
-		var _sortBy1;
-		const second = (_sortBy1 = b.manifest[sortBy]) !== null && _sortBy1 !== void 0 ? _sortBy1 : "";
-		if (typeof first === "string") return String(first).toLowerCase().localeCompare(String(second).toLowerCase());
-		if (first > second) return 1;
-		if (second > first) return -1;
-		return 0;
-	})[order === "ascending" ? "reverse" : "slice"](0);
-}
-function OverflowContextMenu({type: addonType}) {
-	const {default: ContextMenu, MenuRadioItem, MenuCheckboxItem, MenuControlItem, MenuSeparator, MenuGroup} = Components$1.byProps("MenuItem", "default");
-	const [sortBy, searchOptions, order] = DataStore.useEvent("misc", () => [
-		DataStore.getMisc(`${addonType}.sortBy`, "name"),
-		DataStore.getMisc(`${addonType}.searchOption`, {
-		}),
-		DataStore.getMisc(`${addonType}.order`, "descending")
-	]
-	);
-	var _type;
-	return ( /*#__PURE__*/ React.createElement(ContextMenu, {
-		navId: "OverflowContextMenu"
-	}, /*#__PURE__*/ React.createElement(MenuControlItem, {
-		id: "order-header",
-		control: () => /*#__PURE__*/ React.createElement("h5", {
-			className: "pc-settings-overflow-header"
-		}, "Order")
-	}), /*#__PURE__*/ React.createElement(MenuSeparator, {
-		key: "separator"
-	}), /*#__PURE__*/ React.createElement(MenuGroup, null, orderLabels.map((type) => /*#__PURE__*/ React.createElement(MenuRadioItem, {
-		key: "order-" + type,
-		label: type[0].toUpperCase() + type.slice(1),
-		checked: order === type,
-		id: "sortBy-" + type,
-		action: () => {
-			DataStore.setMisc(void 0, `${addonType}.order`, type);
-		}
-	})
-	)), /*#__PURE__*/ React.createElement(MenuSeparator, {
-		key: "separator"
-	}), /*#__PURE__*/ React.createElement(MenuControlItem, {
-		id: "sort-header",
-		control: () => /*#__PURE__*/ React.createElement("h5", {
-			className: "pc-settings-overflow-header"
-		}, "Sort Options")
-	}), /*#__PURE__*/ React.createElement(MenuSeparator, {
-		key: "separator"
-	}), /*#__PURE__*/ React.createElement(MenuGroup, null, sortLabels.map((type) => /*#__PURE__*/ React.createElement(MenuRadioItem, {
-		key: "sortBy-" + type,
-		label: type[0].toUpperCase() + type.slice(1),
-		checked: sortBy === type,
-		id: "sortBy-" + type,
-		action: () => {
-			DataStore.setMisc(void 0, `${addonType}.sortBy`, type);
-		}
-	})
-	)), /*#__PURE__*/ React.createElement(MenuSeparator, {
-		key: "separator"
-	}), /*#__PURE__*/ React.createElement(MenuControlItem, {
-		id: "search-header",
-		control: () => /*#__PURE__*/ React.createElement("h5", {
-			className: "pc-settings-overflow-header"
-		}, "Search Options")
-	}), /*#__PURE__*/ React.createElement(MenuSeparator, {
-		key: "separator"
-	}), /*#__PURE__*/ React.createElement(MenuGroup, null, searchLabels.map((type) => /*#__PURE__*/ React.createElement(MenuCheckboxItem, {
-		key: "search-" + type,
-		id: "search-" + type,
-		label: type[0].toUpperCase() + type.slice(1),
-		checked: (_type = searchOptions[type]) !== null && _type !== void 0 ? _type : true,
-		action: () => {
-			var _type;
-			DataStore.setMisc(void 0, `${addonType}.searchOption.${type}`, !((_type = searchOptions[type]) !== null && _type !== void 0 ? _type : true));
-		}
-	})
-	))));
-}
-function AddonPanel({manager, type}) {
-	const {React: React1} = DiscordModules;
-	const [query, setQuery] = React1.useState("");
-	const [addons, setAddons] = React1.useState(null);
-	const [sortBy, searchOptions, order] = DataStore.useEvent("misc", () => [
-		DataStore.getMisc(`${type}.sortBy`, "name"),
-		DataStore.getMisc(`${type}.searchOption`, {
-		}),
-		DataStore.getMisc(`${type}.order`, "descending")
-	]
-	);
-	const {ContextMenuActions} = DiscordModules;
-	const SearchBar = Components$1.get("SearchBar");
-	const Spinner = Components$1.get("Spinner");
-	const OverflowMenu = Components$1.get("OverflowMenu");
-	const Tooltip = Components$1.get("Tooltip");
-	const Button = Components$1.byProps("DropdownSizes");
-	// const classes = Components.byProps("");
-	React1.useEffect(() => {
-		sortAddons(Array.from(manager.addons), order !== null && order !== void 0 ? order : "descending", query, searchOptions !== null && searchOptions !== void 0 ? searchOptions : {
-			author: true,
-			name: true,
-			description: true
-		}, sortBy).then((addons) => setAddons(addons)
-		);
-	}, [
-		query,
-		manager,
-		type,
-		order,
-		searchOptions,
-		sortBy
-	]);
-	return ( /*#__PURE__*/ React.createElement("div", {
-		className: "pc-settings-addons"
-	}, /*#__PURE__*/ React.createElement("div", {
-		className: "pc-settings-addons-controls"
-	}, /*#__PURE__*/ React.createElement(SearchBar, {
-		// @ts-ignore
-		onQueryChange: (value) => setQuery(value),
-		onClear: () => setQuery(""),
-		placeholder: `Search ${type}s...`,
-		size: SearchBar.Sizes.SMALL,
-		query: query,
-		className: "pc-settings-addons-search"
-	}), /*#__PURE__*/ React.createElement(Tooltip, {
-		text: "Options",
-		position: "bottom"
-	}, (props) => /*#__PURE__*/ React.createElement(Button, _extends$E({
-	}, props, {
-		size: Button.Sizes.NONE,
-		look: Button.Looks.BLANK,
-		className: "pc-settings-overflow-menu",
-		onClick: (e) => {
-			ContextMenuActions.openContextMenu(e, () => /*#__PURE__*/ React.createElement(OverflowContextMenu, {
-				type: type
-			})
-			);
-		}
-	}), /*#__PURE__*/ React.createElement(OverflowMenu, null))
-	)), /*#__PURE__*/ React.createElement("div", {
-		className: "pc-settings-card-scroller"
-	}, addons ? addons.map((addon) => /*#__PURE__*/ React.createElement(AddonCard, {
-		addon: addon,
-		hasSettings: false,
-		manager: manager,
-		type: type,
-		key: addon.manifest.name,
-		openSettings: () => {}
-	})
-	) : /*#__PURE__*/ React.createElement(Spinner, {
-		type: Spinner.Type.WANDERING_CUBES
-	}))));
 }
 
 class Patcher {
@@ -1120,9 +662,9 @@ class Patcher {
 			return returnValue;
 		};
 	}
-	static pushPatch(caller, module, functionName) {
+	static pushPatch(caller1, module, functionName) {
 		const patch = {
-			caller,
+			caller: caller1,
 			module,
 			functionName,
 			originalFunction: module[functionName],
@@ -1139,15 +681,15 @@ class Patcher {
 		});
 		return this._patches.push(patch), patch;
 	}
-	static doPatch(caller, module, functionName, callback, type = "after", options = {
+	static doPatch(caller2, module1, functionName1, callback, type = "after", options = {
 		}) {
 		let {displayName} = options;
 		var ref;
-		const patch = (ref = this._patches.find((e) => e.module === module && e.functionName === functionName
-		)) !== null && ref !== void 0 ? ref : this.pushPatch(caller, module, functionName);
-		if (typeof displayName !== "string") displayName || module.displayName || module.name || module.constructor.displayName || module.constructor.name;
+		const patch = (ref = this._patches.find((e) => e.module === module1 && e.functionName === functionName1
+		)) !== null && ref !== void 0 ? ref : this.pushPatch(caller2, module1, functionName1);
+		if (typeof displayName !== "string") displayName || module1.displayName || module1.name || module1.constructor.displayName || module1.constructor.name;
 		const child = {
-			caller,
+			caller: caller2,
 			type,
 			id: patch.count,
 			callback,
@@ -1155,7 +697,7 @@ class Patcher {
 				patch.children.splice(patch.children.findIndex((cpatch) => cpatch.id === child.id && cpatch.type === type
 				), 1);
 				if (patch.children.length <= 0) {
-					const patchNum = this._patches.findIndex((p) => p.module == module && p.functionName == functionName
+					const patchNum = this._patches.findIndex((p) => p.module == module1 && p.functionName == functionName1
 					);
 					this._patches[patchNum].undo();
 					this._patches.splice(patchNum, 1);
@@ -1166,17 +708,769 @@ class Patcher {
 		patch.count++;
 		return child.unpatch;
 	}
-	static before(caller, module, functionName, callback) {
-		return this.doPatch(caller, module, functionName, callback, "before");
+	static before(caller3, module2, functionName2, callback1) {
+		return this.doPatch(caller3, module2, functionName2, callback1, "before");
 	}
-	static after(caller, module, functionName, callback) {
-		return this.doPatch(caller, module, functionName, callback, "after");
+	static after(caller4, module3, functionName3, callback2) {
+		return this.doPatch(caller4, module3, functionName3, callback2, "after");
 	}
-	static instead(caller, module, functionName, callback) {
-		return this.doPatch(caller, module, functionName, callback, "instead");
+	static instead(caller5, module4, functionName4, callback3) {
+		return this.doPatch(caller5, module4, functionName4, callback3, "instead");
 	}
 }
 Patcher._patches = [];
+
+function findInTree(tree = {
+	}, filter = (_) => _
+	, {ignore =[], walkable =[], maxProperties =100} = {
+	}) {
+	let stack = [
+		tree
+	];
+	const wrapFilter = function(...args) {
+		try {
+			return Reflect.apply(filter, this, args);
+		} catch (e) {
+			return false;
+		}
+	};
+	while (stack.length && maxProperties) {
+		const node = stack.shift();
+		if (wrapFilter(node)) return node;
+		if (Array.isArray(node)) stack.push(...node);
+		else if (typeof node === "object" && node !== null) {
+			if (walkable.length) {
+				for (const key in node) {
+					const value = node[key];
+					if (~walkable.indexOf(key) && !~ignore.indexOf(key)) {
+						stack.push(value);
+					}
+				}
+			} else {
+				for (const key in node) {
+					const value = node[key];
+					if (node && ~ignore.indexOf(key)) continue;
+					stack.push(value);
+				}
+			}
+		}
+		maxProperties--;
+	}
+}
+function findInReactTree(tree, filter, options = {
+	}) {
+	return findInTree(tree, filter, {
+		...options,
+		walkable: [
+			"props",
+			"children"
+		]
+	});
+}
+function getReactInstance(node) {
+	return node["__reactFiber$"];
+}
+function getOwnerInstance(node) {
+	if (!node) return null;
+	const fiber = getReactInstance(node);
+	let current = fiber;
+	while (!((current === null || current === void 0 ? void 0 : current.stateNode) instanceof DiscordModules.React.Component)) {
+		current = current.return;
+	}
+	return current === null || current === void 0 ? void 0 : current.stateNode;
+}
+function forceUpdateElement(selector) {
+	var ref;
+	(ref = getOwnerInstance(document.querySelector(selector))) === null || ref === void 0 ? void 0 : ref.forceUpdate();
+}
+function waitFor(selector) {
+	return new Promise((resolve) => {
+		const element = document.querySelector(selector);
+		if (element) return resolve(element);
+		new MutationObserver((mutations, observer) => {
+			for (let m = 0; m < mutations.length; m++) {
+				for (let i = 0; i < mutations[m].addedNodes.length; i++) {
+					const mutation = mutations[m].addedNodes[i];
+					if (mutation.nodeType === 3) continue; // ignore text
+					const directMatch = mutation.matches(selector) && mutation;
+					if (directMatch) {
+						observer.disconnect();
+						return resolve(directMatch);
+					}
+				}
+			}
+		}).observe(document, {
+			childList: true,
+			subtree: true
+		});
+	});
+}
+
+var util = /*#__PURE__*/ Object.freeze({
+	__proto__: null,
+	findInTree: findInTree,
+	findInReactTree: findInReactTree,
+	getReactInstance: getReactInstance,
+	getOwnerInstance: getOwnerInstance,
+	forceUpdateElement: forceUpdateElement,
+	waitFor: waitFor
+});
+
+function _extends$I() {
+	_extends$I = Object.assign || function(target) {
+		for (var i = 1; i < arguments.length; i++) {
+			var source = arguments[i];
+			for (var key in source) {
+				if (Object.prototype.hasOwnProperty.call(source, key)) {
+					target[key] = source[key];
+				}
+			}
+		}
+		return target;
+	};
+	return _extends$I.apply(this, arguments);
+}
+promise.then(() => {
+	var ref5,
+		ref1,
+		ref2;
+	/* Avatar Utility Classes */ const Avatar = Webpack.findByProps("AnimatedAvatar");
+	Patcher.after("pc-utility-classes-avatar", Avatar, "default", (_, args, res) => {
+		var ref,
+			ref3;
+		if ((ref = args[0]) === null || ref === void 0 ? void 0 : (ref3 = ref.src) === null || ref3 === void 0 ? void 0 : ref3.includes("/avatars")) {
+			var ref4;
+			res.props["data-user-id"] = (ref4 = args[0].src.match(/\/(?:avatars|users)\/(\d+)/)) === null || ref4 === void 0 ? void 0 : ref4[1];
+		}
+		return res;
+	});
+	Patcher.after("pc-utility-classes-animated-avatar", Avatar.AnimatedAvatar, "type", (_, args, res) => {
+		return ( /*#__PURE__*/ React.createElement(Avatar.default, _extends$I({
+		}, res.props)));
+	});
+	const AvatarWrapper = (ref2 = (ref5 = Webpack.findByProps([
+		"wrapper",
+		"avatar"
+	])) === null || ref5 === void 0 ? void 0 : (ref1 = ref5.wrapper) === null || ref1 === void 0 ? void 0 : ref1.split(" ")) === null || ref2 === void 0 ? void 0 : ref2[0];
+	setImmediate(() => forceUpdateElement(`.${AvatarWrapper}`)
+	);
+});
+
+class Store {
+	has(event) {
+		return event in this.events;
+	}
+	on(event1, listener) {
+		if (!this.has(event1))
+			this.events[event1] = new Set();
+		this.events[event1].add(listener);
+		return () => void this.off(event1, listener);
+	}
+	off(event2, listener1) {
+		if (!this.has(event2)) return;
+		return this.events[event2].delete(listener1);
+	}
+	emit(event3, ...args) {
+		if (!this.has(event3)) return;
+		for (const listener of this.events[event3]) {
+			try {
+				listener(...args);
+			} catch (error) {
+				Logger.error(`Store:${this.constructor.name}`, error);
+			}
+		}
+	}
+	useEvent(event4, listener2) {
+		const [state, setState] = DiscordModules.React.useState(listener2());
+		DiscordModules.React.useEffect(() => {
+			return this.on(event4, () => setState(listener2())
+			);
+		}, [
+			event4,
+			listener2
+		]);
+		return state;
+	}
+	constructor() {
+		this.events = {
+		};
+	}
+}
+
+class Emitter {
+	static has(event) {
+		return event in this.events;
+	}
+	static on(event1, listener) {
+		if (!this.has(event1))
+			this.events[event1] = new Set();
+		this.events[event1].add(listener);
+		return this.off.bind(this, event1, listener);
+	}
+	static off(event2, listener1) {
+		if (!this.has(event2)) return;
+		return this.events[event2].delete(listener1);
+	}
+	static emit(event3, ...args) {
+		if (!this.has(event3)) return;
+		for (const listener of this.events[event3]) {
+			try {
+				listener(...args);
+			} catch (error) {
+				Logger.error(`Store:${this.constructor.name}`, "Could not fire callback:", error);
+			}
+		}
+	}
+}
+Emitter.events = {
+};
+
+class fs {
+	static readFileSync(path, options = "utf8") {
+		return PCCompatNative.executeJS(`require("fs").readFileSync(${JSON.stringify(path)}, ${JSON.stringify(options)});`);
+	}
+	static writeFileSync(path1, data, options1) {
+		return PCCompatNative.executeJS(`require("fs").writeFileSync(${JSON.stringify(path1)}, ${JSON.stringify(data)}, ${JSON.stringify(options1)})`);
+	}
+	static writeFile(path2, data1, options2, callback) {
+		if (typeof options2 === "function") {
+			callback = options2;
+			options2 = null;
+		}
+		const ret = {
+			error: null
+		};
+		try {
+			this.writeFileSync(path2, data1, options2);
+		} catch (error) {
+			ret.error = error;
+		}
+		callback(ret.error);
+	}
+	static readdirSync(path3, options3) {
+		return PCCompatNative.executeJS(`require("fs").readdirSync(${JSON.stringify(path3)}, ${JSON.stringify(options3)});`);
+	}
+	static existsSync(path4) {
+		return PCCompatNative.executeJS(`require("fs").existsSync(${JSON.stringify(path4)});`);
+	}
+	static mkdirSync(path5, options4) {
+		return PCCompatNative.executeJS(`require("fs").mkdirSync(${JSON.stringify(path5)}, ${JSON.stringify(options4)});`);
+	}
+	static statSync(path6, options5) {
+		return PCCompatNative.executeJS(`
+            const stats = require("fs").statSync(${JSON.stringify(path6)}, ${JSON.stringify(options5)});
+            const ret = {
+                ...stats,
+                isFile: () => stats.isFile(),
+                isDirectory: () => stats.isDirectory()
+            };
+            ret
+        `);
+	}
+	static watch(path7, options6, callback1) {
+		if (typeof options6 === "function") {
+			callback1 = options6;
+			options6 = null;
+		}
+		const eventId = "bdcompat-watcher-" + Math.random().toString(36).slice(2, 10);
+		PCCompatNative.IPC.on(eventId, (event, filename) => {
+			callback1(event, filename);
+		});
+		return PCCompatNative.executeJS(`
+            require("fs").watch(${JSON.stringify(path7)}, ${JSON.stringify(options6)}, (event, filename) => {
+                PCCompatNative.IPC.dispatch(${JSON.stringify(eventId)}, event, filename);
+            });
+        `);
+	}
+}
+
+const path = PCCompatNative.executeJS(`require("path")`);
+
+const ipcRenderer = PCCompatNative.executeJS(`Object.keys(require("electron").ipcRenderer)`).slice(3).reduce((newElectron, key) => {
+	newElectron[key] = PCCompatNative.executeJS(`require("electron").ipcRenderer[${JSON.stringify(key)}].bind(require("electron").ipcRenderer)`);
+	return newElectron;
+}, {
+});
+const shell = PCCompatNative.executeJS(`require("electron").shell`);
+const clipboard = PCCompatNative.executeJS(`require("electron").clipboard`);
+const contextBridge = {
+	exposeInMainWorld(name, value) {
+		window[name] = value;
+	}
+};
+const electron = {
+	ipcRenderer,
+	shell,
+	contextBridge,
+	clipboard
+};
+
+function _classStaticPrivateFieldSpecGet(receiver, classConstructor, descriptor) {
+	if (receiver !== classConstructor) {
+		throw new TypeError("Private static access of wrong provenance");
+	}
+	return descriptor.value;
+}
+class Components$1 {
+	static byProps(...props) {
+		const name = props.join(":");
+		if (_classStaticPrivateFieldSpecGet(this, Components$1, __cache)[name]) return _classStaticPrivateFieldSpecGet(this, Components$1, __cache)[name];
+		_classStaticPrivateFieldSpecGet(this, Components$1, __cache)[name] = Webpack.findModule((m) => props.every((p) => p in m
+			) && ("default" in m ? true : typeof m === "function")
+		);
+		return _classStaticPrivateFieldSpecGet(this, Components$1, __cache)[name];
+	}
+	static get(name, filter = (_) => _
+	) {
+		if (_classStaticPrivateFieldSpecGet(this, Components$1, __cache)[name]) return _classStaticPrivateFieldSpecGet(this, Components$1, __cache)[name];
+		_classStaticPrivateFieldSpecGet(this, Components$1, __cache)[name] = Webpack.findModule((m) => m.displayName === name && filter(m)
+		);
+		return _classStaticPrivateFieldSpecGet(this, Components$1, __cache)[name];
+	}
+}
+var __cache = {
+	writable: true,
+	value: {
+	}
+};
+
+class Modals {
+	static showConfirmationModal(title, content, options = {
+		}) {
+		const {confirmText ="Okay", cancelText ="Cancel", onConfirm =() => {}, onCancel =() => {}} = options;
+		const {ModalsApi, ConfirmationModal, React, Markdown} = DiscordModules;
+		return ModalsApi.openModal((props) => {
+			React.createElement(ConfirmationModal, Object.assign({
+				header: title,
+				confirmText: confirmText,
+				cancelText: cancelText,
+				onConfirm,
+				onCancel
+			}, props), React.createElement(Markdown, null, content));
+		});
+	}
+	static alert(title1, content1) {
+		return this.showConfirmationModal(title1, content1, {
+			cancelText: null
+		});
+	}
+}
+
+function _extends$H() {
+	_extends$H = Object.assign || function(target) {
+		for (var i = 1; i < arguments.length; i++) {
+			var source = arguments[i];
+			for (var key in source) {
+				if (Object.prototype.hasOwnProperty.call(source, key)) {
+					target[key] = source[key];
+				}
+			}
+		}
+		return target;
+	};
+	return _extends$H.apply(this, arguments);
+}
+function Icon$1({name, ...props}) {
+	const Component = Components$1.get(name);
+	if (!Components$1) return null;
+	return ( /*#__PURE__*/ React.createElement(Component, _extends$H({
+	}, props)));
+}
+function ToolButton({label, icon, onClick, danger =false, disabled =false}) {
+	const {Button, Tooltips: {Tooltip}} = DiscordModules;
+	return ( /*#__PURE__*/ React.createElement(Tooltip, {
+		text: label,
+		position: "top"
+	}, (props) => /*#__PURE__*/ React.createElement(Button, _extends$H({
+	}, props, {
+		className: "pc-settings-toolbutton",
+		look: Button.Looks.BLANK,
+		size: Button.Sizes.NONE,
+		onClick: onClick,
+		disabled: disabled
+	}), /*#__PURE__*/ React.createElement(Icon$1, {
+		name: icon,
+		color: danger ? "#ed4245" : void 0,
+		width: "20",
+		height: "20"
+	}))
+	));
+}
+function ButtonWrapper({value, onChange, disabled =false}) {
+	const [isChecked, setChecked] = React.useState(value);
+	const Switch = Components$1.get("Switch");
+	return ( /*#__PURE__*/ React.createElement(Switch, {
+		className: "pc-settings-addons-switch",
+		checked: isChecked,
+		disabled: disabled,
+		onChange: () => {
+			onChange(!isChecked);
+			setChecked(!isChecked);
+		}
+	}));
+}
+function AddonCard({addon, manager, openSettings, hasSettings, type}) {
+	var ref,
+		ref1,
+		ref2;
+	const Markdown = Components$1.get("Markdown", (e) => "rules" in e
+	);
+	const [, forceUpdate] = React.useReducer((n) => n + 1
+		, 0);
+	React.useEffect(() => {
+		manager.on("toggle", (name) => {
+			if (name !== addon.entityID) return;
+			forceUpdate();
+		});
+	}, [
+		addon,
+		manager
+	]);
+	var ref3,
+		ref4;
+	return ( /*#__PURE__*/ React.createElement("div", {
+		style: {
+			"--plugin-color": addon.color
+		},
+		className: "pc-settings-addon-card " + ((ref = addon.manifest.name) === null || ref === void 0 ? void 0 : ref.replace(/ /g, "-"))
+	}, /*#__PURE__*/ React.createElement("div", {
+		className: "pc-settings-card-header"
+	}, /*#__PURE__*/ React.createElement("div", {
+		className: "pc-settings-card-field pc-settings-card-name"
+	}, addon.manifest.name), "version" in addon.manifest && /*#__PURE__*/ React.createElement("div", {
+			className: "pc-settings-card-field"
+		}, "v", addon.manifest.version), "author" in addon.manifest && /*#__PURE__*/ React.createElement("div", {
+			className: "pc-settings-card-field"
+		}, " by ", addon.manifest.author), /*#__PURE__*/ React.createElement("div", {
+			className: "pc-settings-card-controls"
+		}, /*#__PURE__*/ React.createElement(ToolButton, {
+			label: "Reload",
+			icon: "Replay",
+			disabled: (ref3 = !((ref1 = manager.isEnabled) === null || ref1 === void 0 ? void 0 : ref1.call(manager, addon))) !== null && ref3 !== void 0 ? ref3 : true,
+			onClick: () => manager.reload(addon)
+		}), /*#__PURE__*/ React.createElement(ToolButton, {
+			label: "Open Path",
+			icon: "Folder",
+			onClick: () => {
+				PCCompatNative.executeJS(`require("electron").shell.showItemInFolder(${JSON.stringify(addon.path)})`);
+			}
+		}), /*#__PURE__*/ React.createElement(ToolButton, {
+			label: "Delete",
+			icon: "Trash",
+			onClick: () => {
+				Modals.showConfirmationModal("Are you sure?", `Are you sure that you want to delete the ${type} "${addon.manifest.name}"?`, {
+					onConfirm: () => {
+						PCCompatNative.executeJS(`require("electron").shell.trashItem(${JSON.stringify(addon.path)})`);
+					}
+				});
+			}
+		}), /*#__PURE__*/ React.createElement(ButtonWrapper, {
+			value: (ref4 = (ref2 = manager.isEnabled) === null || ref2 === void 0 ? void 0 : ref2.call(manager, addon)) !== null && ref4 !== void 0 ? ref4 : false,
+			onChange: () => {
+				manager.toggle(addon);
+			}
+		}))), addon.manifest.description && /*#__PURE__*/ React.createElement("div", {
+			className: "pc-settings-card-desc"
+		}, /*#__PURE__*/ React.createElement(Markdown, null, addon.manifest.description))));
+}
+
+function _extends$G() {
+	_extends$G = Object.assign || function(target) {
+		for (var i = 1; i < arguments.length; i++) {
+			var source = arguments[i];
+			for (var key in source) {
+				if (Object.prototype.hasOwnProperty.call(source, key)) {
+					target[key] = source[key];
+				}
+			}
+		}
+		return target;
+	};
+	return _extends$G.apply(this, arguments);
+}
+const sortLabels = [
+	"name",
+	"author",
+	"version",
+	"description",
+	"added"
+];
+const searchLabels = [
+	"name",
+	"author",
+	"description"
+];
+const orderLabels = [
+	"ascending",
+	"descending"
+];
+async function sortAddons(addons, order, query, searchOptions, sortBy) {
+	return addons.filter((addon) => {
+		if (!query) return true;
+		const {manifest} = addon;
+		var _type;
+		// Use String() wrapper for clever escaping
+		return [
+			"name",
+			"author",
+			"description"
+		].some((type) => searchOptions[type] && ~String((_type = manifest[type]) !== null && _type !== void 0 ? _type : "").toLowerCase().indexOf(query)
+		);
+	}).sort((a, b) => {
+		var _sortBy;
+		const first = (_sortBy = a.manifest[sortBy]) !== null && _sortBy !== void 0 ? _sortBy : "";
+		var _sortBy1;
+		const second = (_sortBy1 = b.manifest[sortBy]) !== null && _sortBy1 !== void 0 ? _sortBy1 : "";
+		if (typeof first === "string") return String(first).toLowerCase().localeCompare(String(second).toLowerCase());
+		if (first > second) return 1;
+		if (second > first) return -1;
+		return 0;
+	})[order === "ascending" ? "reverse" : "slice"](0);
+}
+function OverflowContextMenu({type: addonType}) {
+	const {default: ContextMenu, MenuRadioItem, MenuCheckboxItem, MenuControlItem, MenuSeparator, MenuGroup} = Components$1.byProps("MenuItem", "default");
+	const [sortBy, searchOptions, order] = DataStore$1.useEvent("misc", () => [
+		DataStore$1.getMisc(`${addonType}.sortBy`, "name"),
+		DataStore$1.getMisc(`${addonType}.searchOption`, {
+		}),
+		DataStore$1.getMisc(`${addonType}.order`, "descending")
+	]
+	);
+	var _type1;
+	return ( /*#__PURE__*/ React.createElement(ContextMenu, {
+		navId: "OverflowContextMenu"
+	}, /*#__PURE__*/ React.createElement(MenuControlItem, {
+		id: "order-header",
+		control: () => /*#__PURE__*/ React.createElement("h5", {
+			className: "pc-settings-overflow-header"
+		}, "Order")
+	}), /*#__PURE__*/ React.createElement(MenuSeparator, {
+		key: "separator"
+	}), /*#__PURE__*/ React.createElement(MenuGroup, null, orderLabels.map((type) => /*#__PURE__*/ React.createElement(MenuRadioItem, {
+		key: "order-" + type,
+		label: type[0].toUpperCase() + type.slice(1),
+		checked: order === type,
+		id: "sortBy-" + type,
+		action: () => {
+			DataStore$1.setMisc(void 0, `${addonType}.order`, type);
+		}
+	})
+	)), /*#__PURE__*/ React.createElement(MenuSeparator, {
+		key: "separator"
+	}), /*#__PURE__*/ React.createElement(MenuControlItem, {
+		id: "sort-header",
+		control: () => /*#__PURE__*/ React.createElement("h5", {
+			className: "pc-settings-overflow-header"
+		}, "Sort Options")
+	}), /*#__PURE__*/ React.createElement(MenuSeparator, {
+		key: "separator"
+	}), /*#__PURE__*/ React.createElement(MenuGroup, null, sortLabels.map((type) => /*#__PURE__*/ React.createElement(MenuRadioItem, {
+		key: "sortBy-" + type,
+		label: type[0].toUpperCase() + type.slice(1),
+		checked: sortBy === type,
+		id: "sortBy-" + type,
+		action: () => {
+			DataStore$1.setMisc(void 0, `${addonType}.sortBy`, type);
+		}
+	})
+	)), /*#__PURE__*/ React.createElement(MenuSeparator, {
+		key: "separator"
+	}), /*#__PURE__*/ React.createElement(MenuControlItem, {
+		id: "search-header",
+		control: () => /*#__PURE__*/ React.createElement("h5", {
+			className: "pc-settings-overflow-header"
+		}, "Search Options")
+	}), /*#__PURE__*/ React.createElement(MenuSeparator, {
+		key: "separator"
+	}), /*#__PURE__*/ React.createElement(MenuGroup, null, searchLabels.map((type) => /*#__PURE__*/ React.createElement(MenuCheckboxItem, {
+		key: "search-" + type,
+		id: "search-" + type,
+		label: type[0].toUpperCase() + type.slice(1),
+		checked: (_type1 = searchOptions[type]) !== null && _type1 !== void 0 ? _type1 : true,
+		action: () => {
+			var _type;
+			DataStore$1.setMisc(void 0, `${addonType}.searchOption.${type}`, !((_type = searchOptions[type]) !== null && _type !== void 0 ? _type : true));
+		}
+	})
+	))));
+}
+function AddonPanel({manager, type}) {
+	const {React: React1} = DiscordModules;
+	const [query, setQuery] = React1.useState("");
+	const [addons1, setAddons] = React1.useState(null);
+	const [sortBy, searchOptions, order] = DataStore$1.useEvent("misc", () => [
+		DataStore$1.getMisc(`${type}.sortBy`, "name"),
+		DataStore$1.getMisc(`${type}.searchOption`, {
+		}),
+		DataStore$1.getMisc(`${type}.order`, "descending")
+	]
+	);
+	const {ContextMenuActions} = DiscordModules;
+	const SearchBar = Components$1.get("SearchBar");
+	const Spinner = Components$1.get("Spinner");
+	const OverflowMenu = Components$1.get("OverflowMenu");
+	const Tooltip = Components$1.get("Tooltip");
+	const Button = Components$1.byProps("DropdownSizes");
+	// const classes = Components.byProps("");
+	React1.useEffect(() => {
+		sortAddons(Array.from(manager.addons), order !== null && order !== void 0 ? order : "descending", query, searchOptions !== null && searchOptions !== void 0 ? searchOptions : {
+			author: true,
+			name: true,
+			description: true
+		}, sortBy).then((addons) => setAddons(addons)
+		);
+	}, [
+		query,
+		manager,
+		type,
+		order,
+		searchOptions,
+		sortBy
+	]);
+	return ( /*#__PURE__*/ React.createElement("div", {
+		className: "pc-settings-addons"
+	}, /*#__PURE__*/ React.createElement("div", {
+		className: "pc-settings-addons-controls"
+	}, /*#__PURE__*/ React.createElement(SearchBar, {
+		// @ts-ignore
+		onQueryChange: (value) => setQuery(value),
+		onClear: () => setQuery(""),
+		placeholder: `Search ${type}s...`,
+		size: SearchBar.Sizes.SMALL,
+		query: query,
+		className: "pc-settings-addons-search"
+	}), /*#__PURE__*/ React.createElement(Tooltip, {
+		text: "Options",
+		position: "bottom"
+	}, (props) => /*#__PURE__*/ React.createElement(Button, _extends$G({
+	}, props, {
+		size: Button.Sizes.NONE,
+		look: Button.Looks.BLANK,
+		className: "pc-settings-overflow-menu",
+		onClick: (e) => {
+			ContextMenuActions.openContextMenu(e, () => /*#__PURE__*/ React.createElement(OverflowContextMenu, {
+				type: type
+			})
+			);
+		}
+	}), /*#__PURE__*/ React.createElement(OverflowMenu, null))
+	)), /*#__PURE__*/ React.createElement("div", {
+		className: "pc-settings-card-scroller"
+	}, addons1 ? addons1.map((addon) => /*#__PURE__*/ React.createElement(AddonCard, {
+		addon: addon,
+		hasSettings: false,
+		manager: manager,
+		type: type,
+		key: addon.manifest.name,
+		openSettings: () => {}
+	})
+	) : /*#__PURE__*/ React.createElement(Spinner, {
+		type: Spinner.Type.WANDERING_CUBES
+	}))));
+}
+
+function _extends$F() {
+	_extends$F = Object.assign || function(target) {
+		for (var i = 1; i < arguments.length; i++) {
+			var source = arguments[i];
+			for (var key in source) {
+				if (Object.prototype.hasOwnProperty.call(source, key)) {
+					target[key] = source[key];
+				}
+			}
+		}
+		return target;
+	};
+	return _extends$F.apply(this, arguments);
+}
+function AsyncComponent({_provider, _fallback, ...props}) {
+	const [Component, setComponent] = DiscordModules.React.useState(() => _fallback !== null && _fallback !== void 0 ? _fallback : () => null
+	);
+	DiscordModules.React.useEffect(() => {
+		_provider().then((comp) => setComponent(() => comp
+		)
+		);
+	}, [
+		_provider,
+		_fallback
+	]);
+	return ( /*#__PURE__*/ React.createElement(Component, _extends$F({
+	}, props)));
+}
+function from(promise, fallback) {
+	return (props) => DiscordModules.React.createElement(AsyncComponent, {
+		_provider: () => promise,
+		_fallback: fallback,
+		...props
+	});
+}
+const fromPromise = from; // Alias
+function fromDisplayName(displayName, fallback) {
+	return from(Webpack.findByDisplayName(displayName, {
+		wait: true
+	}), fallback);
+}
+Object.assign(AsyncComponent, {
+	from,
+	fromDisplayName
+}); // TODO: Add fromModule and fromModuleProp
+
+const Icon = fromPromise(promise.then(() => {
+	const Icons = Webpack.findModules((m) => typeof m === "function" && m.toString().indexOf("\"currentColor\"") !== -1
+	);
+	function IconComponent(props) {
+		const mdl = Icons.find((i) => i.displayName === props.name
+		);
+		const Props = _.cloneDeep(props);
+		delete Props.name;
+		return React.createElement(mdl, Props);
+	}
+	Icon.Names = Icons.map((m) => m.displayName
+	);
+	return IconComponent;
+}));
+
+const ErrorState = fromPromise(promise.then(() => {
+	const {Margins, Markdown} = DiscordModules;
+	const {error, backgroundRed, icon, text} = Webpack.findByProps("error", "backgroundRed");
+	return function ErrorState({children}) {
+		return ( /*#__PURE__*/ React.createElement("div", {
+			className: `${error} ${backgroundRed} ${Margins.marginBottom20}`
+		}, /*#__PURE__*/ React.createElement(Icon, {
+			className: icon,
+			name: "WarningCircle"
+		}), /*#__PURE__*/ React.createElement("div", {
+			className: text
+		}, /*#__PURE__*/ React.createElement(Markdown, null, children))));
+	};
+}));
+
+const ErrorBoundary = fromPromise(promise.then(() => {
+	return class ErrorBoundary extends DiscordModules.React.Component {
+		static getDerivedStateFromError(error) {
+			return {
+				hasError: true,
+				error: error.message
+			};
+		}
+		componentDidCatch(error1, errorInfo) {
+			console.error(error1, errorInfo);
+		}
+		render() {
+			if (this.state.hasError) {
+				return ( /*#__PURE__*/ React.createElement(ErrorState, null, this.state.error));
+			}
+			return this.props.children;
+		}
+		constructor(...args) {
+			super(...args);
+			this.state = {
+				hasError: false,
+				error: null
+			};
+		}
+	};
+}));
 
 function SettingsPanel({store, name, children, header =null}) {
 	const [, forceUpdate] = DiscordModules.React.useReducer((n) => n + 1
@@ -1189,16 +1483,16 @@ function SettingsPanel({store, name, children, header =null}) {
 	}, [
 		store
 	]);
-	return ( /*#__PURE__*/ React.createElement("div", {
+	return ( /*#__PURE__*/ React.createElement(ErrorBoundary, null, /*#__PURE__*/ React.createElement("div", {
 		className: "pc-settings-panel"
 	}, /*#__PURE__*/ React.createElement("div", {
 		className: "pc-settings-title"
-	}, name, header), children()));
+	}, name, header), children())));
 }
 
 let SettingsModule;
 promise.then(() => {
-	SettingsModule = class SettingsModule1 extends DiscordModules.Flux.Store {
+	SettingsModule = class SettingsModule extends DiscordModules.Flux.Store {
 		connectStore() {
 			return DiscordModules.Flux.connectStores([
 				this
@@ -1213,7 +1507,7 @@ promise.then(() => {
 				toggleSetting: this.toggle.bind(this)
 			};
 		}
-		constructor(id) {
+		constructor(id1) {
 			super(DiscordModules.Dispatcher, {
 			});
 			this.getKeys = () => {
@@ -1232,23 +1526,23 @@ promise.then(() => {
 				} else {
 					this.settings[id] = value;
 				}
-				DataStore.trySaveData(this.id, this.settings);
+				DataStore$1.trySaveData(this.id, this.settings);
 				this.emitChange();
 			};
-			this.settings = DataStore.tryLoadData(id);
-			this.id = id;
+			this.settings = DataStore$1.tryLoadData(id1);
+			this.id = id1;
 		}
 	}
 	;
 });
-const cache$1 = new Map();
+const cache$2 = new Map();
 function getSettings(id) {
-	if (!cache$1.has(id)) {
+	if (!cache$2.has(id)) {
 		const Settings = new SettingsModule(id);
-		cache$1.set(id, Settings);
+		cache$2.set(id, Settings);
 		return Settings;
 	}
-	return cache$1.get(id);
+	return cache$2.get(id);
 }
 
 class SettingsRenderer {
@@ -1279,8 +1573,8 @@ class SettingsRenderer {
 			return true;
 		};
 	}
-	static unregisterPanel(id) {
-		const panel = this.panels.findIndex((e) => e.id === id
+	static unregisterPanel(id1) {
+		const panel = this.panels.findIndex((e) => e.id === id1
 		);
 		if (panel < 0) return;
 		this.panels.splice(panel, 1);
@@ -1313,40 +1607,12 @@ SettingsRenderer.panels = [
 	},
 ];
 
-class Emitter {
-	static has(event) {
-		return event in this.events;
-	}
-	static on(event, listener) {
-		if (!this.has(event))
-			this.events[event] = new Set();
-		this.events[event].add(listener);
-		return this.off.bind(this, event, listener);
-	}
-	static off(event, listener) {
-		if (!this.has(event)) return;
-		return this.events[event].delete(listener);
-	}
-	static emit(event, ...args) {
-		if (!this.has(event)) return;
-		for (const listener of this.events[event]) {
-			try {
-				listener(...args);
-			} catch (error) {
-				Logger.error(`Store:${this.constructor.name}`, "Could not fire callback:", error);
-			}
-		}
-	}
-}
-Emitter.events = {
-};
-
 class PluginManager extends Emitter {
 	static get folder() {
-		return path.resolve(DataStore.baseDir, "plugins");
+		return path.resolve(DataStore$1.baseDir, "plugins");
 	}
 	static get addons() {
-		return Array. from (this.plugins, (e) => e[1]
+		return Array.from(this.plugins, (e) => e[1]
 		);
 	}
 	static initialize() {
@@ -1357,7 +1623,7 @@ class PluginManager extends Emitter {
 				manager: this
 			})
 		});
-		this.states = DataStore.tryLoadData("plugins");
+		this.states = DataStore$1.tryLoadData("plugins");
 		this.loadAllPlugins();
 	}
 	static loadAllPlugins() {
@@ -1397,7 +1663,7 @@ class PluginManager extends Emitter {
 		return pluginOrName;
 	}
 	static saveData() {
-		DataStore.trySaveData("plugins", this.states);
+		DataStore$1.trySaveData("plugins", this.states);
 	}
 	static isEnabled(addon) {
 		const plugin = this.resolve(addon);
@@ -1431,18 +1697,18 @@ class PluginManager extends Emitter {
 			this.startPlugin(exports);
 		}
 	}
-	static unloadAddon(addon, log = true) {
-		const plugin = this.resolve(addon);
-		if (!addon) return;
+	static unloadAddon(addon1, log1 = true) {
+		const plugin = this.resolve(addon1);
+		if (!addon1) return;
 		this.stopPlugin(plugin);
 		this.plugins.delete(plugin.entityID);
-		if (log) {
+		if (log1) {
 			Logger.log("PluginsManager", `${plugin.displayName} was unloaded!`);
 		}
 	}
-	static reloadPlugin(addon) {
-		const plugin = this.resolve(addon);
-		if (!addon) return;
+	static reloadPlugin(addon2) {
+		const plugin = this.resolve(addon2);
+		if (!addon2) return;
 		const success = this.stopPlugin(plugin, false);
 		if (!success) {
 			return Logger.error("PluginsManager", `Something went wrong while trying to enable ${plugin.displayName}:`);
@@ -1450,12 +1716,12 @@ class PluginManager extends Emitter {
 		this.startPlugin(plugin, false);
 		Logger.log("PluginsManager", `Finished reloading ${plugin.displayName}.`);
 	}
-	static startPlugin(addon, log = true) {
-		const plugin = this.resolve(addon);
+	static startPlugin(addon3, log2 = true) {
+		const plugin = this.resolve(addon3);
 		if (!plugin) return;
 		try {
 			if (typeof plugin.startPlugin === "function") plugin.startPlugin();
-			if (log) {
+			if (log2) {
 				Logger.log("PluginsManager", `${plugin.displayName} has been started!`);
 			}
 		} catch (error) {
@@ -1463,12 +1729,12 @@ class PluginManager extends Emitter {
 		}
 		return true;
 	}
-	static stopPlugin(addon, log = true) {
-		const plugin = this.resolve(addon);
+	static stopPlugin(addon4, log3 = true) {
+		const plugin = this.resolve(addon4);
 		if (!plugin) return;
 		try {
 			if (typeof plugin.pluginWillUnload === "function") plugin.pluginWillUnload();
-			if (log) {
+			if (log3) {
 				Logger.log("PluginsManager", `${plugin.displayName} has been stopped!`);
 			}
 		} catch (error) {
@@ -1477,30 +1743,30 @@ class PluginManager extends Emitter {
 		}
 		return true;
 	}
-	static enablePlugin(addon, log = true) {
-		const plugin = this.resolve(addon);
+	static enablePlugin(addon5, log4 = true) {
+		const plugin = this.resolve(addon5);
 		if (!plugin) return;
 		this.states[plugin.entityID] = true;
-		DataStore.trySaveData("plugins", this.states);
+		DataStore$1.trySaveData("plugins", this.states);
 		this.startPlugin(plugin, false);
-		if (log) {
+		if (log4) {
 			Logger.log("PluginsManager", `${plugin.displayName} has been enabled!`);
 			this.emit("toggle", plugin.entityID, true);
 		}
 	}
-	static disablePlugin(addon, log = true) {
-		const plugin = this.resolve(addon);
+	static disablePlugin(addon6, log5 = true) {
+		const plugin = this.resolve(addon6);
 		if (!plugin) return;
 		this.states[plugin.entityID] = false;
-		DataStore.trySaveData("plugins", this.states);
+		DataStore$1.trySaveData("plugins", this.states);
 		this.stopPlugin(plugin, false);
-		if (log) {
+		if (log5) {
 			Logger.log("PluginsManager", `${plugin.displayName} has been disabled!`);
 			this.emit("toggle", plugin.entityID, false);
 		}
 	}
-	static toggle(addon) {
-		const plugin = this.resolve(addon);
+	static toggle(addon7) {
+		const plugin = this.resolve(addon7);
 		if (!plugin) return;
 		if (this.isEnabled(plugin.entityID)) this.disable(plugin);
 		else this.enable(plugin);
@@ -1546,14 +1812,14 @@ class Plugin$1 {
 	log(...messages) {
 		console.log(`%c[Powercord:Plugin:${this.constructor.name}]`, `color: ${this.color};`, ...messages);
 	}
-	debug(...messages) {
-		console.debug(`%c[Powercord:Plugin:${this.constructor.name}]`, `color: ${this.color};`, ...messages);
+	debug(...messages1) {
+		console.debug(`%c[Powercord:Plugin:${this.constructor.name}]`, `color: ${this.color};`, ...messages1);
 	}
-	warn(...messages) {
-		console.warn(`%c[Powercord:Plugin:${this.constructor.name}]`, `color: ${this.color};`, ...messages);
+	warn(...messages2) {
+		console.warn(`%c[Powercord:Plugin:${this.constructor.name}]`, `color: ${this.color};`, ...messages2);
 	}
-	error(...messages) {
-		console.error(`%c[Powercord:Plugin:${this.constructor.name}]`, `color: ${this.color};`, ...messages);
+	error(...messages3) {
+		console.error(`%c[Powercord:Plugin:${this.constructor.name}]`, `color: ${this.color};`, ...messages3);
 	}
 	// "Internals" :zere_zoom:
 	_load() {
@@ -1577,21 +1843,19 @@ var entities = /*#__PURE__*/ Object.freeze({
 	Plugin: Plugin$1
 });
 
-var index$2 = /*#__PURE__*/ Object.freeze({
+var index$3 = /*#__PURE__*/ Object.freeze({
 	__proto__: null,
 	plugins: PluginManager
 });
 
 let store = null;
 promise.then(() => {
-	setImmediate(() => {
-		store = getSettings("powercord");
-	});
+	store = getSettings("powercord");
 });
 function registerSettings(id, options) {
 	SettingsRenderer.registerPanel(id, {
 		label: options.label,
-		render: typeof options.render ? () => DiscordModules.React.createElement(options.render, cache$1.get(id).makeProps())
+		render: typeof options.render ? () => DiscordModules.React.createElement(options.render, cache$2.get(id).makeProps())
 			: options.render
 	});
 }
@@ -1696,18 +1960,18 @@ var commands$1 = /*#__PURE__*/ Object.freeze({
 
 promise.then(() => {
 	const {LocaleManager, Dispatcher, Constants: {ActionTypes}} = DiscordModules;
-	locale = LocaleManager.getLocale();
+	locale1 = LocaleManager.getLocale();
 	Dispatcher.subscribe(ActionTypes.USER_SETTINGS_UPDATE, () => {
 		const partialLocale = LocaleManager.getLocale();
-		if (partialLocale !== locale) {
-			locale = partialLocale;
+		if (partialLocale !== locale1) {
+			locale1 = partialLocale;
 			LocaleManager.loadPromise.then(injectStrings);
 		}
 	});
 });
 let messages = {
 };
-let locale = null;
+let locale1 = null;
 function loadAllStrings(strings) {
 	for (let locale in strings) {
 		loadStrings(locale, strings[locale]);
@@ -1723,7 +1987,7 @@ function loadStrings(locale, strings) {
 function injectStrings() {
 	if (!DiscordModules.LocaleManager) return;
 	const context = DiscordModules.LocaleManager._provider._context;
-	Object.assign(context.messages, messages[locale]);
+	Object.assign(context.messages, messages[locale1]);
 	Object.assign(context.defaultMessages, messages["en-US"]);
 }
 
@@ -1731,113 +1995,18 @@ var i18n = /*#__PURE__*/ Object.freeze({
 	__proto__: null,
 	messages: messages,
 	get locale() {
-		return locale;
+		return locale1;
 	},
 	loadAllStrings: loadAllStrings,
 	loadStrings: loadStrings,
 	injectStrings: injectStrings
 });
 
-var index$1 = /*#__PURE__*/ Object.freeze({
+var index$2 = /*#__PURE__*/ Object.freeze({
 	__proto__: null,
 	settings: settings,
 	commands: commands$1,
 	i18n: i18n
-});
-
-function findInTree(tree = {
-	}, filter = (_) => _
-	, {ignore =[], walkable =[], maxProperties =100} = {
-	}) {
-	let stack = [
-		tree
-	];
-	const wrapFilter = function(...args) {
-		try {
-			return Reflect.apply(filter, this, args);
-		} catch (e) {
-			return false;
-		}
-	};
-	while (stack.length && maxProperties) {
-		const node = stack.shift();
-		if (wrapFilter(node)) return node;
-		if (Array.isArray(node)) stack.push(...node);
-		else if (typeof node === "object" && node !== null) {
-			if (walkable.length) {
-				for (const key in node) {
-					const value = node[key];
-					if (~walkable.indexOf(key) && !~ignore.indexOf(key)) {
-						stack.push(value);
-					}
-				}
-			} else {
-				for (const key in node) {
-					const value = node[key];
-					if (node && ~ignore.indexOf(key)) continue;
-					stack.push(value);
-				}
-			}
-		}
-		maxProperties--;
-	}
-}
-function findInReactTree(tree, filter, options = {
-	}) {
-	return findInTree(tree, filter, {
-		...options,
-		walkable: [
-			"props",
-			"children"
-		]
-	});
-}
-function getReactInstance(node) {
-	return node["__reactFiber$"];
-}
-function getOwnerInstance(node) {
-	if (!node) return null;
-	const fiber = getReactInstance(node);
-	let current = fiber;
-	while (!((current === null || current === void 0 ? void 0 : current.stateNode) instanceof DiscordModules.React.Component)) {
-		current = current.return;
-	}
-	return current === null || current === void 0 ? void 0 : current.stateNode;
-}
-function forceUpdateElement(selector) {
-	const instance = getOwnerInstance(document.querySelector(selector));
-	if (instance) instance.forceUpdate();
-}
-function waitFor(selector) {
-	return new Promise((resolve) => {
-		new MutationObserver((mutations, observer) => {
-			for (let m = 0; m < mutations.length; m++) {
-				for (let i = 0; i < mutations[m].addedNodes.length; i++) {
-					const mutation = mutations[m].addedNodes[i];
-					if (mutation.nodeType === 3) continue; // ignore text
-					const directMatch = mutation.matches(selector) && mutation;
-					const childrenMatch = mutation.querySelector(selector);
-					if (directMatch || childrenMatch) {
-						observer.disconnect();
-						return resolve(directMatch !== null && directMatch !== void 0 ? directMatch : childrenMatch);
-					}
-				}
-			}
-		}).observe(document, {
-			childList: true,
-			subtree: true
-		});
-	});
-}
-
-var util = /*#__PURE__*/ Object.freeze({
-	__proto__: null,
-	findInTree: findInTree,
-	findInReactTree: findInReactTree,
-	getReactInstance: getReactInstance,
-	getOwnerInstance: getOwnerInstance,
-	forceUpdateElement: forceUpdateElement,
-	waitFor: waitFor
 });
 
 let ModalContext = null;
@@ -1970,6 +2139,12 @@ var components = {
 		filter: [
 			"MenuGroup"
 		],
+		rename: [
+			{
+				from: "default",
+				to: "Menu"
+			}
+		],
 		prop: [
 			"MenuCheckboxItem",
 			"MenuControlItem",
@@ -1982,6 +2157,59 @@ var components = {
 		settings: false
 	}
 };
+
+var Divider = fromPromise(promise.then(() => {
+	const {Forms} = DiscordModules;
+	return function Divider() {
+		return ( /*#__PURE__*/ React.createElement(Forms.FormDivider, {
+			className: "pc-settings-divider"
+		}));
+	};
+}));
+
+const FormItem = fromPromise(promise.then(() => {
+	const {Forms, Flex, FormClasses, Margins} = DiscordModules;
+	return function FormItem({title, required, children, note, noteHasMargin}) {
+		const noteClasses = [
+			FormClasses.description,
+			noteHasMargin && Margins.marginTop8
+		].filter(Boolean).join(" ");
+		return ( /*#__PURE__*/ React.createElement(Forms.FormItem, {
+			className: `${Flex.Direction.VERTICAL} ${Flex.Justify.START} ${Flex.Align.STRETCH} ${Flex.Wrap.NO_WRAP} ${Margins.marginBottom20}`,
+			required: required,
+			title: title
+		}, children, note && /*#__PURE__*/ React.createElement(Forms.FormText, {
+				className: noteClasses
+			}, note), /*#__PURE__*/ React.createElement(Divider, null)));
+	};
+}));
+
+function _extends$E() {
+	_extends$E = Object.assign || function(target) {
+		for (var i = 1; i < arguments.length; i++) {
+			var source = arguments[i];
+			for (var key in source) {
+				if (Object.prototype.hasOwnProperty.call(source, key)) {
+					target[key] = source[key];
+				}
+			}
+		}
+		return target;
+	};
+	return _extends$E.apply(this, arguments);
+}
+function TextInput(props) {
+	const {children: title, note, required} = props;
+	delete props.children;
+	const {TextInput: TextInput1} = DiscordModules;
+	return ( /*#__PURE__*/ React.createElement(FormItem, {
+		title: title,
+		note: note,
+		required: required,
+		noteHasMargin: true
+	}, /*#__PURE__*/ React.createElement(TextInput1, _extends$E({
+	}, props))));
+}
 
 function _extends$D() {
 	_extends$D = Object.assign || function(target) {
@@ -1997,15 +2225,47 @@ function _extends$D() {
 	};
 	return _extends$D.apply(this, arguments);
 }
-function TextInput({children, note, ...rest}) {
-	const {React: React1, TextInput: TextInput1, Forms} = DiscordModules;
-	return ( /*#__PURE__*/ React.createElement(Forms.FormItem, {
-		title: children
-	}, /*#__PURE__*/ React.createElement(TextInput1, _extends$D({
-	}, rest)), note && /*#__PURE__*/ React.createElement(Forms.FormText, {
-			type: "description"
-		}, note)));
+function RadioGroup({children: title, note, required, ...props}) {
+	const RadioGroup1 = Components$1.get("RadioGroup");
+	return ( /*#__PURE__*/ React.createElement(FormItem, {
+		title: title,
+		note: note,
+		required: required
+	}, /*#__PURE__*/ React.createElement(RadioGroup1, _extends$D({
+	}, props))));
 }
+
+var Category = fromPromise(promise.then(() => {
+	const {Forms, Text} = DiscordModules;
+	const Caret = Components$1.get("Caret");
+	return function Category({children, opened, onChange, name, description}) {
+		return ( /*#__PURE__*/ React.createElement("div", {
+			className: joinClassNames("pc-category", [
+				opened,
+				"pc-category-opened"
+			])
+		}, /*#__PURE__*/ React.createElement("div", {
+			className: "pc-category-header",
+			onClick: onChange
+		}, /*#__PURE__*/ React.createElement("div", {
+			className: "pc-category-details"
+		}, /*#__PURE__*/ React.createElement(Forms.FormTitle, {
+			color: Text.Colors.HEADER_PRIMARY,
+			tag: Forms.FormTitle.Tags.H3,
+			size: Text.Sizes.SIZE_16,
+			className: "pc-category-details-title"
+		}, name), /*#__PURE__*/ React.createElement(Forms.FormText, {
+			color: Text.Colors.HEADER_SECONDARY,
+			size: Text.Sizes.SIZE_14,
+			className: "pc-category-details-description"
+		}, description)), /*#__PURE__*/ React.createElement(Caret, {
+			direction: opened ? Caret.Directions.DOWN : Caret.Directions.RIGHT,
+			className: "pc-category-caret"
+		})), /*#__PURE__*/ React.createElement("div", {
+			className: `pc-category-content ${opened ? "pc-margin-top-20" : ""}`
+		}, opened && children), !opened && /*#__PURE__*/ React.createElement(Divider, null)));
+	};
+}));
 
 function _extends$C() {
 	_extends$C = Object.assign || function(target) {
@@ -2021,43 +2281,45 @@ function _extends$C() {
 	};
 	return _extends$C.apply(this, arguments);
 }
-function RadioGroup({children, note, value, onChange, ...props}) {
-	const {React: React1, Forms} = DiscordModules;
-	const RadioGroup1 = Components$1.get("RadioGroup");
-	const [state, setValue] = React1.useState(value);
-	return ( /*#__PURE__*/ React.createElement(Forms.FormItem, {
-		title: children
-	}, note && /*#__PURE__*/ React.createElement(Forms.FormText, {
-			type: "description"
-		}, note), /*#__PURE__*/ React.createElement(RadioGroup1, _extends$C({
-		}, props, {
-			value: state,
-			onChange: ({value}) => (setValue(value), onChange(value))
-		}))));
-}
-
-function Category({children, opened, onChange, name, description}) {
-	const Caret = Components$1.get("Caret");
-	return ( /*#__PURE__*/ React.createElement("div", {
-		className: joinClassNames("pc-category", [
-			opened,
-			"pc-category-opened"
-		])
-	}, /*#__PURE__*/ React.createElement("div", {
-		className: "pc-category-header",
-		onClick: onChange
-	}, /*#__PURE__*/ React.createElement("div", {
-		className: "pc-category-label"
-	}, name), /*#__PURE__*/ React.createElement("div", {
-		className: "pc-category-stroke"
-	}), /*#__PURE__*/ React.createElement(Caret, {
-		direction: opened ? Caret.Directions.DOWN : Caret.Directions.LEFT,
-		className: "pc-category-caret"
-	})), /*#__PURE__*/ React.createElement("div", {
-		className: "pc-category-content"
-	}, opened && children), /*#__PURE__*/ React.createElement("div", {
-		className: "pc-category-description"
-	}, description)));
+const ColorPicker1 = fromPromise(Webpack.whenReady.then(() => {
+	try {
+		const GuildFolderSettingsModal = Webpack.findByDisplayName("GuildFolderSettingsModal");
+		if (!GuildFolderSettingsModal)
+			throw "GuildFolderSettingsModal was not found!";
+		const rendered = GuildFolderSettingsModal.prototype.render.call({
+			state: {
+			},
+			props: {
+			}
+		});
+		const ColorPicker = findInReactTree(rendered, (e) => {
+			var ref;
+			return (e === null || e === void 0 ? void 0 : (ref = e.props) === null || ref === void 0 ? void 0 : ref.defaultColor) != null;
+		}).type;
+		if (typeof ColorPicker !== "function")
+			throw "ColorPicker could not be found!";
+		return (props) => /*#__PURE__*/ React.createElement(ErrorBoundary, null, /*#__PURE__*/ React.createElement(ColorPicker, _extends$C({
+		}, props)));
+	} catch (error) {
+		Logger.error("Failed to get ColorPicker component!", error);
+		return () => null;
+	}
+}));
+function ColorPickerInput(props) {
+	const {Constants: {DEFAULT_ROLE_COLOR, ROLE_COLORS}} = DiscordModules;
+	const {children: title, note, required, default: defaultValue, defaultColors =ROLE_COLORS, value, disabled, onChange} = props;
+	delete props.children;
+	return ( /*#__PURE__*/ React.createElement(FormItem, {
+		title: title,
+		required: required,
+		note: note
+	}, /*#__PURE__*/ React.createElement(ColorPicker1, {
+		colors: defaultColors,
+		defaultColor: typeof defaultValue === "number" ? defaultValue : DEFAULT_ROLE_COLOR,
+		onChange: onChange,
+		disabled: disabled,
+		value: value
+	})));
 }
 
 function _extends$B() {
@@ -2074,27 +2336,33 @@ function _extends$B() {
 	};
 	return _extends$B.apply(this, arguments);
 }
-function AsyncComponent({_provider, _fallback, ...props}) {
-	const [Component, setComponent] = DiscordModules.React.useState(() => _fallback !== null && _fallback !== void 0 ? _fallback : () => null
-	);
-	DiscordModules.React.useEffect(() => {
-		_provider().then((comp) => setComponent(() => comp
-		)
-		);
-	}, [
-		_provider,
-		_fallback
-	]);
-	return ( /*#__PURE__*/ React.createElement(Component, _extends$B({
-	}, props)));
-}
+const SliderInput = fromPromise(promise.then(() => {
+	const {Slider} = DiscordModules;
+	return function SliderInput(props) {
+		const {children: title, note, required} = props;
+		delete props.children;
+		return ( /*#__PURE__*/ React.createElement(FormItem, {
+			title: title,
+			note: note,
+			required: required
+		}, /*#__PURE__*/ React.createElement(Slider, _extends$B({
+		}, Object.assign({
+		}, props, {
+			className: [
+				props.className,
+				"pc-margin-top-20"
+			].filter((n) => n
+			).join(" ")
+		})))));
+	};
+}));
 
 const Modal = {
 };
 Webpack.whenReady.then(() => {
 	const ModalComponents = Webpack.findByProps("ModalRoot");
 	const keys = omit(Object.keys(ModalComponents), "default", "ModalRoot");
-	const props = Object.fromEntries(keys.map((key) => [
+	const props1 = Object.fromEntries(keys.map((key) => [
 		key === "ModalSize" ? "Sizes" : key.slice("Modal".length),
 		ModalComponents[key]
 	]
@@ -2104,13 +2372,13 @@ Webpack.whenReady.then(() => {
 		return React.createElement(ModalComponent, Object.assign({
 		}, modalProps, props));
 	};
-	Object.assign(Modal, props, {
+	Object.assign(Modal, props1, {
 		Confirm: Object.assign(BindProps(Webpack.findByDisplayName("ConfirmModal")), {
 			displayName: "PowercordModal"
 		}),
 		Modal: Object.assign(BindProps(ModalComponents.ModalRoot), {
 			displayName: "PowercordModal"
-		}, props)
+		}, props1)
 	});
 });
 
@@ -3053,6 +3321,9 @@ var VerifiedBadge = ((props) => {
 	})));
 });
 
+var FrontAwesome = (() => null
+);
+
 var Icons = /*#__PURE__*/ Object.freeze({
 	__proto__: null,
 	Bin: Bin,
@@ -3091,18 +3362,25 @@ var Icons = /*#__PURE__*/ Object.freeze({
 	Unlink: Unlink,
 	Unpin: Unpin,
 	Verified: Verified,
-	VerifiedBadge: VerifiedBadge
+	VerifiedBadge: VerifiedBadge,
+	FontAwesome: FrontAwesome
 });
 
 let Components = {
 	settings: {
 		TextInput,
 		RadioGroup,
-		Category
+		Category,
+		ColorPickerInput,
+		SliderInput,
+		FormItem
 	},
+	Icon,
 	AsyncComponent,
 	modal: Modal,
-	Icons
+	Icons,
+	ColorPicker: ColorPicker1,
+	Divider
 };
 promise.then(async () => {
 	for (const id in components) {
@@ -3123,11 +3401,29 @@ promise.then(async () => {
 			component = createUpdateWrapper(component, void 0, void 0, options.valueProps);
 			Object.assign(component, temp);
 		}
-		if (options.settings) {
-			Components.settings[id] = component;
-		} else {
-			Components[id] = component;
+		let data = {
+		};
+		if (Array.isArray(options.prop)) {
+			Object.assign(data, Object.fromEntries(options.prop.map((prop) => [
+				prop,
+				component[prop]
+			]
+			)));
+		} else if (typeof options.prop === "string") {
+			data = component[options.prop];
 		}
+		if (Array.isArray(options.rename)) {
+			for (const {from, to} of options.rename) {
+				data[to] = component[ from ];
+			}
+		}
+		if (!Array.isArray(options.rename) && !options.prop) {
+			data = component;
+		}
+		const target = options.settings ? Components.settings : Components;
+		Object.assign(target, {
+			[id]: data
+		});
 	}
 });
 
@@ -3294,12 +3590,12 @@ const injector = {
 
 const querystring = require("querystring");
 const https = require("https");
-const http$1 = require("http");
+const http = require("http");
 const url = require("url");
 class HTTPError extends Error {
-	constructor(message, res) {
+	constructor(message, res1) {
 		super(message);
-		Object.assign(this, res);
+		Object.assign(this, res1);
 		this.name = this.constructor.name;
 	}
 }
@@ -3309,20 +3605,20 @@ class GenericRequest {
 			[key]: value
 		};
 	}
-	query(key, value) {
-		Object.assign(this.opts.query, this._objectify(key, value));
+	query(key1, value1) {
+		Object.assign(this.opts.query, this._objectify(key1, value1));
 		return this;
 	}
-	set(key, value) {
-		Object.assign(this.opts.headers, this._objectify(key, value));
+	set(key2, value2) {
+		Object.assign(this.opts.headers, this._objectify(key2, value2));
 		return this;
 	}
-	send(data) {
-		if (data instanceof Object) {
+	send(data1) {
+		if (data1 instanceof Object) {
 			const serialize = this.opts.headers["Content-Type"] === "application/x-www-form-urlencoded" ? querystring.encode : JSON.stringify;
-			this.opts.data = serialize(data);
+			this.opts.data = serialize(data1);
 		} else {
-			this.opts.data = data;
+			this.opts.data = data1;
 		}
 		return this;
 	}
@@ -3331,7 +3627,7 @@ class GenericRequest {
 			const opts = Object.assign({
 			}, this.opts);
 			console.debug("%c[Powercord:HTTP]", "color: #7289da", "Performing request to", opts.uri);
-			const {request} = opts.uri.startsWith("https") ? https : http$1;
+			const {request} = opts.uri.startsWith("https") ? https : http;
 			if (Object.keys(opts.query)[0]) {
 				opts.uri += `?${querystring.encode(opts.query)}`;
 			}
@@ -3380,8 +3676,8 @@ class GenericRequest {
 		}
 		return this._res = this.execute().then(resolver, rejector);
 	}
-	catch(rejector) {
-		return this.then(null, rejector);
+	catch(rejector1) {
+		return this.then(null, rejector1);
 	}
 	constructor(method, uri) {
 		this.opts = {
@@ -3396,7 +3692,7 @@ class GenericRequest {
 	}
 }
 
-const http = {
+var index$1 = {
 	get(url) {
 		return new GenericRequest("GET", url);
 	},
@@ -3432,8 +3728,8 @@ function once(event, callback) {
 var powercord$1 = /*#__PURE__*/ Object.freeze({
 	__proto__: null,
 	entities: entities,
-	managers: index$2,
-	api: index$1,
+	managers: index$3,
+	api: index$2,
 	util: util,
 	modal: modal,
 	get initialized() {
@@ -3443,7 +3739,7 @@ var powercord$1 = /*#__PURE__*/ Object.freeze({
 	components: Components,
 	webpack: webpack,
 	injector: injector,
-	http: http
+	http: index$1
 });
 
 // Main
@@ -3464,39 +3760,7 @@ class JSXCompiler {
 	}
 }
 
-let ErrorBoundary = () => null;
-promise.then(() => {
-	ErrorBoundary = class ErrorBoundary1 extends DiscordModules.React.Component {
-		static getDerivedStateFromError(error) {
-			return {
-				hasError: true
-			};
-		}
-		componentDidCatch(error, errorInfo) {
-			console.error(error, errorInfo);
-		}
-		render() {
-			if (this.state.hasError) {
-				return ( /*#__PURE__*/ React.createElement("p", {
-					style: {
-						color: "#ed4245"
-					}
-				}, "Component Error"));
-			}
-			return this.props.children;
-		}
-		constructor(...args) {
-			super(...args);
-			this.state = {
-				hasError: false
-			};
-		}
-	}
-	;
-});
-var errorboundary = ErrorBoundary;
-
-const cache = {
+const cache$1 = {
 };
 const extensions = {
 	".js": (module, filename) => {
@@ -3539,7 +3803,7 @@ const extensions = {
 };
 class Module {
 	_compile(code) {
-		const wrapped = eval(`((${[
+		const wrapped = window.eval(`((${[
 			"require",
 			"module",
 			"exports",
@@ -3552,21 +3816,21 @@ class Module {
         })`);
 		wrapped(this.require, this, this.exports, this.filename, this.path, window);
 	}
-	constructor(id, parent, require) {
+	constructor(id, parent1, require1) {
 		this.id = id;
 		this.path = path.dirname(id);
 		this.exports = {
 		};
-		this.parent = parent;
+		this.parent = parent1;
 		this.filename = id;
 		this.loaded = false;
 		this.children = [];
-		this.require = require;
-		if (parent) parent.children.push(this);
+		this.require = require1;
+		if (parent1) parent1.children.push(this);
 	}
 }
 function resolve(path) {
-	for (const key in cache) {
+	for (const key in cache$1) {
 		if (key.startsWith(path)) return key;
 	}
 }
@@ -3588,18 +3852,20 @@ function createRequire(_path) {
 				return NodeModule;
 			case "electron":
 				return electron;
+			case "http":
+				return window.require("http");
 			default: {
 				if (mod.startsWith("powercord/")) {
-					const value = mod.split("/").slice(1).reduce((value, key) => value[key]
+					const value1 = mod.split("/").slice(1).reduce((value, key) => value[key]
 						, powercord$1);
-					if (value) return value;
+					if (value1) return value1;
 				}
 				return load(_path, mod);
 			}
 		}
 	};
 	Object.assign(require, {
-		cache,
+		cache: cache$1,
 		resolve
 	});
 	// @ts-ignore
@@ -3628,11 +3894,11 @@ function getFilePath(_path, mod) {
 	return mod;
 }
 function load(_path, mod, req = null) {
-	if (mod.includes("pc-settings/components/ErrorBoundary")) return errorboundary;
+	if (mod.includes("pc-settings/components/ErrorBoundary")) return ErrorBoundary;
 	const file = getFilePath(_path, mod);
 	if (!fs.existsSync(file))
 		throw new Error(`Cannot find module ${mod}`);
-	if (cache[file]) return cache[file].exports;
+	if (cache$1[file]) return cache$1[file].exports;
 	const stats = fs.statSync(file, "utf8");
 	if (stats.isDirectory())
 		mod = resolveMain(_path, mod);
@@ -3640,21 +3906,21 @@ function load(_path, mod, req = null) {
 	const loader = extensions[ext];
 	if (!loader)
 		throw new Error(`Cannot find module ${file}`);
-	const module = cache[file] = new Module(file, req, createRequire(path.dirname(file)));
+	const module = cache$1[file] = new Module(file, req, createRequire(path.dirname(file)));
 	loader(module, file);
 	return module.exports;
 }
 // TODO: Add globalPaths support
 const NodeModule = {
 	_extensions: extensions,
-	cache,
+	cache: cache$1,
 	_load: load,
 	globalPaths: []
 };
 
 var Require = createRequire(path.resolve(PCCompatNative.getBasePath(), "plugins"));
 
-const DataStore1 = new class DataStore extends Store {
+const DataStore = new class DataStore extends Store {
 	tryLoadData(name) {
 		try {
 			const location = path.resolve(this.configFolder, `${name}.json`);
@@ -3665,21 +3931,21 @@ const DataStore1 = new class DataStore extends Store {
 			Logger.error("DataStore", `Data of ${name} corrupt:`, error);
 		}
 	}
-	trySaveData(name, data, emit) {
+	trySaveData(name1, data, emit) {
 		try {
-			fs.writeFileSync(path.resolve(this.configFolder, `${name}.json`), JSON.stringify(data, null, "\t"), "utf8");
+			fs.writeFileSync(path.resolve(this.configFolder, `${name1}.json`), JSON.stringify(data, null, "\t"), "utf8");
 		} catch (error) {
-			Logger.error("DataStore", `Failed to save data of ${name}:`, error);
+			Logger.error("DataStore", `Failed to save data of ${name1}:`, error);
 		}
-		if (emit) this.emit("data-update", name, data);
+		if (emit) this.emit("data-update", name1, data);
 	}
 	getMisc(misc = "", def) {
 		var ref;
 		return (ref = getProps(this.tryLoadData("misc"), misc)) !== null && ref !== void 0 ? ref : def;
 	}
-	setMisc(misc = this.getMisc("", {
+	setMisc(misc1 = this.getMisc("", {
 		}), prop, value) {
-		this.trySaveData("misc", _.set(misc, prop.split("."), value));
+		this.trySaveData("misc", _.set(misc1, prop.split("."), value));
 		this.emit("misc");
 	}
 	constructor() {
@@ -3695,7 +3961,46 @@ const DataStore1 = new class DataStore extends Store {
 		}
 	}
 };
-var DataStore = DataStore1;
+var DataStore$1 = DataStore;
+
+function memoize(target, key, value) {
+	Object.defineProperty(target, key, {
+		value: value,
+		configurable: true
+	});
+	return value;
+}
+
+class DOM {
+	static get head() {
+		return memoize(this, "head", document.head.appendChild(this.createElement("pc-head")));
+	}
+	static createElement(type, options = {
+		}, ...children) {
+		const node = Object.assign(document.createElement(type), options);
+		node.append(...children);
+		return node;
+	}
+	static injectCSS(id, css) {
+		const element = this.createElement("style", {
+			id,
+			textContent: css
+		});
+		this.head.appendChild(element);
+		this.elements[id] = element;
+		return element;
+	}
+	static getElement(id1) {
+		return this.elements[id1] || this.head.querySelector(`style[id="${id1}"]`);
+	}
+	static clearCSS(id2) {
+		const element = this.getElement(id2);
+		if (element) element.remove();
+		delete this.elements[id2];
+	}
+}
+DOM.elements = {
+};
 
 /// <reference path="../../types.d.ts" />
 if (!("process" in window)) {
@@ -3709,9 +4014,6 @@ var index = new class PCCompat {
 		this.expose("React", DiscordModules.React);
 		this.expose("powercord", Require("powercord"));
 		await init();
-		console.log({
-			DiscordModules
-		});
 		powercord.api.commands.initialize();
 		Object.defineProperty(window, "powercord_require", {
 			value: Require,
