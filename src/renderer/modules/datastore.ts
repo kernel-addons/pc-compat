@@ -1,10 +1,23 @@
-import Store from "../classes/store";
-import {fs, path} from "../node";
-import {require as Require} from "../node";
-import Logger from "./logger";
+import {Store} from "@classes";
+import fs from "@node/fs";
+import path from "@node/path";
+import {default as Require} from "@node/require";
 import {getProps, setProps} from "./utilities";
+import Logger from "./logger";
 
 const DataStore = new class DataStore extends Store<"misc" | "data-update"> {
+    constructor() {
+        super();
+
+        if (!fs.existsSync(this.configFolder)) {
+            try {
+                fs.mkdirSync(this.configFolder);
+            } catch (error) {
+                Logger.error("Failed to create config folder:", error);
+            }
+        }
+    }
+
     baseDir: string = path.resolve(PCCompatNative.getBasePath());
 
     configFolder = path.resolve(this.baseDir, "config");

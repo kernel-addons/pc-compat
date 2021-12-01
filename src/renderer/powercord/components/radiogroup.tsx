@@ -1,19 +1,12 @@
-import {DiscordModules} from "../../modules";
-import Components from "../../modules/components";
+import Components from "@modules/components";
+import FormItem from "./formitem"
 
-export default function RadioGroup({children, note, value, onChange, ...props}) {
-    const {React, Forms} = DiscordModules;
+export default function RadioGroup({children: title, note, required, ...props}) {
     const RadioGroup = Components.get("RadioGroup");
-    const [state, setValue] = React.useState(value);
 
     return (
-        <Forms.FormItem title={children}>
-            {note && <Forms.FormText type="description">{note}</Forms.FormText>}
-            <RadioGroup
-                {...props}
-                value={state}
-                onChange={({value}) => (setValue(value), onChange(value))}
-            />
-        </Forms.FormItem>
+        <FormItem title={title} note={note} required={required}>
+            <RadioGroup {...props} />
+        </FormItem>
     );
 };

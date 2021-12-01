@@ -7,7 +7,7 @@ import Plugin from "./classes/plugin";
 import Emitter from "../classes/staticemitter";
 
 export default class PluginManager extends Emitter {
-    static folder = path.resolve(DataStore.baseDir, "plugins");
+    static get folder() {return path.resolve(DataStore.baseDir, "plugins")};
 
     static mainFiles = ["index.js", "index.jsx"];
 

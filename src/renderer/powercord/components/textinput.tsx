@@ -1,12 +1,16 @@
 import {DiscordModules} from "../../modules";
+import FormItem from './formitem';
 
-export default function TextInput({children, note, ...rest}) {
-    const {React, TextInput, Forms} = DiscordModules;
-    
+export default function TextInput(props) {
+    const { children: title, note, required } = props;
+    delete props.children;
+
+    const {TextInput} = DiscordModules;
+
+
     return (
-        <Forms.FormItem title={children}>
-            <TextInput {...rest} />
-            {note && <Forms.FormText type="description">{note}</Forms.FormText>}
-        </Forms.FormItem>
+        <FormItem title={title} note={note} required={required} noteHasMargin>
+            <TextInput {...props} />
+        </FormItem>
     );
 }

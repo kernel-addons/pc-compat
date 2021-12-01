@@ -1,4 +1,4 @@
-import {DOM, Utilities} from "../../modules";
+import {DOM, memoize, Utilities} from "../../modules";
 import {fs, path, require as Require} from "../../node";
 import PluginManager from "../pluginmanager";
 import {getSettings} from './settings';
@@ -13,21 +13,15 @@ export type PluginManifest = {
 };
 
 export default class Plugin {
-    constructor(id: string, _path: string) {
-        this.entityID = id;
-        this.path = _path;
-        this.settings = getSettings(id);
-    }
+    get entityID() {return memoize(this, "entityID", path.basename(this.path));}
+
+    get settings() {return memoize(this, "settings", getSettings(this.entityID));}
 
     path: string;   
 
-    entityID: string;
-
     stylesheets: {[id: string]: HTMLElement} = {};
 
-    color: string = "#7289da";
-
-    settings: any;
+    get color() {return "#7289da"};
 
     manifest: PluginManifest;
 

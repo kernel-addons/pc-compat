@@ -1,4 +1,4 @@
-import {Webpack} from "../modules";
+import Webpack from "../modules/webpack";
 
 export {default as components} from "./components/index";
 export {default as webpack} from "./webpack";
@@ -8,6 +8,7 @@ export * as managers from "./managers/index"
 export * as api from "./api/index";
 export * as util from "./util";
 export * as modal from "./modal";
+export {default as http} from "./http/index";
 
 export let initialized = false;
 

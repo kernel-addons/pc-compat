@@ -1,9 +1,9 @@
-import memoize from "./memoize.js";
+import memoize from "./memoize";
 
 export default class DOM {
     static elements = {};
 
-    static get head() {return memoize(this, "head", () => document.head.appendChild(this.createElement("pc-head")));}
+    static get head() {return memoize(this, "head", document.head.appendChild(this.createElement("pc-head")));}
 
     static createElement(type: string, options = {}, ...children: (string | Node)[]) {
         const node = Object.assign(document.createElement(type), options);

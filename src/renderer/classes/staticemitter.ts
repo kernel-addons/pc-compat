@@ -1,4 +1,4 @@
-import Logger from "../modules/logger";
+import Logger from "@modules/logger";
 
 export default class Emitter {
     static events: {[event: string]: Set<Function>;} = {};

@@ -1,5 +1,5 @@
-import {DiscordModules} from "../modules";
-import Logger from "../modules/logger";
+import Logger from "@modules/logger";
+import DiscordModules from "@modules/discord";
 
 export default class Store<events = string> {
     events: {[event: string]: Set<Function>} = {};

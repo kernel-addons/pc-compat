@@ -1,54 +1,83 @@
-import {Webpack} from "../../modules";
+import { Webpack } from "../../modules";
 import components from "../data/components";
-import DiscordModules from '../../modules/discord';
-import { createUpdateWrapper } from '../../modules/utilities';
+import {promise} from '../../modules/discord';
+import {createUpdateWrapper} from "../../modules/utilities";
+
 import TextInput from "./textinput";
-import AsyncComponent from "./asynccomponent";
 import RadioGroup from "./radiogroup";
-import Modal from "./modal";
 import Category from './category';
+import Divider from "./divider"
+import ColorPicker, {ColorPickerInput} from "./colorpicker";
+import SliderInput from "./slider";
+import FormItem from "./formitem";
+import Icon from "./icon";
+
+import AsyncComponent from "./asynccomponent";
+import Modal from "./modal";
+import * as Icons from "./icons/index"
 
 let Components = {
     settings: {
         TextInput,
         RadioGroup,
-        Category
+        Category,
+        ColorPickerInput,
+        SliderInput,
+        FormItem
     },
+    Icon,
     AsyncComponent,
     modal: Modal,
+    Icons,
+    ColorPicker,
+    Divider
 };
 
-(() => {
-    const cache = new Map();
-
+promise.then(async () => {
     for (const id in components) {
         const options = components[id];
-        
-        (options.settings ? Components.settings : Components)[id] = (props) => {
-            if (!cache.has(id)) {
-                const module = typeof (options.filter) === "function"
-                    ? Webpack.findModule(options.filter)
-                    : typeof (options.filter) === "string"
-                        ? Webpack.findByDisplayName(options.filter)
-                        : Array.isArray(options.filter)
-                            ? Webpack.findByProps(options.filter)
-                             : null;
-                if (!module) return null;
 
-                cache.set(id, createUpdateWrapper(module, void 0, void 0, options.valueProps));
+        let component: any = (() => {
+            if (typeof (options.filter) === "function") {
+                return Webpack.findModule(options.filter);
             }
 
-            const Component = cache.get(id);
+            if (typeof (options.filter) === "string") {
+                return Webpack.findByDisplayName(options.filter);
+            }
 
-            return DiscordModules.React.createElement(Component, props);
+            if (Array.isArray(options.filter)) {
+                return Webpack.findByProps(...options.filter);
+            }
+        })();
+
+        if (options.updater) {
+            const temp = component;
+            component = createUpdateWrapper(component, void 0, void 0, options.valueProps);
+            Object.assign(component, temp);
         }
+
+        let data = {};
+
+        if (Array.isArray(options.prop)) {
+            Object.assign(data, Object.fromEntries(options.prop.map(prop => [prop, component[prop]])));
+        } else if (typeof (options.prop) === "string") {
+            data = component[options.prop]
+        }
+
+        if (Array.isArray(options.rename)) {
+            for (const {from, to} of options.rename) {
+                data[to] = component[from];
+            }
+        }
+
+        if (!Array.isArray(options.rename) && !options.prop) {
+            data = component;
+        }
+
+        const target = options.settings ? Components.settings : Components;
+        Object.assign(target, {[id]: data});
     }
-
-    Webpack.whenReady.then(() => {
-        const Forms = Webpack.findByProps("FormItem");
-
-        Object.assign(Components, Forms);
-    });
-})();
+});
 
 export default Components;

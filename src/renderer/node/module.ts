@@ -3,6 +3,7 @@ import path from "./path";
 import * as powercord from "../powercord/index";
 import {JSX, SASS} from "../powercord/compilers";
 import electron from "./electron";
+import errorboundary from "../powercord/components/errorboundary";
 
 export const cache = {};
 export const extensions = {
@@ -52,7 +53,7 @@ export const extensions = {
 export class Module {
     public id: string;
     public path: string;
-    public exports: any; 
+    public exports: any;
     public parent: Module | null;
     public filename: string;
     public loaded: boolean;
@@ -74,7 +75,7 @@ export class Module {
     }
 
     _compile(code: string) {
-        const wrapped = eval(`((${["require", "module", "exports", "__filename", "__dirname", "global"].join(", ")}) => {
+        const wrapped = window.eval(`((${["require", "module", "exports", "__filename", "__dirname", "global"].join(", ")}) => {
             ${code}
             //# sourceURL=${JSON.stringify(this.filename).slice(1, -1)}
         })`);
@@ -102,11 +103,12 @@ export function createRequire(_path: string): Require {
         if (typeof (mod) !== "string") return;
 
         switch (mod) {
-            case "powercord": return powercord;        
+            case "powercord": return powercord;
             case "path": return path;
             case "fs": return fs;
             case "module": return NodeModule;
             case "electron": return electron;
+            case "http": return window.require('http');
 
             default: {
                 if (mod.startsWith("powercord/")) {
@@ -126,7 +128,7 @@ export function createRequire(_path: string): Require {
 };
 
 export function resolveMain(_path: string, mod: string): string {
-    const parent = path.extname(_path) ? path.dirname(_path) : _path;
+    const parent = path.extname(_path) ? path.dirname(_path) : path.resolve(_path, mod);
     if (!fs.existsSync(parent)) throw new Error(`Cannot find module ${mod}`);
     const files = fs.readdirSync(parent, "utf8");
 
@@ -140,20 +142,21 @@ export function resolveMain(_path: string, mod: string): string {
             return path.resolve(parent, pkg.main);
         }
 
-        if (file.slice(0, -ext.length) === "index" && extensions[ext]) return path.resolve(parent, mod + ext);
+        if (file.slice(0, -ext.length) === "index" && extensions[ext]) return path.resolve(parent, file);
     }
 };
 
 export function getFilePath(_path: string, mod: string): string {
     mod = path.resolve(_path, mod);
     const pth = mod + getExtension(mod);
-    if (fs.existsSync(pth)) return pth;
+    if (fs.existsSync(pth) && fs.statSync(pth).isFile()) return pth;
     if (!path.extname(mod)) return resolveMain(_path, mod);
 
     return mod;
 };
 
 export function load(_path: string, mod: string, req = null) {
+    if (mod.includes("pc-settings/components/ErrorBoundary")) return errorboundary;
     const file = getFilePath(_path, mod);
     if (!fs.existsSync(file)) throw new Error(`Cannot find module ${mod}`);
     if (cache[file]) return cache[file].exports;

@@ -16,15 +16,16 @@
     "@types/lodash": "^4.14.176"
   },
   "dependencies": {
+    "@rollup/plugin-alias": "^3.1.8",
     "@rollup/plugin-node-resolve": "^13.0.6",
+    "@swc/core": "^1.2.111",
+    "@types/react": "^17.0.34",
+    "@types/react-dom": "^17.0.11",
     "esformatter-quotes": "^1.1.0",
     "rollup": "^2.59.0",
     "rollup-plugin-esformatter": "^2.0.1",
     "rollup-plugin-swc": "^0.2.0",
-    "@types/react": "^17.0.34",
-    "@types/react-dom": "^17.0.11",
     "sass": "^1.43.4",
-    "sucrase": "^3.20.3",
-    "@swc/core": "^1.2.111"
+    "sucrase": "^3.20.3"
   }
 }

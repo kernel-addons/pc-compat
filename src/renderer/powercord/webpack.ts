@@ -11,11 +11,11 @@ export function getModule<module = any>(filter: (Function | string[]), retry: bo
 
     if (typeof (filter) !== "function") return retry ? Promise.resolve(null) : null;
 
-    if (!retry) return Webpack.findModule(filter, false, true);
+    if (!retry) return Webpack.findModule(filter, {cache: true, all: false});
 
     return new Promise<module>(async (resolve) => {
         for (let i = 0; i < (forever ? 666 : 21); i++) {
-            const found = Webpack.findModule((filter as Function), false, true);
+            const found = Webpack.findModule((filter as Function), {cache: true, all: false});
             if (found) {
                 return resolve(found);
             }

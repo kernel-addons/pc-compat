@@ -1,6 +1,13 @@
 import {DiscordModules} from "../../modules";
+import {promise} from "../../modules/discord";
 import SettingsRenderer from "../../modules/settings";
-import {cache} from "../classes/settings";
+import {cache, getSettings} from "../classes/settings";
+
+export let store = null;
+
+promise.then(() => {
+    store = getSettings("powercord");
+});
 
 export function registerSettings(id: string, options: any) {
     SettingsRenderer.registerPanel(id, {
@@ -13,4 +20,12 @@ export function registerSettings(id: string, options: any) {
 
 export function unregisterSettings(id: string) {
     SettingsRenderer.unregisterPanel(id);
+};
+
+export function _fluxProps(id: string) {
+    return getSettings(id)?.makeProps();
+};
+
+export function connectStores(id: string) {
+    return getSettings(id)?.connectStore();
 };

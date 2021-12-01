@@ -1,3 +1,5 @@
+import Logger from "./logger";
+
 export default class Patcher {
     static _patches = [];
 
@@ -16,35 +18,45 @@ export default class Patcher {
 
     static makeOverride(patch) {
         return function() {
-            let returnValue;
-            if(!patch?.children?.length) return patch.originalFunction.apply(this, arguments);
+            let returnValue, args: any = arguments;
+        
+            if (!patch?.children?.length) return patch.originalFunction.apply(this, arguments);
+            
             for(const beforePatch of patch.children.filter(e => e.type === "before")) {
                 try {
                     const tempReturn = beforePatch.callback(this, arguments, patch.originalFunction.bind(this));
-                    if(tempReturn != undefined) returnValue = tempReturn;
+                    if (typeof(tempReturn) !== "undefined") {
+                        if (Array.isArray(tempReturn)) args = tempReturn;
+                        else returnValue = tempReturn;
+                    }
                 } catch (error) {
-                    console.error("Patch:" + patch.functionName, error);
+                    Logger.error(`Patcher:${patch.functionName}:${beforePatch.caller}`, error);
                 }
             }
+
             const insteadPatches = patch.children.filter(e => e.type === "instead");
-            if(!insteadPatches.length) returnValue = patch.originalFunction.apply(this, arguments);
+
+            if (!insteadPatches.length) returnValue = patch.originalFunction.apply(this, arguments);
+                
             else for(const insteadPatch of insteadPatches) {
                 try {
                     const tempReturn = insteadPatch.callback(this, arguments, patch.originalFunction.bind(this));
-                    if(tempReturn != undefined) returnValue = tempReturn;
+                    if(typeof (tempReturn) !== "undefined") returnValue = tempReturn;
                 } catch (error) {
-                    console.error("Patch:" + patch.functionName, error);
+                    Logger.error(`Patcher:${patch.functionName}:${insteadPatch.caller}`, error);
                 }
             }
+            if (!returnValue) returnValue = patch.originalFunction.apply(this, args);
 
             for(const afterPatch of patch.children.filter(e => e.type === "after")) {
                 try {
                     const tempReturn = afterPatch.callback(this, arguments, returnValue, ret => (returnValue = ret));
-                    if(tempReturn != undefined) returnValue = tempReturn;
+                    if(typeof(tempReturn) !== "undefined") returnValue = tempReturn;
                 } catch (error) {
-                    console.error("Patch:" + patch.functionName, error);
+                    Logger.error(`Patcher:${patch.functionName}:${afterPatch.caller}`, error);
                 }
             }
+
             return returnValue;
         }
     }
@@ -62,7 +74,12 @@ export default class Patcher {
             count: 0,
             children: []
         }
+
         module[functionName] = this.makeOverride(patch);
+        Object.assign(module[functionName], patch.originalFunction, {
+            toString:() => patch.originalFunction.toString()
+        });
+
         return this._patches.push(patch), patch;
     }
 

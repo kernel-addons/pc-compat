@@ -1,6 +1,6 @@
-import {DiscordModules} from "../modules";
+import {DiscordModules} from "@modules";
 
-export function findInTree(tree = {}, filter = _ => _, {ignore = [], walkable = [], maxProperties = 100} = {}) {
+export function findInTree(tree = {}, filter = _ => _, {ignore = [], walkable = [], maxProperties = 100} = {}): any {
     let stack = [tree];
     const wrapFilter = function (...args) {
         try { return Reflect.apply(filter, this, args); }
@@ -53,6 +53,25 @@ export function getOwnerInstance(node: any) {
 }
 
 export function forceUpdateElement(selector: string) {
-    const instance = getOwnerInstance(document.querySelector(selector));
-    if (instance) instance.forceUpdate();
+    getOwnerInstance(document.querySelector(selector))?.forceUpdate();
+};
+
+export function waitFor(selector: string) {
+    return new Promise(resolve => {
+        const element = document.querySelector(selector);
+        if (element) return resolve(element);
+        new MutationObserver((mutations, observer) => {
+            for (let m = 0; m < mutations.length; m++) {
+                for (let i = 0; i < mutations[m].addedNodes.length; i++) {
+                    const mutation = mutations[m].addedNodes[i];
+                    if (mutation.nodeType === 3) continue; // ignore text
+                    const directMatch = mutation.matches(selector) && mutation;
+                    if (directMatch) {
+                        observer.disconnect();
+                        return resolve(directMatch);
+                    }
+                }
+            }
+        }).observe(document, {childList: true, subtree: true});
+    });
 };

@@ -1,0 +1,25 @@
+{
+    "compilerOptions": {
+        "target": "ES2019",
+        "baseUrl": ".",
+        "esModuleInterop": true,
+        "jsx": "react-jsx",
+        "downlevelIteration": true,
+        "moduleResolution": "node",
+        "paths": {
+            "@powercord/*": ["src/renderer/powercord/*"],
+            "@powercord": ["src/renderer/powercord/index"],
+            "@data/*": ["src/renderer/data/*"],
+            "@data": ["src/renderer/data/index"],
+            "@modules/*": ["src/renderer/modules/*"],
+            "@modules": ["src/renderer/modules/index"],
+            "@ui/*": ["src/renderer/ui/*"],
+            "@ui": ["src/renderer/ui/index"],
+            "@common/*": ["src/common/*"],
+            "@node": ["src/renderer/node/index"],
+            "@node/*": ["src/renderer/node/*"],
+            "@classes/": ["src/renderer/classes/*"],
+            "@classes": ["src/renderer/classes/index"]
+        }
+    }
+}

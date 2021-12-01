@@ -18,7 +18,7 @@ export const Events = {
 };
 
 export class WebpackModule {
-    whenReady: Promise<void>;
+    whenReady = null;
     #events = Object.fromEntries(Object.keys(Events).map(key => [key, new Set()]));
     #cache = null;
     get Events() {return Events;}
@@ -40,7 +40,7 @@ export class WebpackModule {
 
                     return Reflect.apply(originalPush, value, values);
                 };
-                
+
                 Object.defineProperty(window, this.chunkName, {
                     value,
                     configurable: true,
@@ -52,23 +52,21 @@ export class WebpackModule {
         });
 
         let listener = (shouldUnsubscribe, Dispatcher, ActionTypes, event) => {
-            if (event?.event !== "app_ui_viewed") return;
-            
             if (shouldUnsubscribe) {
-                Dispatcher.unsubscribe(ActionTypes.TRACK, listener);
+                Dispatcher.unsubscribe(ActionTypes.START_SESSION, listener);
             }
 
             this.dispatch(Events.LOADED);
         };
 
-        
-        this.once(Events.CREATE, async () => {
+
+        this.once(Events.PUSH, async () => {
             const [Dispatcher, Constants] = await this.findByProps(
                 ["dirtyDispatch"], ["API_HOST", "ActionTypes"],
                 {cache: false, bulk: true, wait: true}
             );
-            
-            Dispatcher.subscribe(Constants.ActionTypes.TRACK, listener = listener.bind(null, true, Dispatcher, Constants.ActionTypes));
+
+            Dispatcher.subscribe(Constants.ActionTypes.START_SESSION, listener = listener.bind(null, true, Dispatcher, Constants.ActionTypes));
         });
     }
 
@@ -100,9 +98,9 @@ export class WebpackModule {
         });
     }
 
-    async waitFor(filter, {retries = 100, all, delay = 50} = {}) {
+    async waitFor(filter, {retries = 100, all = false, delay = 50} = {}) {
         for (let i = 0; i < retries; i++) {
-            const module = this.findModule(filter, all, false);
+            const module = this.findModule(filter, {all, cache: false});
             if (module) return module;
             await new Promise(res => setTimeout(res, delay));
         }
@@ -126,27 +124,63 @@ export class WebpackModule {
         return req;
     }
 
-    findModule(filter, {all = false, cache = true} = {}) {
+    findModule(filter, {all = false, cache = true, force = false} = {}) {
+        if (typeof (filter) !== "function") return void 0;
+
         const __webpack_require__ = this.request(cache);
         const found = [];
 
-        const wrapFilter = (module) => {
+        const wrapFilter = function (module) {
             try {return filter(module);}
             catch {return false;}
         };
 
-        for (let i in __webpack_require__.c) {
-            var m = __webpack_require__.c[i].exports;
-            if ((typeof m == "object" || typeof m == "function") && wrapFilter(m)) found.push(m);
-            if (m?.__esModule) for (let j in m) if ((typeof m[j] == "object" || typeof m[j] == "function") && wrapFilter(m[j])) found.push(m[j]);
+        for (const id in __webpack_require__.c) {
+            var module = __webpack_require__.c[id].exports;
+            if (!module) continue;
+            
+            switch (typeof module) {
+                case "object": {
+                    if (wrapFilter(module)) {
+                        if (!all) return module;
+                        found.push(module);
+                    }
+
+                    if (module.__esModule && module.default != null && wrapFilter(module.default)) {
+                        if (!all) return module.default;
+                        found.push(module.default);
+                    }
+
+                    if (force && module.__esModule) for (const key in module) {
+                        if (!module[key]) continue;
+
+                        if (wrapFilter(module[key])) {
+                            if (!all) return module[key];
+                            found.push(module[key]);
+                        }
+                    }
+                
+                    break;
+                }
+
+                case "function": {
+                    if (wrapFilter(module)) {
+                        if (!all) return module;
+                        found.push(module);
+                    }
+
+                    break;
+                }
+            }
         }
-        return all ? found : found.at(0);
+        
+        return all ? found : found[0];
     }
 
     findModules(filter) {return this.findModule(filter, {all: true});}
 
     bulk(...options) {
-        const [filters, {cache = true, wait = false}] = this.#parseOptions(options);
+        const [filters, {wait = false, ...rest}] = this.#parseOptions(options);
         const found = new Array(filters.length);
         const searchFunction = wait ? this.waitFor : this.findModule;
 
@@ -162,8 +196,8 @@ export class WebpackModule {
                 found[filters.indexOf(filter)] = module;
             }
 
-            return true;
-        }, {all: true, cache});
+            return found.filter(Boolean).length === filters.length;
+        }, rest);
 
         if (wait) return returnValue.then(() => found);
 
@@ -171,28 +205,28 @@ export class WebpackModule {
     }
 
     findByProps(...options) {
-        const [props, {bulk = false, cache = true, wait = false}] = this.#parseOptions(options);
+        const [props, {bulk = false, wait = false, ...rest}] = this.#parseOptions(options);
         const filter = (props, module) => module && props.every(prop => prop in module);
-        
+
         return bulk
-            ? this.bulk(...props.map(props => filter.bind(null, props)).concat({cache, wait}))
+            ? this.bulk(...props.map(props => filter.bind(null, props)).concat({wait, ...rest}))
             : wait
                 ? this.waitFor(filter.bind(null, props))
-                : this.findModule(filter.bind(null, props), false, cache);
+                : this.findModule(filter.bind(null, props), rest);
     }
 
     findByDisplayName(...options) {
-        const [displayNames, {all = false, bulk = false, default: defaultExport = false, cache = true, wait = false}] = this.#parseOptions(options);
+        const [displayNames, {bulk = false, default: defaultExport = false, wait = false, ...rest}] = this.#parseOptions(options);
 
         const filter = (name, module) => defaultExport
             ? module?.default?.displayName === name
             : module?.displayName === name;
-        
+
         return bulk
             ? this.bulk(...displayNames.map(name => filter.bind(null, name)).concat({wait, cache}))
             : wait
-                ? this.waitFor(filter.bind(null, displayNames[0]), {all})
-                : this.findModule(filter.bind(null, displayNames[0]), false, cache);
+                ? this.waitFor(filter.bind(null, displayNames[0]), rest)
+                : this.findModule(filter.bind(null, displayNames[0]), rest);
     }
 
     async wait(callback = null) {

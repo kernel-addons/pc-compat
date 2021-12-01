@@ -5,12 +5,13 @@ const ipcRenderer: typeof import("electron/renderer").ipcRenderer = PCCompatNati
 }, {});
 
 const shell: typeof import("electron").shell = PCCompatNative.executeJS(`require("electron").shell`);
+const clipboard: typeof import("electron").clipboard = PCCompatNative.executeJS(`require("electron").clipboard`);
 const contextBridge: typeof import("electron").contextBridge = {
     exposeInMainWorld(name: string, value: any) {
         window[name] = value;
     }
 };
 
-const electron = {ipcRenderer, shell, contextBridge};
+const electron = {ipcRenderer, shell, contextBridge, clipboard};
 
 export default electron;
