@@ -112,6 +112,7 @@ export function OverflowContextMenu({type: addonType}) {
 
 export default function AddonPanel({manager, type}) {
     const {React} = DiscordModules;
+
     const [query, setQuery] = React.useState("");
     const [addons, setAddons] = React.useState(null);
     const [sortBy, searchOptions, order] = DataStore.useEvent("misc", () => [
@@ -125,7 +126,12 @@ export default function AddonPanel({manager, type}) {
     const OverflowMenu = Components.get("OverflowMenu");
     const Tooltip = Components.get("Tooltip");
     const Button = Components.byProps("DropdownSizes");
-    // const classes = Components.byProps("");
+
+    React.useEffect(() => {
+        manager.on("delete", () => {
+            setAddons(manager.addons)
+        });
+    }, [manager]);
 
     React.useEffect(() => {
         sortAddons(

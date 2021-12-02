@@ -13,7 +13,7 @@ export function Icon({name, ...props}) {
 
 export function ToolButton({label, icon, onClick, danger = false, disabled = false}) {
     const {Button, Tooltips: {Tooltip}} = DiscordModules;
-    
+
     return (
         <Tooltip text={label} position="top">
             {props => (
@@ -75,7 +75,7 @@ export default function AddonCard({addon, manager, openSettings, hasSettings, ty
                     <ToolButton label="Delete" icon="Trash" onClick={() => {
                         Modals.showConfirmationModal("Are you sure?", `Are you sure that you want to delete the ${type} "${addon.manifest.name}"?`, {
                             onConfirm: () => {
-                                PCCompatNative.executeJS(`require("electron").shell.trashItem(${JSON.stringify(addon.path)})`);
+                                manager.delete(addon.entityID)
                             }
                         });
                     }} />

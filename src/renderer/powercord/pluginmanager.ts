@@ -56,7 +56,7 @@ export default class PluginManager extends Emitter {
 
     static clearCache(plugin: string) {
         if (!path.isAbsolute(plugin)) plugin = path.resolve(this.folder, plugin)
-        
+
         let current;
         while (current = Require.resolve(plugin)) {
             delete Module.cache[current];
@@ -169,7 +169,7 @@ export default class PluginManager extends Emitter {
         this.states[plugin.entityID] = true;
         DataStore.trySaveData("plugins", this.states);
         this.startPlugin(plugin, false);
-        
+
         if (log) {
             Logger.log("PluginsManager", `${plugin.displayName} has been enabled!`);
             this.emit("toggle", plugin.entityID, true);
@@ -179,7 +179,7 @@ export default class PluginManager extends Emitter {
     static disablePlugin(addon: any, log = true) {
         const plugin: Plugin = this.resolve(addon);
         if (!plugin) return;
-        
+
         this.states[plugin.entityID] = false;
         DataStore.trySaveData("plugins", this.states);
         this.stopPlugin(plugin, false);
@@ -190,6 +190,15 @@ export default class PluginManager extends Emitter {
         }
     }
 
+    static delete(addon: any) {
+        const plugin: Plugin = this.resolve(addon);
+        if (!plugin) return;
+
+        this.unloadAddon(plugin);
+        PCCompatNative.executeJS(`require("electron").shell.trashItem(${JSON.stringify(plugin.path)})`);
+        this.emit("delete", plugin)
+    }
+
     static toggle(addon: any) {
         const plugin = this.resolve(addon);
         if (!plugin) return;
@@ -197,8 +206,8 @@ export default class PluginManager extends Emitter {
         if (this.isEnabled(plugin.entityID)) this.disable(plugin);
         else this.enable(plugin);
     }
-    
+
     static get enable() {return this.enablePlugin;}
-    static get disable() {return this.disablePlugin;} 
+    static get disable() {return this.disablePlugin;}
     static get reload() {return this.reloadPlugin;}
 }
