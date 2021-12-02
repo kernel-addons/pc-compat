@@ -2,9 +2,9 @@ import Patcher from "./patcher";
 import Webpack from "./webpack"
 import {promise} from "./discord";
 import {forceUpdateElement} from "@powercord/util";
+import Logger from "./logger";
 
-export default promise.then(() => {
-   /* Avatar Utility Classes */
+const patchAvatars = function () {
    const Avatar = Webpack.findByProps("AnimatedAvatar");
    Patcher.after("pc-utility-classes-avatar", Avatar, "default", (_, args, res) => {
       if (args[0]?.src?.includes("/avatars")) {
@@ -20,4 +20,16 @@ export default promise.then(() => {
 
    const AvatarWrapper = Webpack.findByProps([ 'wrapper', 'avatar' ])?.wrapper?.split(' ')?.[0];
    setImmediate(() => forceUpdateElement(`.${AvatarWrapper}`));
-})
+};
+
+const injectMessageName = function () {
+   const Message = Webpack.findModule(m => m?.toString()?.indexOf("childrenSystemMessage") > -1);
+   if (!Message) return Logger.warn("ComponentPatcher", "Message Component was not found!");
+
+   Message.displayName === "Message";
+};
+
+export default promise.then(() => {
+   patchAvatars();
+   injectMessageName();
+});

@@ -6,7 +6,7 @@ export default class Modals {
         const {ModalsApi, ConfirmationModal, React, Markdown} = DiscordModules;
 
         return ModalsApi.openModal(props => {
-            React.createElement(ConfirmationModal, Object.assign({
+            return React.createElement(ConfirmationModal, Object.assign({
                 header: title,
                 confirmText: confirmText,
                 cancelText: cancelText,
