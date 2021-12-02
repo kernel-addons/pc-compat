@@ -32,9 +32,21 @@ export default {
         props: ["Messages", "getAvailableLocales"],
         ensure: (mod: any) => mod.Messages.CLOSE
     },
+    Lodash: {
+        props: ["zipObjectDeep"]
+    },
     // Components
     ModalComponents: {
         props: ["ModalRoot", "ModalHeader"]
+    },
+    Switch: {
+        name: "Switch"
+    },
+    SwitchItem: {
+        name: "SwitchItem"
+    },
+    TextInput: {
+        name: "TextInput"
     },
     Tooltips: {
         props: ["TooltipContainer"],
@@ -47,8 +59,7 @@ export default {
         ]
     },
     Button: {
-        props: ["DropdownSizes"],
-        ensure: (m: any) => typeof (m) === "function"
+        props: ["BorderColors", "Colors"]
     },
     Slider: {
         name: "Slider"

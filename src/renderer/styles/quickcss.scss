@@ -1,0 +1,190 @@
+.pc-quickcss {
+    background: var(--background-secondary);
+    border-radius: 10px;
+    padding-left: 0;
+    display: flex;
+    overflow: hidden;
+    height: calc(100vh - 125px);
+
+    .pc-quickcss-sidebar {
+        display: flex;
+        background: var(--background-secondary-alt);
+        
+        .pc-quickcss-sidebar-iconsrow {
+            padding: 10px;
+            border-right: thin solid var(--background-modifier-active);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .pc-quickcss-sidebar-icon {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            position: relative;
+
+            & + .pc-quickcss-sidebar-icon:not(.pc-align-bottom) {
+                margin-top: 10px;
+            }
+
+            &.pc-align-bottom {
+                margin-top: auto;
+            }
+
+            &.pc-quickcss-selected::before {
+                content: "";
+                position: absolute;
+                left: -10px;
+                height: 30px;
+                width: 3px;
+                background: var(--background-accent);
+            }
+        }
+        
+        .pc-quickcss-sidebar-files-file {
+            padding: 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 5px;
+            display: flex;  
+            align-items: center;
+
+            .pc-quickcss-filename {
+                margin-left: 5px;
+                text-overflow: ellipsis;
+                overflow: hidden;
+            }
+
+            > svg {
+                flex-shrink: 0;
+            }
+        }
+        
+        .pc-quickcss-sidebar-files-file.pc-quickcss-selected {
+            background: var(--background-modifier-active);
+        }
+        
+        .pc-quickcss-sidebar-files-file:not(.pc-quickcss-selected):hover {
+            background: var(--background-modifier-hover);
+        }
+        
+        .pc-quickcss-sidebar-content {
+            padding: 10px;
+            border-right: thin solid var(--background-modifier-active);
+            width: 150px;
+            display: none;
+        }
+        
+        &.pc-visible .pc-quickcss-sidebar-content {
+            display: block;
+
+            .pc-quickcss-controls {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                border-bottom: thin solid var(--background-modifier-accent);
+                padding-bottom: 2px;
+                margin-bottom: 5px;
+
+                .pc-quickcss-controlbutton {
+                    display: inline-flex;
+                }
+            }
+        }
+    }
+
+    .pc-quickcss-content {
+        width: 100%;
+        background: var(--background-secondary-alt);
+    }
+    
+    .pc-quickcss-topbar {
+        display: flex;
+        border-bottom: thin solid var(--background-modifier-active);
+
+        .pc-quickcss-topbar-file {
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            padding: 5px;
+            margin: 5px;
+            border-radius: 4px;
+            background: var(--background-secondary);
+        }
+        
+        .pc-quickcss-close svg {
+            width: 16px;
+            height: 16px;
+        }
+        
+        .pc-quickcss-topbar-file {
+            box-sizing: border-box;
+
+            .pc-quickcss-filename  {
+                color: var(--interactive-normal);
+                margin-left: 5px;
+            }
+
+            &.pc-quickcss-selected .pc-quickcss-filename {
+                font-weight: 500;
+                color: vaR(--interactive-active);
+            }
+        }
+
+        .pc-quickcss-topbar-file + .pc-quickcss-topbar-file {
+            border-left: thin solid var(--background-modifier-active);
+        }
+    }
+
+    .pc-quickcss-snippets {
+        .pc-quickcss-snippet {
+            padding: 10px;
+            border-radius: 8px;
+            background: var(--background-secondary);
+
+            .pc-quickcss-snippet-header {
+                display: flex;
+                align-items: center;
+            }
+            
+            .pc-quickcss-snippet-controls {
+                margin-left: auto;
+            }
+
+            .pc-file-icon {
+                display: inline-flex;
+            }
+            
+            .pc-quickcss-snippet-name {
+                font-size: 20px;
+                font-weight: 700;
+            }
+            
+            & + .pc-quickcss-snippet {
+                margin-top: 10px;
+            }
+        }
+        
+    }
+
+    .pc-quickcss-panel {
+        padding: 20px;
+    }
+    
+}
+
+.pc-editor {
+    height: 100%;
+    position: relative;
+}
+
+.pc-editor > div, .pc-editor .overflow-guard {
+    height: 100% !important;
+    width: 100%;
+}
+
+.pc-quickcss-notice {
+    text-align: center;
+    margin-top: 50%;
+    font-size: 20px;
+}

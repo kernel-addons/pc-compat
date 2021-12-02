@@ -18,15 +18,15 @@ const patchAvatars = function () {
       return <Avatar.default {...res.props} />;
    })
 
-   const AvatarWrapper = Webpack.findByProps([ 'wrapper', 'avatar' ])?.wrapper?.split(' ')?.[0];
+   const AvatarWrapper = Webpack.findByProps([ "wrapper", "avatar" ])?.wrapper?.split(" ")?.[0];
    setImmediate(() => forceUpdateElement(`.${AvatarWrapper}`));
 };
 
 const injectMessageName = function () {
    const Message = Webpack.findModule(m => m?.toString()?.indexOf("childrenSystemMessage") > -1);
    if (!Message) return Logger.warn("ComponentPatcher", "Message Component was not found!");
-
-   Message.displayName === "Message";
+   
+   Message.displayName = "Message";
 };
 
 export default promise.then(() => {

@@ -74,6 +74,7 @@ export default function AddonCard({addon, manager, openSettings, hasSettings, ty
                     }} />
                     <ToolButton label="Delete" icon="Trash" onClick={() => {
                         Modals.showConfirmationModal("Are you sure?", `Are you sure that you want to delete the ${type} "${addon.manifest.name}"?`, {
+                            danger: true,
                             onConfirm: () => {
                                 manager.delete(addon.entityID)
                             }

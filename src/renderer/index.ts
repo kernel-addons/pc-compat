@@ -6,6 +6,7 @@ import {init as initializeWebpack} from "@powercord/webpack";
 import PluginManager from "@powercord/pluginmanager";
 import SettingsRenderer from "@modules/settings";
 import {promise} from "@modules/discord";
+import QuickCSS from "@ui/quickcss";
 
 if (!("process" in window)) {
     PCCompatNative.IPC.dispatch(IPCEvents.EXPOSE_PROCESS_GLOBAL);
@@ -30,6 +31,7 @@ export default new class PCCompat {
         DOM.injectCSS("core", Require(path.resolve(PCCompatNative.getBasePath(), "src/renderer/styles", "index.scss")));
 
         SettingsRenderer.patchSettingsView();
+        QuickCSS.initialize();
         PluginManager.initialize();
     }
 

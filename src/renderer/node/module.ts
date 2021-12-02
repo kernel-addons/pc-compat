@@ -4,8 +4,10 @@ import * as powercord from "../powercord/index";
 import {JSX, SASS} from "../powercord/compilers";
 import electron from "./electron";
 import errorboundary from "../powercord/components/errorboundary";
+import DiscordModules from "@modules/discord";
 
 export const cache = {};
+export const globalPaths = [];
 export const extensions = {
     ".js": (module: Module, filename: string) => {
         const fileContent = fs.readFileSync(filename, "utf8");
@@ -109,6 +111,8 @@ export function createRequire(_path: string): Require {
             case "module": return NodeModule;
             case "electron": return electron;
             case "http": return window.require('http');
+            case "react": return DiscordModules.React;
+            case "react-dom": return DiscordModules.ReactDOM;
 
             default: {
                 if (mod.startsWith("powercord/")) {
@@ -173,6 +177,6 @@ export function load(_path: string, mod: string, req = null) {
 };
 
 // TODO: Add globalPaths support
-const NodeModule = {_extensions: extensions, cache, _load: load, globalPaths: []};
+const NodeModule = {_extensions: extensions, cache, _load: load, globalPaths: globalPaths};
 
 export default NodeModule;

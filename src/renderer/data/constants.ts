@@ -1,0 +1,1 @@
+export const MONACO_BASEURL = "https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.20.0/min";

@@ -22,23 +22,30 @@ const DataStore = new class DataStore extends Store<"misc" | "data-update"> {
 
     configFolder = path.resolve(this.baseDir, "config");
 
-    tryLoadData(name: string) {
+    cache = new Map();
+
+    tryLoadData(name: string, def: any = {}) {
+        if (this.cache.has(name)) return this.cache.get(name);
+
         try {
             const location = path.resolve(this.configFolder, `${name}.json`);
-            if (!fs.existsSync(location)) return {};
+            if (!fs.existsSync(location)) return def;
             return Require(location);
         } catch (error) {
             Logger.error("DataStore", `Data of ${name} corrupt:`, error);
         }
     } 
 
-    trySaveData(name: string, data: any, emit?: boolean) {
+    trySaveData(name: string, data: any, emit?: boolean, event: any = "data-update") {
+        this.cache.set(name, data);
+
         try {
             fs.writeFileSync(path.resolve(this.configFolder, `${name}.json`), JSON.stringify(data, null, "\t"), "utf8");
         } catch (error) {
             Logger.error("DataStore", `Failed to save data of ${name}:`, error);
         }
-        if (emit) this.emit("data-update", name, data);
+
+        if (emit) this.emit(event, name, data);
     }
 
     getMisc(misc: string = "", def: any) {
