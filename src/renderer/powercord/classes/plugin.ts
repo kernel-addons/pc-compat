@@ -13,10 +13,6 @@ export type PluginManifest = {
 };
 
 export default class Plugin {
-    get entityID() {return memoize(this, "entityID", path.basename(this.path));}
-
-    get settings() {return memoize(this, "settings", getSettings(this.entityID));}
-
     path: string;   
 
     stylesheets: {[id: string]: HTMLElement} = {};
@@ -24,6 +20,10 @@ export default class Plugin {
     get color() {return "#7289da"};
 
     manifest: PluginManifest;
+
+    entityID: string;
+
+    settings: any;
 
     startPlugin?: Function;
 

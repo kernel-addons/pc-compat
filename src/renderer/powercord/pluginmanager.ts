@@ -6,6 +6,7 @@ import {fs, path, require as Require, Module} from "../node";
 import Plugin from "./classes/plugin";
 import Emitter from "../classes/staticemitter";
 import {globalPaths} from "@node/module";
+import {getSettings} from "./classes/settings";
 
 export default class PluginManager extends Emitter {
     static get folder() {return path.resolve(DataStore.baseDir, "plugins")};
@@ -85,15 +86,37 @@ export default class PluginManager extends Emitter {
 
     static loadPlugin(location: string, log = true) {
         const _path = path.resolve(location, this.mainFiles.find(f => fs.existsSync(path.resolve(location, f))));
-        const manifest = Require(path.resolve(location, "manifest.json"));
+        const manifest = Object.freeze(Require(path.resolve(location, "manifest.json")));
         if (this.plugins.get(manifest.name)) throw new Error(`Plugin with name ${manifest.name} already exists!`);
 
         let exports = {};
         try {
             this.clearCache(location);
             const data = Require(_path);
+
+            Object.defineProperties(data.prototype, {
+                entityID: {
+                    value: path.basename(location),
+                    configurable: false,
+                    writable: false
+                },
+                manifest: {
+                    value: manifest,
+                    configurable: false,
+                    writable: false
+                },
+                settings: {
+                    value: getSettings(path.basename(location)),
+                    configurable: false,
+                    writable: false
+                },
+                path: {
+                    value: location,
+                    configurable: false,
+                    writable: false
+                }
+            });
             exports = new data(path.basename(location), location);
-            Object.assign(exports, {manifest, path: location});
         } catch (error) {
             return void Logger.error("PluginsManager", `Failed to compile ${manifest.name || path.basename(location)}:`, error);
         }
