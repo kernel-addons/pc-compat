@@ -22,11 +22,11 @@ export default class SettingsRenderer {
     static registerPanel(id: string, options: {label: string, render: () => import("react").ReactElement, header?: import("react").ReactElement, order: number}) {
         const {label, render, order} = options;
         const tab = this.panels.find(e => e.id === id)
-        
+
         if (tab) throw new Error(`Settings tab ${id} is already registered!`);
 
         const panel = {
-            section: "PCCompat-" + label,
+            section: "pc-moduleManager-" + label,
             label: label,
             id: id,
             order: order,
@@ -40,7 +40,7 @@ export default class SettingsRenderer {
         };
 
         this.panels = this.panels.concat(panel).sort(this.sortPanels);
-        
+
         return () => {
             const index = this.panels.indexOf(panel);
             if (index < 0) return false;
@@ -63,7 +63,7 @@ export default class SettingsRenderer {
 
     static patchSettingsView() {
         const SettingsView = Webpack.findByDisplayName("SettingsView");
-    
+
         Patcher.after("PCSettings", SettingsView.prototype, "getPredicateSections", (_, __, res) => {
             if (!Array.isArray(res) || !res.some(e => e?.section?.toLowerCase() === "changelog") || res.some(s => s?.id === "pc-settings")) return;
 

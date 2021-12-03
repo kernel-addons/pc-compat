@@ -40,6 +40,7 @@ export default class QuickCSS {
 
             if (!fs.existsSync(file)) {
                 closeFile(file);
+                continue;
             }
 
             const code = this.shouldCompile(file) ? SASS.compile(file) : fs.readFileSync(file, "utf8");
