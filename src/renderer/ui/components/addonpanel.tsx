@@ -158,7 +158,6 @@ export default function AddonPanel({manager, type}) {
                             look={Button.Looks.BLANK}
                             className="pc-settings-overflow-menu"
                             onClick={e => {
-                                console.log({DiscordModules});
                                 ContextMenu.open(e, () => (
                                     <OverflowContextMenu type={type} />
                                 ));
