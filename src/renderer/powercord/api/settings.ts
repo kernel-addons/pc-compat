@@ -12,6 +12,7 @@ promise.then(() => {
 export function registerSettings(id: string, options: any) {
     id = options.category || id;
 
+    options.render = connectStores(options.category)(options.render);
     settings.set(id, options);
 };
 
@@ -22,6 +23,7 @@ export function unregisterSettings(id: string) {
 export function _fluxProps(id: string) {
     return getSettings(id)?.makeProps();
 };
+
 
 export function connectStores(id: string) {
     return getSettings(id)?.connectStore();
