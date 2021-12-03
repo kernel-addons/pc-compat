@@ -74,10 +74,9 @@ export default function AddonCard({addon, manager, openSettings, hasSettings, ty
                 {"version" in addon.manifest && <div className="pc-settings-card-field">v{addon.manifest.version}</div>}
                 {"author" in addon.manifest && <div className="pc-settings-card-field"> by {addon.manifest.author}</div>}
                 <div className="pc-settings-card-controls">
-                    <ToolButton
+                    {getPanel(addon.entityID) && <ToolButton
                         label="Settings"
                         icon="Gear"
-                        disabled={(!manager.isEnabled?.(addon) ?? true) || !getPanel(addon.entityID)}
                         onClick={() => {
                             const Settings = getPanel(addon.entityID);
 
@@ -88,7 +87,7 @@ export default function AddonCard({addon, manager, openSettings, hasSettings, ty
                                     : Settings.render
                             });
                         }}
-                    />
+                    />}
                     <ToolButton label="Reload" icon="Replay" disabled={!manager.isEnabled?.(addon) ?? true} onClick={() => manager.reload(addon)} />
                     <ToolButton label="Open Path" icon="Folder" onClick={() => {
                         PCCompatNative.executeJS(`require("electron").shell.showItemInFolder(${JSON.stringify(addon.path)})`);
