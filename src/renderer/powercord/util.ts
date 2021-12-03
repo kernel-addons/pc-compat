@@ -68,7 +68,7 @@ export function waitFor(selector: string) {
         new MutationObserver((mutations, observer) => {
             for (let m = 0; m < mutations.length; m++) {
                 for (let i = 0; i < mutations[m].addedNodes.length; i++) {
-                    const mutation = mutations[m].addedNodes[i];
+                    const mutation = mutations[m].addedNodes[i] as Element;
                     if (mutation.nodeType === 3) continue; // ignore text
                     const directMatch = mutation.matches(selector) && mutation;
                     if (directMatch) {
