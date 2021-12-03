@@ -74,8 +74,8 @@ export default {
         name: "Markdown",
         props: ["rules"]
     },
-    TextInput: {
-        name: "TextInput"
+    Caret: {
+        name: "Caret"
     },
     Forms: {
         props: ["FormItem", "FormTitle"]
@@ -83,11 +83,37 @@ export default {
     Flex: {
         name: "Flex"
     },
+    SearchBar: {
+        name: "SearchBar"
+    },
+    Spinner: {
+        name: "Spinner"
+    },
     // Classes
     Margins: {
         props: ["marginXLarge"]
     },
     FormClasses: {
         props: ["formText", "description"]
+    },
+    ContextMenu: {
+        type: "MERGE",
+        props: [
+            ["openContextMenu"],
+            ["MenuItem", "MenuControlItem"]
+        ],
+        rename: [
+            {from: "default", to: "Menu"},
+            {from: "MenuItem", to: "Item"},
+            {from: "MenuGroup", to: "Group"},
+            {from: "MenuCheckboxItem", to: "CheckboxItem"},
+            {from: "MenuSeparator", to: "Separator"},
+            {from: "MenuCheckboxItem", to: "CheckboxItem"},
+            {from: "MenuRadioItem", to: "RadioItem"},
+            {from: "MenuStyle", to: "Style"},
+            {from: "MenuControlItem", to: "ControlItem"},
+            {from: "openContextMenu", to: "open"},
+            {from: "closeContextMenu", to: "close"},
+        ]
     }
 }

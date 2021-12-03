@@ -38,6 +38,7 @@ const filters = new Promise<any[]>(resolve => {
         if (module.rename) {
             const current = map ?? NOOP_RET;
             map = (mod: any) => {
+                mod = current(mod);
                 const cloned = {...mod};
 
                 for (const {from, to} of module.rename) {
@@ -45,7 +46,7 @@ const filters = new Promise<any[]>(resolve => {
                     delete cloned[from];
                 }
 
-                return current(cloned);
+                return cloned;
             };
         }
 

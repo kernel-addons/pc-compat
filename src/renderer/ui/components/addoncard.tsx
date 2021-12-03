@@ -1,15 +1,9 @@
 import Modals from "../modals";
-import Components from "../../modules/components";
 import DiscordModules from "@modules/discord";
-
-export function Icon({name, ...props}) {
-    const Component = Components.get(name);
-    if (!Components) return null;
-
-    return (
-        <Component {...props} />
-    );
-};
+import DiscordIcon from "@ui/discordicon";
+import {SettingsContext} from "./settingspanel";
+import {settings} from "@powercord/api/settings";
+import {cache} from "@powercord/classes/settings";
 
 export function ToolButton({label, icon, onClick, danger = false, disabled = false}) {
     const {Button, Tooltips: {Tooltip}} = DiscordModules;
@@ -25,7 +19,7 @@ export function ToolButton({label, icon, onClick, danger = false, disabled = fal
                     onClick={onClick}
                     disabled={disabled}
                 >
-                    <Icon name={icon} color={danger ? "#ed4245" : void 0} width="20" height="20" />
+                    <DiscordIcon name={icon} color={danger ? "#ed4245" : void 0} width="20" height="20" />
                 </Button>
             )}
         </Tooltip>
@@ -33,8 +27,8 @@ export function ToolButton({label, icon, onClick, danger = false, disabled = fal
 };
 
 export function ButtonWrapper({value, onChange, disabled = false}) {
+    const {Switch} = DiscordModules; 
     const [isChecked, setChecked] = React.useState(value);
-    const Switch = Components.get("Switch");
 
     return (
         <Switch
@@ -50,8 +44,9 @@ export function ButtonWrapper({value, onChange, disabled = false}) {
 };
 
 export default function AddonCard({addon, manager, openSettings, hasSettings, type}) {
-    const Markdown = Components.get("Markdown", e => "rules" in e);
+    const {Markdown} = DiscordModules;
     const [, forceUpdate] = React.useReducer(n => n + 1, 0);
+    const SettingsApi = React.useContext<any>(SettingsContext);
 
     React.useEffect(() => {
         manager.on("toggle", (name: string) => {
@@ -68,6 +63,21 @@ export default function AddonCard({addon, manager, openSettings, hasSettings, ty
                 {"version" in addon.manifest && <div className="pc-settings-card-field">v{addon.manifest.version}</div>}
                 {"author" in addon.manifest && <div className="pc-settings-card-field"> by {addon.manifest.author}</div>}
                 <div className="pc-settings-card-controls">
+                    <ToolButton
+                        label="Settings"
+                        icon="Gear"
+                        disabled={(!manager.isEnabled?.(addon) ?? true) || !settings.has(addon.entityID)}
+                        onClick={() => {
+                            const Settings = settings.get(addon.entityID);
+
+                            SettingsApi.setPage({
+                                label: addon.manifest.name,
+                                render: typeof(Settings.render) === "function"
+                                    ? (() => DiscordModules.React.createElement(Settings.render, cache.get(addon.entityID).makeProps())) 
+                                    : Settings.render
+                            });
+                        }}
+                    />
                     <ToolButton label="Reload" icon="Replay" disabled={!manager.isEnabled?.(addon) ?? true} onClick={() => manager.reload(addon)} />
                     <ToolButton label="Open Path" icon="Folder" onClick={() => {
                         PCCompatNative.executeJS(`require("electron").shell.showItemInFolder(${JSON.stringify(addon.path)})`);

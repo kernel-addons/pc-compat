@@ -3,18 +3,24 @@ import Patcher from "./patcher";
 import DiscordModules from "./discord";
 import SettingsPanel from "@ui/components/settingspanel";
 import {getSettings} from "@powercord/classes/settings";
+import memoize from "./memoize";
+import {getOwnerInstance} from "@powercord/util";
 
 export default class SettingsRenderer {
-    static panels: any[] = [
+    static get sidebarClass() {return memoize(this, "sidebarClass", Webpack.findByProps("standardSidebarView"));}
+
+    static defaultPanels = [
         {section: "DIVIDER"},
         {
             section: "HEADER",
             label: "Powercord",
         },
-    ];
+    ]
 
-    static registerPanel(id: string, options: {label: string, render: () => import("react").ReactElement, header?: import("react").ReactElement}) {
-        const {label, render} = options;
+    static panels: any[] = [];
+
+    static registerPanel(id: string, options: {label: string, render: () => import("react").ReactElement, header?: import("react").ReactElement, order: number}) {
+        const {label, render, order} = options;
         const tab = this.panels.find(e => e.id === id)
         
         if (tab) throw new Error(`Settings tab ${id} is already registered!`);
@@ -23,6 +29,7 @@ export default class SettingsRenderer {
             section: "PCCompat-" + label,
             label: label,
             id: id,
+            order: order,
             className: `pccompat-settings-${id}-item`,
             element: () => DiscordModules.React.createElement(SettingsPanel, {
                 name: label,
@@ -32,10 +39,8 @@ export default class SettingsRenderer {
             })
         };
 
-        this.panels.push(
-            panel
-        );
-
+        this.panels = this.panels.concat(panel).sort(this.sortPanels);
+        
         return () => {
             const index = this.panels.indexOf(panel);
             if (index < 0) return false;
@@ -49,6 +54,11 @@ export default class SettingsRenderer {
         if (panel < 0) return;
 
         this.panels.splice(panel, 1);
+        this.forceUpdate();
+    }
+
+    static sortPanels(a, b) {
+        return a.order - b.order;
     }
 
     static patchSettingsView() {
@@ -60,7 +70,15 @@ export default class SettingsRenderer {
             const index = res.findIndex(s => s?.section?.toLowerCase() === "changelog") - 1;
             if (index < 0) return;
 
-            res.splice(index, 0, ...SettingsRenderer.panels);
+            res.splice(index, 0, ...SettingsRenderer.defaultPanels.concat(SettingsRenderer.panels));
         });
+    }
+
+    static forceUpdate() {
+        const [node] = document.getElementsByName(this.sidebarClass.standardSidebarView);
+        if (!node) return;
+
+        const instance = getOwnerInstance(node, e => e?.constructor?.displayName === "SettingsView");
+        if (instance) instance.forceUpdate();
     }
 }

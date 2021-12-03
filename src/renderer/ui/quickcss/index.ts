@@ -18,10 +18,11 @@ export default class QuickCSS {
 
         SettingsRenderer.registerPanel(QuickCSS.name, {
             label: "QuickCSS",
-            render: () => DiscordModules.React.createElement(QuickCSSPanel, {})
+            render: () => DiscordModules.React.createElement(QuickCSSPanel, {}),
+            order: 2
         });
         this.loadMonaco();
-        console.log({DataStore});
+        
         DataStore.on("QUICK_CSS_UPDATE" as any, this.onDataUpdate);
         this.onDataUpdate();
     }

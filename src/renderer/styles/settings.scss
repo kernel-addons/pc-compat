@@ -30,6 +30,23 @@
         display: flex;
         flex-direction: column;
     }
+
+    .pc-settings-title-caret {
+        color: var(--text-muted);
+    }
+
+    .pc-settings-title-name {
+        cursor: pointer;
+        color: var(--header-secondary);
+
+        &:hover {
+            color: var(--header-primary);
+        }
+    }
+
+    .pc-settings-title-sub {
+        color: var(--header-primary);
+    }
 }
 
 .pc-settings-overflow-header {

@@ -40,17 +40,22 @@ export function getReactInstance(node: any) {
     return node["__reactFiber$"];
 };
 
-export function getOwnerInstance(node: any) {
+export function getOwnerInstance(node, filter = _ => true) {
     if (!node) return null;
     const fiber = getReactInstance(node);
     let current = fiber;
 
-    while (!(current?.stateNode instanceof DiscordModules.React.Component)) {
-        current = current.return;
+    const matches = function () {
+        const isInstanceOf = current?.stateNode instanceof DiscordModules.React.Component;
+        return isInstanceOf && filter(current?.stateNode);
     }
 
-    return current?.stateNode;
-}
+    while (!matches()) {
+        current = current?.return;
+    }
+
+    return current?.stateNode ?? null;
+};
 
 export function forceUpdateElement(selector: string) {
     getOwnerInstance(document.querySelector(selector))?.forceUpdate();

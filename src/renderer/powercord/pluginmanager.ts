@@ -5,6 +5,7 @@ import SettingsRenderer from "../modules/settings";
 import {fs, path, require as Require, Module} from "../node";
 import Plugin from "./classes/plugin";
 import Emitter from "../classes/staticemitter";
+import {globalPaths} from "@node/module";
 
 export default class PluginManager extends Emitter {
     static get folder() {return path.resolve(DataStore.baseDir, "plugins")};
@@ -20,6 +21,7 @@ export default class PluginManager extends Emitter {
     static initialize() {
         SettingsRenderer.registerPanel("plugins", {
             label: "Plugins",
+            order: 1,
             render: () => DiscordModules.React.createElement(AddonPanel, {type: "plugin", manager: this})
         });
 
@@ -45,6 +47,7 @@ export default class PluginManager extends Emitter {
             if (!fs.existsSync(path.join(location, "manifest.json"))) continue;
             if (!fs.statSync(path.join(location, "manifest.json")).isFile()) continue;
             if (!this.mainFiles.some(f => fs.existsSync(path.join(location, f)))) continue;
+            if (fs.existsSync(path.join(location, "node_modules"))) globalPaths.push(path.join(location, "node_modules"));
 
             try {
                 this.loadPlugin(location);

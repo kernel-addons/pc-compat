@@ -1,5 +1,5 @@
 import {DataStore, DiscordModules} from "@modules";
-import Components from "@modules/components";
+import DiscordIcon from "@ui/discordicon";
 import AddonCard from "./addoncard";
 
 export type SearchOptions = {
@@ -35,7 +35,8 @@ export async function sortAddons(addons: any[], order: "ascending" | "descending
 };
 
 export function OverflowContextMenu({type: addonType}) {
-    const {default: ContextMenu, MenuRadioItem, MenuCheckboxItem, MenuControlItem, MenuSeparator, MenuGroup} = Components.byProps("MenuItem", "default");
+    const {ContextMenu} = DiscordModules;
+
     const [sortBy, searchOptions, order] = DataStore.useEvent("misc", () => [
         DataStore.getMisc(`${addonType}.sortBy`, "name"),
         DataStore.getMisc(`${addonType}.searchOption`, {}),
@@ -43,17 +44,17 @@ export function OverflowContextMenu({type: addonType}) {
     ]);
 
     return (
-        <ContextMenu navId="OverflowContextMenu">
-            <MenuControlItem
+        <ContextMenu.Menu navId="OverflowContextMenu">
+            <ContextMenu.ControlItem
                 id="order-header"
                 control={() => (
                     <h5 className="pc-settings-overflow-header">Order</h5>
                 )}
             />
-            <MenuSeparator key="separator" />
-            <MenuGroup>
+            <ContextMenu.Separator key="separator" />
+            <ContextMenu.Group>
                 {orderLabels.map(type => (
-                    <MenuRadioItem
+                    <ContextMenu.RadioItem
                         key={"order-" + type}
                         label={type[0].toUpperCase() + type.slice(1)}
                         checked={order === type}
@@ -63,18 +64,18 @@ export function OverflowContextMenu({type: addonType}) {
                         }}
                     />
                 ))}
-            </MenuGroup>
-            <MenuSeparator key="separator" />
-            <MenuControlItem
+            </ContextMenu.Group>
+            <ContextMenu.Separator key="separator" />
+            <ContextMenu.ControlItem
                 id="sort-header"
                 control={() => (
                     <h5 className="pc-settings-overflow-header">Sort Options</h5>
                 )}
             />
-            <MenuSeparator key="separator" />
-            <MenuGroup>
+            <ContextMenu.Separator key="separator" />
+            <ContextMenu.Group>
                 {sortLabels.map(type => (
-                    <MenuRadioItem
+                    <ContextMenu.RadioItem
                         key={"sortBy-" + type}
                         label={type[0].toUpperCase() + type.slice(1)}
                         checked={sortBy === type}
@@ -84,18 +85,18 @@ export function OverflowContextMenu({type: addonType}) {
                         }}
                     />
                 ))}
-            </MenuGroup>
-            <MenuSeparator key="separator" />
-            <MenuControlItem
+            </ContextMenu.Group>
+            <ContextMenu.Separator key="separator" />
+            <ContextMenu.ControlItem
                 id="search-header"
                 control={() => (
                     <h5 className="pc-settings-overflow-header">Search Options</h5>
                 )}
             />
-            <MenuSeparator key="separator" />
-            <MenuGroup>
+            <ContextMenu.Separator key="separator" />
+            <ContextMenu.Group>
                 {searchLabels.map(type => (
-                    <MenuCheckboxItem
+                    <ContextMenu.CheckboxItem
                         key={"search-" + type}
                         id={"search-" + type}
                         label={type[0].toUpperCase() + type.slice(1)}
@@ -105,13 +106,13 @@ export function OverflowContextMenu({type: addonType}) {
                         }}
                     />
                 ))}
-            </MenuGroup>
-        </ContextMenu>
+            </ContextMenu.Group>
+        </ContextMenu.Menu>
     );
 };
 
 export default function AddonPanel({manager, type}) {
-    const {React} = DiscordModules;
+    const {React, Button, ContextMenu, Tooltips, Spinner, SearchBar} = DiscordModules;
 
     const [query, setQuery] = React.useState("");
     const [addons, setAddons] = React.useState(null);
@@ -120,12 +121,6 @@ export default function AddonPanel({manager, type}) {
         DataStore.getMisc(`${type}.searchOption`, {}),
         DataStore.getMisc(`${type}.order`, "descending")
     ]);
-    const {ContextMenuActions} = DiscordModules;
-    const SearchBar = Components.get("SearchBar");
-    const Spinner = Components.get("Spinner");
-    const OverflowMenu = Components.get("OverflowMenu");
-    const Tooltip = Components.get("Tooltip");
-    const Button = Components.byProps("DropdownSizes");
 
     React.useEffect(() => {
         manager.on("delete", () => {
@@ -155,7 +150,7 @@ export default function AddonPanel({manager, type}) {
                     query={query}
                     className="pc-settings-addons-search"
                 />
-                <Tooltip text="Options" position="bottom">
+                <Tooltips.Tooltip text="Options" position="bottom">
                     {props => (
                         <Button
                             {...props}
@@ -163,14 +158,15 @@ export default function AddonPanel({manager, type}) {
                             look={Button.Looks.BLANK}
                             className="pc-settings-overflow-menu"
                             onClick={e => {
-                                ContextMenuActions.openContextMenu(e, () => (
+                                console.log({DiscordModules});
+                                ContextMenu.open(e, () => (
                                     <OverflowContextMenu type={type} />
                                 ));
                             }}>
-                            <OverflowMenu />
+                            <DiscordIcon name="OverflowMenu" />
                         </Button>
                     )}
-                </Tooltip>
+                </Tooltips.Tooltip>
             </div>
             <div className="pc-settings-card-scroller">
                 {addons
