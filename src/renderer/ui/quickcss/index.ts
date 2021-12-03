@@ -7,7 +7,7 @@ import SettingsRenderer from "@modules/settings";
 import {fs, path} from "@node";
 import {SASS} from "@powercord/compilers";
 import QuickCSSPanel from "./components/panel";
-import {getConfig} from "./util";
+import {closeFile, getConfig} from "./util";
 
 export default class QuickCSS {
     static injectedFiles = {};
@@ -22,7 +22,7 @@ export default class QuickCSS {
             order: 2
         });
         this.loadMonaco();
-        
+
         DataStore.on("QUICK_CSS_UPDATE" as any, this.onDataUpdate);
         this.onDataUpdate();
     }
@@ -38,9 +38,13 @@ export default class QuickCSS {
             if (this.injectedFiles[file] && !files[file]) this.injectedFiles[file].destroy();
             if (!files[file]) continue;
 
+            if (!fs.existsSync(file)) {
+                closeFile(file);
+            }
+
             const code = this.shouldCompile(file) ? SASS.compile(file) : fs.readFileSync(file, "utf8");
             const id = path.basename(file).split(".").join("-");
-            
+
             DOM.injectCSS(id, code);
 
             this.injectedFiles[file] = {
