@@ -27,7 +27,7 @@ export function ToolButton({label, icon, onClick, danger = false, disabled = fal
 };
 
 export function ButtonWrapper({value, onChange, disabled = false}) {
-    const {Switch} = DiscordModules; 
+    const {Switch} = DiscordModules;
     const [isChecked, setChecked] = React.useState(value);
 
     return (
@@ -42,6 +42,17 @@ export function ButtonWrapper({value, onChange, disabled = false}) {
         />
     );
 };
+
+function getPanel(id) {
+    const get = settings.get(id);
+    if (get) return get;
+
+    for(const [key, options] of settings.entries()) {
+        if (options.category == id) return settings.get(key);
+    }
+
+    return null;
+}
 
 export default function AddonCard({addon, manager, openSettings, hasSettings, type}) {
     const {Markdown} = DiscordModules;
@@ -66,14 +77,14 @@ export default function AddonCard({addon, manager, openSettings, hasSettings, ty
                     <ToolButton
                         label="Settings"
                         icon="Gear"
-                        disabled={(!manager.isEnabled?.(addon) ?? true) || !settings.has(addon.entityID)}
+                        disabled={(!manager.isEnabled?.(addon) ?? true) || !getPanel(addon.entityID)}
                         onClick={() => {
-                            const Settings = settings.get(addon.entityID);
+                            const Settings = getPanel(addon.entityID);
 
                             SettingsApi.setPage({
                                 label: addon.manifest.name,
                                 render: typeof(Settings.render) === "function"
-                                    ? (() => DiscordModules.React.createElement(Settings.render, cache.get(addon.entityID).makeProps())) 
+                                    ? (() => DiscordModules.React.createElement(Settings.render, cache.get(addon.entityID).makeProps()))
                                     : Settings.render
                             });
                         }}
