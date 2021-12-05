@@ -1,6 +1,6 @@
 import IPC, {events} from "./ipc";
 import {contextBridge, ipcRenderer, webFrame} from "electron";
-import {cloneObject} from "../common/util";
+import {cloneObject, getKeys} from "../common/util";
 import Module from "module";
 import path from "path";
 import * as IPCEvents from "../common/ipcevents";
@@ -19,13 +19,16 @@ const API = {
     executeJS(js: string) {
         return eval(js);
     },
+    setDevtools(opened: boolean) {
+        return ipcRenderer.invoke(IPCEvents.SET_DEV_TOOLS, opened);
+    },
     IPC: IPC
 };
 
 // Expose Native bindings and cloned process global.
 Object.defineProperties(window, {
     PCCompatNative: {
-        value: API,
+        value: Object.assign({}, API, {cloneObject, getKeys}),
         configurable: false,
         writable: false
     },
@@ -36,20 +39,15 @@ Object.defineProperties(window, {
     }
 });
 
-if(webFrame?.top?.context != null) {
-    webFrame.top.context.window.PCCompatNative = API;
-    webFrame.top.context.window.require = require;
-    webFrame.top.context.window.Buffer = Buffer;
-} else {
-    contextBridge.exposeInMainWorld("PCCompatNative", API);
-}
+contextBridge.exposeInMainWorld("PCCompatNative", API);
 
 IPC.on(IPCEvents.EXPOSE_PROCESS_GLOBAL, () => {
     try {
-        if(!process.contextIsolated) {
-            window.process = cloneObject(process);
-        } else if(webFrame?.top?.context != null) {
-            webFrame.top.context.window.process = cloneObject(process);
+        if (!process.contextIsolated) {
+            Object.defineProperty(window, "process", {
+                value: cloneObject(process),
+                configurable: true
+            });
         } else {
             contextBridge.exposeInMainWorld("process", cloneObject(process));
         }

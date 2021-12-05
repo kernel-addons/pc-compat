@@ -1,7 +1,8 @@
-const querystring = require('querystring');
-const https = require('https');
-const http = require('http');
-const url = require('url');
+import Logger from "@modules/logger";
+import * as https from "@node/https";
+import * as http from "@node/http";
+import querystring from "@node/querystring";
+import url from "@node/url";
 
 class HTTPError extends Error {
     constructor(message, res) {
@@ -29,7 +30,7 @@ class GenericRequest {
             uri,
             query: {},
             headers: {
-                'User-Agent': navigator.userAgent
+                "User-Agent": navigator.userAgent
             }
         };
     }
@@ -52,7 +53,7 @@ class GenericRequest {
 
     send(data) {
         if (data instanceof Object) {
-            const serialize = this.opts.headers['Content-Type'] === 'application/x-www-form-urlencoded'
+            const serialize = this.opts.headers["Content-Type"] === "application/x-www-form-urlencoded"
                 ? querystring.encode
                 : JSON.stringify;
 
@@ -67,8 +68,8 @@ class GenericRequest {
     execute() {
         return new Promise((resolve, reject) => {
             const opts = Object.assign({}, this.opts);
-            console.debug('%c[Powercord:HTTP]', 'color: #7289da', 'Performing request to', opts.uri);
-            const { request } = opts.uri.startsWith('https')
+            Logger.debug("HTTP", "Performing request to", opts.uri);
+            const { request } = opts.uri.startsWith("https")
                 ? https
                 : http;
 
@@ -81,19 +82,19 @@ class GenericRequest {
             const req = request(options, (res) => {
                 const data = [];
 
-                res.on('data', (chunk) => {
+                res.on("data", (chunk) => {
                     data.push(chunk);
                 });
 
-                res.once('error', reject);
+                res.once("error", reject);
 
-                res.once('end', () => {
+                res.once("end", () => {
                     const raw = Buffer.concat(data);
 
                     const result = {
                         raw,
                         body: (() => {
-                            if ((/application\/json/).test(res.headers['content-type'])) {
+                            if ((/application\/json/).test(res.headers["content-type"])) {
                                 try {
                                     return JSON.parse(raw);
                                 } catch (_) { }
@@ -115,7 +116,7 @@ class GenericRequest {
                 });
             });
 
-            req.once('error', reject);
+            req.once("error", reject);
 
             if (this.opts.data) {
                 req.write(this.opts.data);

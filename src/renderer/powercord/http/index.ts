@@ -1,4 +1,4 @@
-import { default as GenericRequest } from "./GenericRequest";
+import GenericRequest from "./GenericRequest";
 
 export default {
   get (url) {

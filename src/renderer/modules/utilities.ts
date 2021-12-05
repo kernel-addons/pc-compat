@@ -68,3 +68,17 @@ export function joinClassNames(...classNames: (string | [boolean, string])[]) {
 
     return className.join(" ");
 }
+
+export function matchAll(regex: RegExp, input: string, parent = false) {
+    let matches: RegExpExecArray, output: (string[])[] = [];
+
+    while(matches = regex.exec(input)) {
+        if (parent) output.push(matches);
+        else {
+            const [, ...match] = matches;
+            output.push(match);
+        }
+    }
+
+    return output;
+};

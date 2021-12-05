@@ -1,4 +1,4 @@
-import DiscordModules from "./discord.js";
+import DiscordModules from "@modules/discord.js";
 
 /**
  * Creates a updateable react store with a remote api.
@@ -12,7 +12,7 @@ export default function createStore(state): any {
         getState(factory = _ => _) {return factory(state);},
         setState(partial) {
             const partialState = typeof partial === "function" ? partial(state) : partial;
-            if (_.isEqual(state, partialState)) return;
+            if (Object.is(state, partialState)) return;
             state = Object.assign({}, state, partialState);
             listeners.forEach(listener => {
                 listener(state);

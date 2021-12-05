@@ -9,6 +9,9 @@ export default {
     ReactDOM: {
         props: ["render", "createPortal"]
     },
+    ReactSpring: {
+        props: ["useSpring", "Controller", "animated"]
+    },
     Flux: {
         type: "MERGE",
         props: [
@@ -34,6 +37,19 @@ export default {
     },
     Lodash: {
         props: ["zipObjectDeep"]
+    },
+    MessageCreators: {
+        props: ["createBotMessage"]
+    },
+    MessageActions: {
+        props: ["receiveMessage"]
+    },
+    AvatarDefaults: {
+        props: ["BOT_AVATARS"]
+    },
+    // Stores
+    SelectedChannelStore: {
+        props: ["_dispatchToken", "getChannelId", "getLastSelectedChannelId"]
     },
     // Components
     ModalComponents: {
@@ -89,6 +105,9 @@ export default {
     Spinner: {
         name: "Spinner"
     },
+    Scrollers: {
+        props: ["ScrollerAuto", "ScrollerThin", "default"]
+    },
     // Classes
     Margins: {
         props: ["marginXLarge"]
@@ -96,6 +115,7 @@ export default {
     FormClasses: {
         props: ["formText", "description"]
     },
+    // ContextMenu
     ContextMenu: {
         type: "MERGE",
         props: [

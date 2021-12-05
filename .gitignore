@@ -9,4 +9,3 @@ pnpm-lock.yaml
 !./plugins/.gitkeep
 !./themes/.gitkeep
 !./config/.gitkeep
-!./dist/.gitkeep

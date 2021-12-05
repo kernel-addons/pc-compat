@@ -136,22 +136,26 @@ export default class PluginManager extends Emitter {
         const plugin = this.resolve(addon);
         if (!addon) return;
 
-        this.stopPlugin(plugin);
+        const success = this.stopPlugin(plugin);
         this.plugins.delete(plugin.entityID);
+        this.clearCache(plugin.path);
+
         if (log) {
             Logger.log("PluginsManager", `${plugin.displayName} was unloaded!`);
         }
+
+        return success;
     }
 
     static reloadPlugin(addon: any) {
         const plugin = this.resolve(addon);
         if (!addon) return;
 
-        const success = this.stopPlugin(plugin, false);
+        const success = this.unloadAddon(plugin, false);
         if (!success) {
-            return Logger.error("PluginsManager", `Something went wrong while trying to enable ${plugin.displayName}:`);
+            return Logger.error("PluginsManager", `Something went wrong while trying to unload ${plugin.displayName}:`);
         }
-        this.startPlugin(plugin, false);
+        this.loadPlugin(plugin.path, false);
         Logger.log("PluginsManager", `Finished reloading ${plugin.displayName}.`);
     }
 
@@ -236,4 +240,5 @@ export default class PluginManager extends Emitter {
     static get enable() {return this.enablePlugin;}
     static get disable() {return this.disablePlugin;}
     static get reload() {return this.reloadPlugin;}
+    static get remount() {return this.reloadPlugin;}
 }

@@ -1,6 +1,6 @@
 import sucrase from "sucrase";
 import sass from "sass";
-import {ipcMain, app} from "electron";
+import {ipcMain, app, BrowserWindow} from "electron";
 import * as IPCEvents from "../common/ipcevents";
 import fs from "fs";
 
@@ -35,4 +35,16 @@ ipcMain.on(IPCEvents.COMPILE_JSX, (event, file) => {
     });
 
     event.returnValue = code;
+});
+
+ipcMain.handle(IPCEvents.SET_DEV_TOOLS, (event, value: boolean) => {
+    const win = BrowserWindow.fromWebContents(event.sender);
+
+    if (!win) return;
+
+    if (value && !win.webContents.isDevToolsOpened()) {
+        win.webContents.openDevTools();
+    } else {
+        win.webContents.closeDevTools();
+    }
 });

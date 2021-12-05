@@ -1,0 +1,28 @@
+.pc-command-list {
+    background: var(--background-secondary);
+    padding: 10px;
+    border-radius: 4px 4px 0 0;
+}
+
+.pc-commands-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.pc-commands-close svg {
+    width: 16px;
+    height: 16px;
+}
+
+.pc-command-row {
+    padding: 8px;
+    color: #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 5px;
+    
+    &:hover {
+        background: var(--background-modifier-hover);
+    }
+}

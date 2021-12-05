@@ -15,7 +15,8 @@ const aliases = {
     "@ui":          path.resolve(__dirname, "./src/renderer/ui"),
     "@node":        path.resolve(__dirname, "./src/renderer/node"),
     "@common":      path.resolve(__dirname, "./src/common"),
-    "@classes":     path.resolve(__dirname, "./src/renderer/classes")
+    "@classes":     path.resolve(__dirname, "./src/renderer/classes"),
+    "@flux":      path.resolve(__dirname, "./src/renderer/flux")
 };
 
 const AliasLoader = () => {
@@ -44,7 +45,6 @@ export default args => {
     delete args.mode;
 
     return defineConfig({
-        
         input: `./src/${mode}/index.ts`,
         external: ["electron", "fs", "path", "module", "sucrase", "sass", "inspector"],
         output: {
@@ -84,9 +84,9 @@ export default args => {
                 }
             })
         ],
-        onwarn: (message) => {
-            // if (IGNORED_WARNINGS.includes(message.code)) return; // Hide this annoying thing
-            return console.error(message.message);
-        }
+        // onwarn: (message) => {
+        //     // if (IGNORED_WARNINGS.includes(message.code)) return; // Hide this annoying thing
+        //     return console.error(message.message);
+        // }
     });
 };

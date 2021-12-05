@@ -19,7 +19,9 @@
             "@node": ["src/renderer/node/index"],
             "@node/*": ["src/renderer/node/*"],
             "@classes/": ["src/renderer/classes/*"],
-            "@classes": ["src/renderer/classes/index"]
+            "@classes": ["src/renderer/classes/index"],
+            "@flux/*": ["src/renderer/flux/*"],
+            "@flux": ["src/renderer/flux/index"]
         }
     }
 }

@@ -1,4 +1,4 @@
-import createStore from "@modules/zustand";
+import createStore from "@flux/zustand";
 
 const [usePanelStore, PanelAPI] = createStore({sidebarVisible: true, panel: "", selectedFile: null});
 

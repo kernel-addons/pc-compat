@@ -24,11 +24,8 @@ export default class Patcher {
             
             for(const beforePatch of patch.children.filter(e => e.type === "before")) {
                 try {
-                    const tempReturn = beforePatch.callback(this, arguments, patch.originalFunction.bind(this));
-                    if (typeof(tempReturn) !== "undefined") {
-                        if (Array.isArray(tempReturn)) args = tempReturn;
-                        else returnValue = tempReturn;
-                    }
+                    const tempArgs = beforePatch.callback(this, args, patch.originalFunction.bind(this));
+                    if (Array.isArray(tempArgs)) args = tempArgs;
                 } catch (error) {
                     Logger.error(`Patcher:${patch.functionName}:${beforePatch.caller}`, error);
                 }
@@ -36,21 +33,20 @@ export default class Patcher {
 
             const insteadPatches = patch.children.filter(e => e.type === "instead");
 
-            if (!insteadPatches.length) returnValue = patch.originalFunction.apply(this, arguments);
+            if (!insteadPatches.length) returnValue = patch.originalFunction.apply(this, args);
                 
             else for(const insteadPatch of insteadPatches) {
                 try {
-                    const tempReturn = insteadPatch.callback(this, arguments, patch.originalFunction.bind(this));
+                    const tempReturn = insteadPatch.callback(this, args, patch.originalFunction.bind(this));
                     if(typeof (tempReturn) !== "undefined") returnValue = tempReturn;
                 } catch (error) {
                     Logger.error(`Patcher:${patch.functionName}:${insteadPatch.caller}`, error);
                 }
             }
-            if (!returnValue) returnValue = patch.originalFunction.apply(this, args);
 
             for(const afterPatch of patch.children.filter(e => e.type === "after")) {
                 try {
-                    const tempReturn = afterPatch.callback(this, arguments, returnValue, ret => (returnValue = ret));
+                    const tempReturn = afterPatch.callback(this, args, returnValue, ret => (returnValue = ret));
                     if(typeof(tempReturn) !== "undefined") returnValue = tempReturn;
                 } catch (error) {
                     Logger.error(`Patcher:${patch.functionName}:${afterPatch.caller}`, error);
@@ -77,7 +73,8 @@ export default class Patcher {
 
         module[functionName] = this.makeOverride(patch);
         Object.assign(module[functionName], patch.originalFunction, {
-            toString:() => patch.originalFunction.toString()
+            toString: () => patch.originalFunction.toString(),
+            __originalFunction: patch.originalFunction
         });
 
         return this._patches.push(patch), patch;

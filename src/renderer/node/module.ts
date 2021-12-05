@@ -5,9 +5,20 @@ import {JSX, SASS} from "../powercord/compilers";
 import electron from "./electron";
 import errorboundary from "../powercord/components/errorboundary";
 import DiscordModules from "@modules/discord";
+import EventEmitter from "./events";
+import os from "./os";
+import util from "./util";
+import zlib from "./zlib";
+import stream from "./stream";
+import querystring from "./querystring";
+import url from "./url";
+import * as http from "./http";
+import crypto from "./crypto";
 
 export const cache = {};
-export const globalPaths = [];
+export const globalPaths = [
+    path.resolve(PCCompatNative.getBasePath(), "node_modules")
+];
 export const extensions = {
     ".js": (module: Module, filename: string) => {
         const fileContent = fs.readFileSync(filename, "utf8");
@@ -109,10 +120,22 @@ export function createRequire(_path: string): Require {
             case "path": return path;
             case "fs": return fs;
             case "module": return NodeModule;
+            case "process": return window.process;
             case "electron": return electron;
-            case "http": return window.require('http');
+            case "https":
+            case "http": return http;
             case "react": return DiscordModules.React;
             case "react-dom": return DiscordModules.ReactDOM;
+            case "events": return EventEmitter;
+            case "os": return os;
+            case "util": return util;
+            case "zlib": return zlib;
+            case "stream": return stream;
+            case "querystring": return querystring;
+            case "url": return url;
+            // case "net":
+            // case "tls":
+            case "crypto": crypto;
 
             default: {
                 if (mod.startsWith("powercord/")) {
@@ -131,9 +154,31 @@ export function createRequire(_path: string): Require {
     return require;
 };
 
+function hasExtension(mod: string) {
+    return extensions[path.extname(mod)] != null;
+}
+
+function getGlobalPath(mod: string) {
+    return globalPaths.find(pth => fs.existsSync(path.join(pth, mod)))
+        || globalPaths.find(pth => getExtension(path.join(pth, mod)))
+        || "";
+}
+
+function getParent(_path: string, mod: string) {
+    const concatPath = path.resolve(_path, mod);
+    const globalPath = path.join(getGlobalPath(mod), mod);
+
+    return fs.existsSync(concatPath)
+        ? concatPath
+        : fs.existsSync(globalPath)
+            ? globalPath
+            : ""; 
+}
+
 export function resolveMain(_path: string, mod: string): string {
-    const parent = path.extname(_path) ? path.dirname(_path) : path.resolve(_path, mod);
-    if (!fs.existsSync(parent)) throw new Error(`Cannot find module ${mod}`);
+    const parent = hasExtension(_path) ? path.dirname(_path) : getParent(_path, mod);
+    
+    if (!fs.existsSync(parent)) throw new Error(`Cannot find module ${mod}\ntree:\n\r-${_path}`);
     const files = fs.readdirSync(parent, "utf8");
 
     for (const file of files) {
@@ -143,18 +188,26 @@ export function resolveMain(_path: string, mod: string): string {
             const pkg = JSON.parse(fs.readFileSync(path.resolve(parent, file), "utf8"));
             if (!Reflect.has(pkg, "main")) continue;
 
-            return path.resolve(parent, pkg.main);
+            return path.resolve(parent, hasExtension(pkg.main) ? pkg.main : pkg.main + getExtension(path.join(parent, pkg.main)));
         }
 
         if (file.slice(0, -ext.length) === "index" && extensions[ext]) return path.resolve(parent, file);
     }
+
+    if (mod.startsWith("./")) return null;
+    const globalMod = globalPaths.find(pth => fs.existsSync(path.join(pth, mod)));
+    
+    if (globalMod) return resolveMain(globalMod, mod);
+    
+    return globalPaths.find(pth => getExtension(path.join(pth, mod)));
 };
 
 export function getFilePath(_path: string, mod: string): string {
-    mod = path.resolve(_path, mod);
-    const pth = mod + getExtension(mod);
+    const combined = path.resolve(_path, mod);
+    const pth = hasExtension(combined) ? combined : combined + getExtension(combined);
+
     if (fs.existsSync(pth) && fs.statSync(pth).isFile()) return pth;
-    if (!path.extname(mod)) return resolveMain(_path, mod);
+    if (!hasExtension(mod)) return resolveMain(_path, mod);
 
     return mod;
 };
@@ -162,7 +215,7 @@ export function getFilePath(_path: string, mod: string): string {
 export function load(_path: string, mod: string, req = null) {
     if (mod.includes("pc-settings/components/ErrorBoundary")) return errorboundary;
     const file = getFilePath(_path, mod);
-    if (!fs.existsSync(file)) throw new Error(`Cannot find module ${mod}`);
+    if (!fs.existsSync(file)) throw new Error(`Cannot find module ${mod}\ntree:\n\r-${_path}`);
     if (cache[file]) return cache[file].exports;
     const stats = fs.statSync(file, "utf8");
     if (stats.isDirectory()) mod = resolveMain(_path, mod);

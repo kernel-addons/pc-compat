@@ -22,6 +22,7 @@
     "@types/react": "^17.0.34",
     "@types/react-dom": "^17.0.11",
     "esformatter-quotes": "^1.1.0",
+    "node-watch": "^0.7.2",
     "rollup": "^2.59.0",
     "rollup-plugin-esformatter": "^2.0.1",
     "rollup-plugin-swc": "^0.2.0",

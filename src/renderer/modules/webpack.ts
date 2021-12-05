@@ -137,7 +137,7 @@ export class WebpackModule {
 
         for (const id in __webpack_require__.c) {
             var module = __webpack_require__.c[id].exports;
-            if (!module) continue;
+            if (!module || module === window) continue;
             
             switch (typeof module) {
                 case "object": {
