@@ -29,6 +29,7 @@ if (process.argv.join("").includes("--debug")) {
 const COMPILE_SASS = "pccompat-compile-sass";
 const COMPILE_JSX = "pccompat-compile-jsx";
 const GET_APP_PATH = "pccompat-get-app-path";
+const SET_DEV_TOOLS = "pccompat-open-devtools";
 
 electron.ipcMain.on(GET_APP_PATH, (event) => {
 	event.returnValue = electron.app.getAppPath();
@@ -61,6 +62,15 @@ electron.ipcMain.on(COMPILE_JSX, (event, file) => {
 		filePath: file
 	});
 	event.returnValue = code;
+});
+electron.ipcMain.handle(SET_DEV_TOOLS, (event, value) => {
+	const win = electron.BrowserWindow.fromWebContents(event.sender);
+	if (!win) return;
+	if (value && !win.webContents.isDevToolsOpened()) {
+		win.webContents.openDevTools();
+	} else {
+		win.webContents.closeDevTools();
+	}
 });
 
 // @ts-ignore
