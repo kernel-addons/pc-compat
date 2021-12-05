@@ -2379,10 +2379,6 @@ function registerCommand(options) {
 				if (typeof cmd.autocomplete === "function") {
 					var ref1;
 					const cmds = cmd.autocomplete(args);
-					console.log({
-						args,
-						cmds
-					});
 					if (!(cmds === null || cmds === void 0 ? void 0 : (ref1 = cmds.commands) === null || ref1 === void 0 ? void 0 : ref1.length)) return;
 					var _header;
 					CommandsApi.setState({
@@ -2712,9 +2708,6 @@ function Notice(props) {
 function NoticesContainer() {
 	const notices = useNoticesStore((s) => Object.entries(s.notices)
 	);
-	console.log({
-		notices
-	});
 	return ( /*#__PURE__*/ React.createElement(ErrorBoundary, null, notices.map(([id, notice]) => /*#__PURE__*/ React.createElement(Notice, _extends$N({
 		id: id
 	}, notice, {
@@ -2767,12 +2760,6 @@ class Notices {
 }
 Notices.container = DOM.createElement("div", {
 	className: "pc-notices"
-});
-console.log({
-	Notices,
-	DiscordModules,
-	Dispatcher,
-	NoticesApi
 });
 promise.then(() => Notices.initialize()
 );

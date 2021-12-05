@@ -102,7 +102,6 @@ export function Notice(props) {
 
 export function NoticesContainer() {
     const notices = useNoticesStore(s => Object.entries(s.notices));
-    console.log({notices});
     return (
         <ErrorBoundary>
             {notices.map(([id, notice]) => (
@@ -160,5 +159,4 @@ export default class Notices {
         });
     }
 }
-console.log({Notices, DiscordModules, Dispatcher, NoticesApi});
 promise.then(() => Notices.initialize());

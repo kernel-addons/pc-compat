@@ -74,7 +74,6 @@ export function registerCommand(options: any) {
 
                 if (typeof (cmd.autocomplete) === "function") {
                     const cmds = cmd.autocomplete(args);
-                    console.log({args, cmds});
                     if (!cmds?.commands?.length) return;
 
                     CommandsApi.setState({
