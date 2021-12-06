@@ -1,15 +1,16 @@
 import DataStore from "@modules/datastore";
 import DiscordModules from "@modules/discord";
-import Logger from "@modules/logger";
+import LoggerModule from "@modules/logger";
 import {fs, path} from "@node";
 
+const Logger = LoggerModule.create("QuickCSS:util");
 export const filesPath = path.resolve(PCCompatNative.getBasePath(), "config", "quickcss");
 
 export const createStorage = function () {
     try {
         fs.mkdirSync(filesPath);
     } catch (error) {
-        Logger.error("QuickCSS", "Failed to create QuickCSS folder:", error);
+        Logger.error("Failed to create QuickCSS folder:", error);
     }
 
     return [];

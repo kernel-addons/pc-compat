@@ -1,5 +1,7 @@
 import DiscordModules from "@modules/discord";
-import Logger from "@modules/logger";
+import LoggerModule from "@modules/logger";
+
+const Logger = LoggerModule.create("FLuxDispatcher");
 
 export default function createDispatcher() {
     const events = {};
@@ -11,7 +13,7 @@ export default function createDispatcher() {
 
             for (const callback of events[event.type]) {
                 try {callback(event);}
-                catch (error) {Logger.error("FluxDispatcher", `Could not fire callback for ${event}:`, error);}
+                catch (error) {Logger.error(`Could not fire callback for ${event}:`, error);}
             }
         },
         on(event: string, callback: Function) {

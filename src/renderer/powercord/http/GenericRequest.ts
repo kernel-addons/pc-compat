@@ -1,8 +1,10 @@
-import Logger from "@modules/logger";
+import LoggerModule from "@modules/logger";
 import * as https from "@node/https";
 import * as http from "@node/http";
 import querystring from "@node/querystring";
 import url from "@node/url";
+
+const Logger = LoggerModule.create("HTTP");
 
 class HTTPError extends Error {
     constructor(message, res) {
@@ -68,7 +70,7 @@ class GenericRequest {
     execute() {
         return new Promise((resolve, reject) => {
             const opts = Object.assign({}, this.opts);
-            Logger.debug("HTTP", "Performing request to", opts.uri);
+            Logger.debug("Performing request to", opts.uri);
             const { request } = opts.uri.startsWith("https")
                 ? https
                 : http;

@@ -12,7 +12,7 @@ promise.then(() => {
 export function registerSettings(id: string, options: any) {
     id = options.category || id;
 
-    options.render = connectStores(options.category)(options.render);
+    options.render = connectStores(id)(options.render);
     settings.set(id, options);
 };
 

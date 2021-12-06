@@ -31,8 +31,7 @@ promise.then(() => {
                 this.settings[id] = value;
             }
 
-            DataStore.trySaveData(this.id, this.settings);
-            this.emitChange();
+            this.save();
         }
 
         save = () => {

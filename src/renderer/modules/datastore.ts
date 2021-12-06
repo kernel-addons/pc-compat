@@ -3,7 +3,9 @@ import fs from "@node/fs";
 import path from "@node/path";
 import {default as Require} from "@node/require";
 import {getProps, setProps} from "./utilities";
-import Logger from "./logger";
+import LoggerModule from "./logger";
+
+const Logger = LoggerModule.create("DataStore");
 
 const DataStore = new class DataStore extends Store<"misc" | "data-update"> {
     constructor() {
@@ -30,9 +32,12 @@ const DataStore = new class DataStore extends Store<"misc" | "data-update"> {
         try {
             const location = path.resolve(this.configFolder, `${name}.json`);
             if (!fs.existsSync(location)) return def;
-            return Require(location);
+            const data = Require(location);
+            this.cache.set(name, data);
+            return data;
         } catch (error) {
-            Logger.error("DataStore", `Data of ${name} corrupt:`, error);
+            Logger.error(`Data of ${name} corrupt:`, error);
+            return def;
         }
     } 
 
@@ -42,7 +47,7 @@ const DataStore = new class DataStore extends Store<"misc" | "data-update"> {
         try {
             fs.writeFileSync(path.resolve(this.configFolder, `${name}.json`), JSON.stringify(data, null, "\t"), "utf8");
         } catch (error) {
-            Logger.error("DataStore", `Failed to save data of ${name}:`, error);
+            Logger.error(`Failed to save data of ${name}:`, error);
         }
 
         if (emit) this.emit(event, name, data);

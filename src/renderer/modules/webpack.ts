@@ -17,6 +17,20 @@ export const Events = {
     LOADED: "LOADED"
 };
 
+export class Filters {
+    static byProps(...props: string[]) {
+        return (module: any) => props.every(prop => prop in module);
+    }
+
+    static byDisplayName(name: string, def = false) {
+        return (module: any) => (def ? (module = module.default) : module) && typeof (module) === "function" && module.displayName === name;
+    }
+
+    static byTypeString(...strings: string[]) {
+        return (module: any) => module.type && (module = module.type?.toString()) && strings.every(str => module.indexOf(str) > -1);
+    }
+}
+
 export class WebpackModule {
     whenReady = null;
     #events = Object.fromEntries(Object.keys(Events).map(key => [key, new Set()]));
@@ -129,6 +143,8 @@ export class WebpackModule {
 
         const __webpack_require__ = this.request(cache);
         const found = [];
+
+        if (!__webpack_require__.c) return null;
 
         const wrapFilter = function (module) {
             try {return filter(module);}

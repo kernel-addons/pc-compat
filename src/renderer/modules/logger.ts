@@ -1,7 +1,13 @@
 export type LogType = keyof typeof console;
 
-export default class Logger {
-    static #parseType(type: LogType) {
+export class Logger {
+    module: string;
+
+    constructor(name: string) {
+        this.module = name;
+    }
+
+    #parseType(type: LogType) {
         switch (type) {
             case "info":
             case "warn":
@@ -13,13 +19,19 @@ export default class Logger {
         }
     }
 
-    static _log(type: LogType, module: string, ...message: any[]) {
-        console[this.#parseType(type)](`%c[Powercord:${module}]%c`, "color: #7289da; font-weight: 700;", "", ...message);
+    #log(type: LogType,  ...message: any[]) {
+        console[this.#parseType(type)](`%c[Powercord:${this.module}]%c`, "color: #7289da; font-weight: 700;", "", ...message);
     }
 
-    static log(module: string, ...message: any[]) {this._log("log", module, ...message);}
-    static info(module: string, ...message: any[]) {this._log("info", module, ...message);}
-    static warn(module: string, ...message: any[]) {this._log("warn", module, ...message);}
-    static error(module: string, ...message: any[]) {this._log("error", module, ...message);}
-    static debug(module: string, ...message: any[]) {this._log("debug", module, ...message);}
+    log(...message: any[]) {this.#log("log", ...message);}
+    info(...message: any[]) {this.#log("info", ...message);}
+    warn(...message: any[]) {this.#log("warn", ...message);}
+    error(...message: any[]) {this.#log("error", ...message);}
+    debug(...message: any[]) {this.#log("debug", ...message);}
+
+    static create(name: string) {
+        return new Logger(name);
+    }
 }
+
+export default Logger;

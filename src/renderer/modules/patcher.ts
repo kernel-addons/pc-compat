@@ -1,4 +1,6 @@
-import Logger from "./logger";
+import LoggerModule from "./logger";
+
+const Logger = LoggerModule.create("Patcher");
 
 export default class Patcher {
     static _patches = [];
@@ -27,7 +29,7 @@ export default class Patcher {
                     const tempArgs = beforePatch.callback(this, args, patch.originalFunction.bind(this));
                     if (Array.isArray(tempArgs)) args = tempArgs;
                 } catch (error) {
-                    Logger.error(`Patcher:${patch.functionName}:${beforePatch.caller}`, error);
+                    Logger.error(`Could not fire before patch for ${patch.functionName} of ${beforePatch.caller}`, error);
                 }
             }
 
@@ -40,7 +42,7 @@ export default class Patcher {
                     const tempReturn = insteadPatch.callback(this, args, patch.originalFunction.bind(this));
                     if(typeof (tempReturn) !== "undefined") returnValue = tempReturn;
                 } catch (error) {
-                    Logger.error(`Patcher:${patch.functionName}:${insteadPatch.caller}`, error);
+                    Logger.error(`Could not fire instead patch for ${patch.functionName} of ${insteadPatch.caller}`, error);
                 }
             }
 
@@ -49,7 +51,7 @@ export default class Patcher {
                     const tempReturn = afterPatch.callback(this, args, returnValue, ret => (returnValue = ret));
                     if(typeof(tempReturn) !== "undefined") returnValue = tempReturn;
                 } catch (error) {
-                    Logger.error(`Patcher:${patch.functionName}:${afterPatch.caller}`, error);
+                    Logger.error(`Could not fire after patch for ${patch.functionName} of ${afterPatch.caller}`, error);
                 }
             }
 

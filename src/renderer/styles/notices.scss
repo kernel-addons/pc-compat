@@ -9,15 +9,16 @@
         color: #ddd;
         background: var(--background-secondary-alt);
         min-width: 250px;
-        min-height: 120px;
         box-shadow: var(--elevation-high);
         overflow: hidden;
         margin-top: 20px;
         max-width: 400px;
-        animation: .4s open ease-in;
+        animation: .6s open ease-in;
+        display: flex;
+        flex-direction: column;
 
         &.pc-notice-closing {
-            animation: .4s close ease-out;
+            animation: .6s close ease-out;
         }
         
         .pc-notice-header {
@@ -52,6 +53,14 @@
             font-weight: 600;
         }
     
+        .pc-notice-close {
+            margin-left: 10px;
+            
+            > div {
+                display: inline-flex;
+            }
+        }
+
         .pc-notice-close svg {
             width: 16px;
             height: 16px;
@@ -63,6 +72,7 @@
             display: flex;
             align-items: center;
             justify-content: flex-end;
+            margin-top: auto;
 
             .pc-notice-button {
                 padding: 5px;
@@ -76,22 +86,28 @@
 }
 
 @keyframes open {
-    from {
+    0% {
         opacity: 0;
         transform: translateX(100%);
     }
-    to {
+    50% {
+        transform: translateX(-10%);
+    }
+    100% {
         transform: translateX(0);
         opacity: 1;
     }
 }
 
 @keyframes close {
-    from {
+    0% {
         opacity: 1;
-        transform: translateX();
+        transform: translateX(0);
     }
-    to {
+    50% {
+        transform: translateX(-10%);
+    }
+    100% {
         transform: translateX(100%);
         opacity: 0;
     }

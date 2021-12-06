@@ -9,3 +9,7 @@
 .pc-margin-left-20 {
     margin-left: 20px;
 }
+
+.powercord-notice:not(:first-child) {
+    border-top-left-radius: 0;
+}

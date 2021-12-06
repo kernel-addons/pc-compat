@@ -61,9 +61,9 @@ export function Notice(props) {
                     <DiscordIcon name="Close" />
                 </Button>
             </div>
-            <div className="pc-notice-content">
+            {props.content && <div className="pc-notice-content">
                 {typeof(props.content) === "string" ? <Markdown>{props.content}</Markdown> : props.content}
-            </div>
+            </div>}
             {Array.isArray(props.buttons) && (
                 <div className="pc-notice-footer">
                     {props.buttons.map((button, i) => button && (

@@ -7,3 +7,5 @@ export function sendToast(id: string, options: any) {
 export function closeToast(id: string) {
     return Notices.close(id);
 }
+
+export * from "@ui/announcements";

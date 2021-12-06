@@ -1,12 +1,14 @@
-import AddonPanel from "../ui/components/addonpanel";
-import {DataStore, DiscordModules} from "../modules";
-import Logger from "../modules/logger";
+import AddonPanel from "@ui/components/addonpanel";
+import {DataStore, DiscordModules} from "@modules";
+import LoggerModule from "@modules/logger";
 import SettingsRenderer from "../modules/settings";
-import {fs, path, require as Require, Module} from "../node";
+import {fs, path, require as Require, Module} from "@node";
 import Plugin from "./classes/plugin";
 import Emitter from "../classes/staticemitter";
 import {globalPaths} from "@node/module";
 import {getSettings} from "./classes/settings";
+
+const Logger = LoggerModule.create("PluginManager");
 
 export default class PluginManager extends Emitter {
     static get folder() {return path.resolve(DataStore.baseDir, "plugins")};
@@ -53,7 +55,7 @@ export default class PluginManager extends Emitter {
             try {
                 this.loadPlugin(location);
             } catch (error) {
-                Logger.error("PluginsManager", `Failed to load ${file}:`, error);
+                Logger.error(`Failed to load ${file}:`, error);
             }
         }
     }
@@ -118,11 +120,11 @@ export default class PluginManager extends Emitter {
             });
             exports = new data(path.basename(location), location);
         } catch (error) {
-            return void Logger.error("PluginsManager", `Failed to compile ${manifest.name || path.basename(location)}:`, error);
+            return void Logger.error(`Failed to compile ${manifest.name || path.basename(location)}:`, error);
         }
 
         if (log) {
-            Logger.log("PluginsManager", `${manifest.name} was loaded!`);
+            Logger.log(`${manifest.name} was loaded!`);
         }
 
         this.plugins.set(path.basename(location), exports);
@@ -141,7 +143,7 @@ export default class PluginManager extends Emitter {
         this.clearCache(plugin.path);
 
         if (log) {
-            Logger.log("PluginsManager", `${plugin.displayName} was unloaded!`);
+            Logger.log(`${plugin.displayName} was unloaded!`);
         }
 
         return success;
@@ -153,10 +155,10 @@ export default class PluginManager extends Emitter {
 
         const success = this.unloadAddon(plugin, false);
         if (!success) {
-            return Logger.error("PluginsManager", `Something went wrong while trying to unload ${plugin.displayName}:`);
+            return Logger.error(`Something went wrong while trying to unload ${plugin.displayName}:`);
         }
         this.loadPlugin(plugin.path, false);
-        Logger.log("PluginsManager", `Finished reloading ${plugin.displayName}.`);
+        Logger.log(`Finished reloading ${plugin.displayName}.`);
     }
 
     static startPlugin(addon: any, log = true) {
@@ -166,10 +168,10 @@ export default class PluginManager extends Emitter {
         try {
             if (typeof (plugin.startPlugin) === "function") plugin.startPlugin();
             if (log) {
-                Logger.log("PluginsManager", `${plugin.displayName} has been started!`);
+                Logger.log(`${plugin.displayName} has been started!`);
             }
         } catch (error) {
-            Logger.error("PluginsManager", `Could not start ${plugin.displayName}:`, error);
+            Logger.error(`Could not start ${plugin.displayName}:`, error);
         }
 
         return true;
@@ -182,10 +184,10 @@ export default class PluginManager extends Emitter {
         try {
             if (typeof (plugin.pluginWillUnload) === "function") plugin.pluginWillUnload();
             if (log) {
-                Logger.log("PluginsManager", `${plugin.displayName} has been stopped!`);
+                Logger.log(`${plugin.displayName} has been stopped!`);
             }
         } catch (error) {
-            Logger.error("PluginsManager", `Could not stop ${plugin.displayName}:`, error);
+            Logger.error(`Could not stop ${plugin.displayName}:`, error);
             return false;
         }
 
@@ -201,7 +203,7 @@ export default class PluginManager extends Emitter {
         this.startPlugin(plugin, false);
 
         if (log) {
-            Logger.log("PluginsManager", `${plugin.displayName} has been enabled!`);
+            Logger.log(`${plugin.displayName} has been enabled!`);
             this.emit("toggle", plugin.entityID, true);
         }
     }
@@ -215,7 +217,7 @@ export default class PluginManager extends Emitter {
         this.stopPlugin(plugin, false);
 
         if (log) {
-            Logger.log("PluginsManager", `${plugin.displayName} has been disabled!`);
+            Logger.log(`${plugin.displayName} has been disabled!`);
             this.emit("toggle", plugin.entityID, false);
         }
     }
@@ -241,4 +243,5 @@ export default class PluginManager extends Emitter {
     static get disable() {return this.disablePlugin;}
     static get reload() {return this.reloadPlugin;}
     static get remount() {return this.reloadPlugin;}
+    static get getPlugins() {return [...this.plugins.keys()];}
 }

@@ -1,12 +1,13 @@
 import {matchAll} from "@modules/utilities";
 import Webpack from "@modules/webpack";
-import Logger from "@modules/logger";
+import LoggerModule from "@modules/logger";
 import Patcher from "@modules/patcher";
 import {findInReactTree} from "@powercord/util";
 import createStore from "@flux/zustand";
 import CommandBar from "@ui/commandbar";
 import Clyde from "@modules/clyde";
 
+const Logger = LoggerModule.create("Commands");
 const [useCommandsStore, CommandsApi] = createStore({header: "", active: false, commands: []});
 
 export const commands = new Map();
@@ -107,7 +108,7 @@ export function registerCommand(options: any) {
                                         Clyde.sendMessage(void 0, {content: res.result});
                                     }
                                 } catch (error) {
-                                    Logger.error("Commands", `Could not executor for ${options.command}-${command}:`, error);
+                                    Logger.error(`Could not executor for ${options.command}-${command}:`, error);
 
                                     Clyde.sendMessage(void 0, {
                                         content: ":x: An error occurred while running this command. Check your console."
@@ -121,7 +122,7 @@ export function registerCommand(options: any) {
                     executor(args);
                 }
             } catch (error) {
-                Logger.error("Commands", error);
+                Logger.error(error);
             }
         },
         applicationId: section.id,

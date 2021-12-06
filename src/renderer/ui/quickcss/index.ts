@@ -2,12 +2,14 @@ import {Constants} from "@data";
 import DataStore from "@modules/datastore";
 import DiscordModules from "@modules/discord";
 import DOM from "@modules/dom";
-import Logger from "@modules/logger";
+import LoggerModule from "@modules/logger";
 import SettingsRenderer from "@modules/settings";
 import {fs, path} from "@node";
 import {SASS} from "@powercord/compilers";
 import QuickCSSPanel from "./components/panel";
 import {closeFile, getConfig} from "./util";
+
+const Logger = LoggerModule.create("QuickCSS");
 
 export default class QuickCSS {
     static injectedFiles = {};
@@ -78,7 +80,7 @@ export default class QuickCSS {
         window.require = originalRequire;
         amdLoader.config({paths: {vs: `${Constants.MONACO_BASEURL}/vs`}});
         amdLoader(["vs/editor/editor.main"], () => {});
-        Logger.log("QuickCSS", "Module loaded!");
+        Logger.log("Module loaded!");
     }
 
     static dispose(): void {
