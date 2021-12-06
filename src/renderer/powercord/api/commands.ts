@@ -24,7 +24,7 @@ export function resetRow() {
 }
 
 export function initialize() {
-    const [AssetUtils, CommandUtils] = Webpack.findByProps(["getApplicationIconURL"], ["useApplicationCommandsDiscoveryState"], {bulk: true});
+    const [AssetUtils, CommandUtils, { AUTOCOMPLETE_OPTIONS }] = Webpack.findByProps(["getApplicationIconURL"], ["useApplicationCommandsDiscoveryState"], ["AUTOCOMPLETE_OPTIONS"], {bulk: true});
 
     Patcher.after("PowercordCommands", AssetUtils, "getApplicationIconURL", (_, [props]) => {
         if (props.icon === "__POWERCORD__") return "https://cdn.discordapp.com/attachments/891039688352219198/908403940738093106/46755359.png";
@@ -33,16 +33,35 @@ export function initialize() {
     Patcher.after("PowercordCommands", CommandUtils, "useApplicationCommandsDiscoveryState", (_, __, returnValue: any) => {
         const cmds = [...commands.values()];
 
-        returnValue.applicationCommandSections.unshift(section);
-        returnValue.discoveryCommands.unshift(...cmds);
-        returnValue.commands.unshift(...cmds.filter(cmd => !returnValue.commands.some(e => e.name === cmd.name)));
-        returnValue.discoverySections.unshift({
-            data: cmds,
-            key: section.id,
-            section
-        });
-        returnValue.sectionsOffset.unshift(commands.size);
+        if (!returnValue.discoverySections.find(d => d.key == section.id)) {
+            returnValue.applicationCommandSections.unshift(section);
+            returnValue.discoveryCommands.unshift(...cmds);
+            returnValue.commands.unshift(...cmds.filter(cmd => !returnValue.commands.some(e => e.name === cmd.name)));
+
+            returnValue.discoverySections.unshift({
+                data: cmds,
+                key: section.id,
+                section
+            });
+
+            returnValue.sectionsOffset.unshift(commands.size);
+        }
     });
+
+    Patcher.after("PowercordCommands", AUTOCOMPLETE_OPTIONS.COMMANDS, 'queryResults', (_this, [,, query], res) => {
+        if (query == "") return res;
+
+        const matches = [...commands.keys()].filter(c => c.toLowerCase().startsWith(query.toLowerCase()));
+
+        return {
+            results: {
+                commands: [
+                    ...res.results.commands,
+                    ...matches.map(c => commands.get(c))
+                ].filter(Boolean)
+            }
+        }
+    })
 };
 
 export function registerCommand(options: any) {
@@ -55,19 +74,18 @@ export function registerCommand(options: any) {
         name: name.slice(1, -1)
     }));
 
-    if (typeof options.autocomplete === "function") {
-        cmdOptions.push({
-            type: 3,
-            required: false,
-            name: "additional_args"
-        });
-    }
+    cmdOptions.push({
+        type: 3,
+        required: false,
+        name: "args"
+    });
 
-    commands.set(  command, {
-        type: 0,
+    commands.set(command, {
+        type: 3,
         target: 1,
         id: command,
         name: command,
+        __powercord: true,
         execute: (result: any) => {
             try {
                 const args = Object.values(result).map(e => e[0].text) ?? [];

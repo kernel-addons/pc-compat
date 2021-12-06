@@ -1,5 +1,7 @@
 import {DiscordModules} from "@modules";
 
+export const sleep = (time) => new Promise(f => setTimeout(f, time));
+
 export function findInTree(tree = {}, filter = _ => _, {ignore = [], walkable = [], maxProperties = 100} = {}): any {
     let stack = [tree];
     const wrapFilter = function (...args) {
