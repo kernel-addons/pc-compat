@@ -627,7 +627,7 @@ const promise = Promise.all([
 	}));
 });
 
-function sleep(time) {
+function sleep$1(time) {
 	return new Promise((resolve) => setTimeout(resolve, time)
 	);
 }
@@ -850,6 +850,8 @@ class Patcher {
 }
 Patcher._patches = [];
 
+const sleep = (time) => new Promise((f) => setTimeout(f, time)
+);
 function findInTree(tree = {
 	}, filter = (_) => _
 	, {ignore =[], walkable =[], maxProperties =100} = {
@@ -944,6 +946,7 @@ function waitFor(selector) {
 
 var util$1 = /*#__PURE__*/ Object.freeze({
 	__proto__: null,
+	sleep: sleep,
 	findInTree: findInTree,
 	findInReactTree: findInReactTree,
 	getReactInstance: getReactInstance,
@@ -2324,10 +2327,12 @@ function resetRow() {
 	});
 }
 function initialize() {
-	const [AssetUtils, CommandUtils] = Webpack.findByProps([
+	const [AssetUtils, CommandUtils, {AUTOCOMPLETE_OPTIONS}] = Webpack.findByProps([
 		"getApplicationIconURL"
 	], [
 		"useApplicationCommandsDiscoveryState"
+	], [
+		"AUTOCOMPLETE_OPTIONS"
 	], {
 		bulk: true
 	});
@@ -2338,17 +2343,36 @@ function initialize() {
 		const cmds = [
 			...commands.values()
 		];
-		returnValue.applicationCommandSections.unshift(section);
-		returnValue.discoveryCommands.unshift(...cmds);
-		returnValue.commands.unshift(...cmds.filter((cmd) => !returnValue.commands.some((e) => e.name === cmd.name
-		)
-		));
-		returnValue.discoverySections.unshift({
-			data: cmds,
-			key: section.id,
-			section
-		});
-		returnValue.sectionsOffset.unshift(commands.size);
+		if (!returnValue.discoverySections.find((d) => d.key == section.id
+			)) {
+			returnValue.applicationCommandSections.unshift(section);
+			returnValue.discoveryCommands.unshift(...cmds);
+			returnValue.commands.unshift(...cmds.filter((cmd) => !returnValue.commands.some((e) => e.name === cmd.name
+			)
+			));
+			returnValue.discoverySections.unshift({
+				data: cmds,
+				key: section.id,
+				section
+			});
+			returnValue.sectionsOffset.unshift(commands.size);
+		}
+	});
+	Patcher.after("PowercordCommands", AUTOCOMPLETE_OPTIONS.COMMANDS, "queryResults", (_this, [,, query], res) => {
+		if (query == "") return res;
+		const matches = [
+			...commands.keys()
+		].filter((c) => c.toLowerCase().startsWith(query.toLowerCase())
+		);
+		return {
+			results: {
+				commands: [
+					...res.results.commands,
+					...matches.map((c) => commands.get(c)
+					)
+				].filter(Boolean)
+			}
+		};
 	});
 }
 function registerCommand(options) {
@@ -2359,18 +2383,17 @@ function registerCommand(options) {
 		name: name.slice(1, -1)
 	})
 	);
-	if (typeof options.autocomplete === "function") {
-		cmdOptions.push({
-			type: 3,
-			required: false,
-			name: "additional_args"
-		});
-	}
+	cmdOptions.push({
+		type: 3,
+		required: false,
+		name: "args"
+	});
 	commands.set(command1, {
-		type: 0,
+		type: 3,
 		target: 1,
 		id: command1,
 		name: command1,
+		__powercord: true,
 		execute: (result) => {
 			try {
 				var ref;
@@ -4281,7 +4304,7 @@ function getModule(filter, retry = true, forever = false) {
 			if (found) {
 				return resolve(found);
 			}
-			await sleep(100);
+			await sleep$1(100);
 		}
 	});
 }
