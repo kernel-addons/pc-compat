@@ -4734,7 +4734,6 @@ class StyleManager extends Emitter {
 		const theme = this.resolve(addon);
 		if (!addon) return;
 		const success = this.stopTheme(theme);
-		this.themes.delete(theme.entityID);
 		this.clearCache(theme.path);
 		if (log) {
 			Logger$4.log(`${theme.displayName} was unloaded!`);
@@ -4804,6 +4803,7 @@ class StyleManager extends Emitter {
 		const theme = this.resolve(addon);
 		if (!theme) return;
 		this.unloadAddon(theme);
+		this.themes.delete(theme.entityID);
 		PCCompatNative.executeJS(`require("electron").shell.trashItem(${JSON.stringify(theme.path)})`);
 		this.emit("delete", theme);
 	}

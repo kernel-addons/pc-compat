@@ -133,7 +133,6 @@ export default class StyleManager extends Emitter {
         if (!addon) return;
 
         const success = this.stopTheme(theme);
-        this.themes.delete(theme.entityID);
         this.clearCache(theme.path);
 
         if (log) {
@@ -221,6 +220,7 @@ export default class StyleManager extends Emitter {
         if (!theme) return;
 
         this.unloadAddon(theme);
+        this.themes.delete(theme.entityID);
         PCCompatNative.executeJS(`require("electron").shell.trashItem(${JSON.stringify(theme.path)})`);
         this.emit("delete", theme)
     }
