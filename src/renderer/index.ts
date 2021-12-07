@@ -1,4 +1,5 @@
 /// <reference path="../../types.d.ts" />
+import {Constants} from "@data";
 import {DiscordModules, DOM} from "@modules";
 import * as IPCEvents from "@common/ipcevents";
 import {require as Require, path} from "@node";
@@ -29,6 +30,7 @@ export default new class PCCompat {
         });
 
         DOM.injectCSS("core", Require(path.resolve(PCCompatNative.getBasePath(), "src/renderer/styles", "index.scss")));
+        DOM.injectCSS("font-awesome", Constants.FONTAWESOME_BASEURL, {type: "URL", documentHead: true});
 
         SettingsRenderer.patchSettingsView();
         QuickCSS.initialize();
