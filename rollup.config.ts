@@ -3,11 +3,9 @@ import {defineConfig} from "rollup";
 import esFormatter from "rollup-plugin-esformatter";
 import resolve from "@rollup/plugin-node-resolve";
 import path from "path";
-import fs from "fs";
 import alias from "@rollup/plugin-alias";
+import sourcemaps from "rollup-plugin-sourcemaps";
 
-const IGNORED_WARNINGS = ["EVAL", "THIS_IS_UNDEFINED"];
-const extensions = [".ts", ".tsx", ".js", ".jsx"];
 const aliases = {
     "@powercord":   path.resolve(__dirname, "./src/renderer/powercord"),
     "@data":        path.resolve(__dirname, "./src/renderer/data"),
@@ -19,40 +17,24 @@ const aliases = {
     "@flux":      path.resolve(__dirname, "./src/renderer/flux")
 };
 
-const AliasLoader = () => {
-    const resolveFile = function (_path) {
-        let ext = extensions.find(ext => fs.existsSync(_path + ext));
-        if (ext) return _path + ext;
-
-        let path1 = resolveFile(_path + "/index");
-        if (!fs.existsSync(path1)) return null;
-        return path1;
-    };
-
-    return {
-        resolveId(dep) {
-            if (dep[0] !== "@") return null;
-
-            const alias = Object.keys(aliases).find(key => dep.startsWith(key));
-            if (!alias) return null;
-            return resolveFile(dep.replace(alias, aliases[alias]));
-        }
-    };
-}
-
 export default args => {
-    const {mode = "renderer"} = args;
+    const {mode = "renderer", source = false} = args;
     delete args.mode;
+    delete args.source;
+
+    console.log(`SourceMaps: ${source}`);
 
     return defineConfig({
         input: `./src/${mode}/index.ts`,
         external: ["electron", "fs", "path", "module", "sucrase", "sass", "inspector"],
         output: {
+            sourcemap: source,
             format: mode === "renderer" ? "esm" : "commonjs",
             file: `./dist/${mode}.js`
         },
 
         plugins: [
+            source && sourcemaps({include: "./src/**"}),
             // AliasLoader(),
             alias({
                 entries: mode === "renderer" 
@@ -61,10 +43,11 @@ export default args => {
             }),
             resolve({
                 browser: mode === "renderer",
-                extensions: [".ts", ".tsx", ".js", ".jsx"],
+                extensions: [".ts", ".tsx", ".js", ".jsx", ".scss"],
                 preferBuiltins: false,                
             }),
-            esFormatter({
+            // Using esFormatter along with sourceMaps: true freezes rollup. Pain.
+            !source && esFormatter({
                 plugins: ["esformatter-quotes"],
                 quotes: {
                     type: "double"
@@ -74,6 +57,7 @@ export default args => {
                 }
             }),
             swc({
+                sourceMaps: source,
                 jsc: {
                     parser: {
                         tsx: true,
@@ -83,7 +67,7 @@ export default args => {
                     target: "es2019"
                 }
             })
-        ],
+        ].filter(Boolean),
         // onwarn: (message) => {
         //     // if (IGNORED_WARNINGS.includes(message.code)) return; // Hide this annoying thing
         //     return console.error(message.message);

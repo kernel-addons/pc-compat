@@ -6,7 +6,10 @@ export let store = null;
 export let settings = new Map();
 
 promise.then(() => {
-    store = getSettings("powercord");
+    store = Object.assign(getSettings("powercord"), {
+        // powerCord momento
+        _fluxProps(id: string) {return getSettings(id).makeProps();}
+    });
 });
 
 export function registerSettings(id: string, options: any) {
