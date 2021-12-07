@@ -20,7 +20,7 @@ export async function sortAddons(addons: any[], order: "ascending" | "descending
             if (!query) return true;
             const {manifest} = addon;
             // Use String() wrapper for clever escaping
-            return ["name", "author", "description"].some(type => searchOptions[type] && ~String(manifest[type] ?? "").toLowerCase().indexOf(query));
+            return ["name", "author", "description"].some(type => searchOptions[type] && String(manifest[type] ?? "").toLowerCase().includes(query.toLowerCase()));
         })
         .sort((a, b) => {
             const first = a.manifest[sortBy] ?? "";
@@ -39,7 +39,7 @@ export function OverflowContextMenu({type: addonType}) {
 
     const [sortBy, searchOptions, order] = DataStore.useEvent("misc", () => [
         DataStore.getMisc(`${addonType}.sortBy`, "name"),
-        DataStore.getMisc(`${addonType}.searchOption`, {}),
+        DataStore.getMisc(`${addonType}.searchOption`, {author: true, name: true, description: true}),
         DataStore.getMisc(`${addonType}.order`, "descending")
     ]);
 
@@ -100,9 +100,9 @@ export function OverflowContextMenu({type: addonType}) {
                         key={"search-" + type}
                         id={"search-" + type}
                         label={type[0].toUpperCase() + type.slice(1)}
-                        checked={searchOptions[type] ?? true}
+                        checked={searchOptions[type]}
                         action={() => {
-                            DataStore.setMisc(void 0, `${addonType}.searchOption.${type}`, !(searchOptions[type] ?? true));
+                            DataStore.setMisc(void 0, `${addonType}.searchOption.${type}`, !(searchOptions[type]));
                         }}
                     />
                 ))}
@@ -118,7 +118,7 @@ export default function AddonPanel({manager, type}) {
     const [addons, setAddons] = React.useState(null);
     const [sortBy, searchOptions, order] = DataStore.useEvent("misc", () => [
         DataStore.getMisc(`${type}.sortBy`, "name"),
-        DataStore.getMisc(`${type}.searchOption`, {}),
+        DataStore.getMisc(`${type}.searchOption`, {author: true, name: true, description: true}),
         DataStore.getMisc(`${type}.order`, "descending")
     ]);
 
@@ -131,9 +131,9 @@ export default function AddonPanel({manager, type}) {
     React.useEffect(() => {
         sortAddons(
             Array.from(manager.addons),
-            order ?? "descending",
+            order,
             query,
-            searchOptions ?? {author: true, name: true, description: true},
+            searchOptions,
             sortBy
         ).then(addons => setAddons(addons));
     }, [query, manager, type, order, searchOptions, sortBy]);
