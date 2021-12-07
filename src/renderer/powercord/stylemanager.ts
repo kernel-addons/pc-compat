@@ -5,6 +5,7 @@ import LoggerModule from "@modules/logger";
 import {fs, Module, path, require as Require} from "@node";
 import Emitter from "../classes/staticemitter";
 import Theme from "@powercord/classes/theme";
+import Plugin from "@powercord/classes/plugin";
 
 const Logger = LoggerModule.create("StyleManager");
 
@@ -87,7 +88,7 @@ export default class StyleManager extends Emitter {
         const entityID = path.basename(location);
         if (this.themes.get(entityID)) throw new Error(`Theme with ID ${entityID} already exists!`);
 
-        let data = {};
+        let data = new Theme();
         try {
             this.clearCache(location);
 
@@ -121,11 +122,37 @@ export default class StyleManager extends Emitter {
             Logger.log(`${manifest.name} was loaded!`);
         }
 
-        debugger;
         this.themes.set(path.basename(location), data);
 
         if (this.isEnabled(path.basename(location))) {
-            // this.startPlugin(exports);
+            this.startTheme(data);
         }
     }
+
+    static startTheme(addon: any, log = true) {
+        const theme = this.resolve(addon);
+        if (!theme) return;
+
+        console.log(theme);
+        try {
+            theme._load();
+            if (log) {
+                Logger.log(`${theme.displayName} has been loaded!`);
+            }
+        } catch (error) {
+            Logger.error(`Could not load ${theme.displayName}:`, error);
+        }
+
+        return true;
+    }
+
+    static get(name: string) {
+        return this.themes.get(name);
+    }
+
+    // static get enable() {return this.enableTheme;}
+    // static get disable() {return this.disableTheme;}
+    // static get reload() {return this.reloadTheme;}
+    // static get remount() {return this.reloadTheme;}
+    // static get getThemes() {return [...this.themes.keys()];}
 }

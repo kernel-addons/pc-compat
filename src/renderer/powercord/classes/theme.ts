@@ -1,15 +1,15 @@
 import {DOM, memoize, Utilities} from "../../modules";
 import {fs, path, require as Require} from "../../node";
 import ThemeManager from "../stylemanager";
-import {getSettings} from './settings';
 
 export type ThemeManifest = {
-    effectiveTheme: string;
     name: string;
     description: string;
     version: string;
     author: string;
     license: string;
+    theme: string;
+    splashTheme: string;
 };
 
 export default class Theme {
@@ -27,7 +27,8 @@ export default class Theme {
 
     themeIdentifier?: string;
 
-    loadStylesheet(_path: string): void {
+    // "Internals" :zere_zoom:
+    _loadStylesheet(_path: string): void {
         const stylePath = path.isAbsolute(_path) ? _path : path.resolve(this.path, _path);
         try {
             if (!fs.existsSync(stylePath)) throw new Error(`Stylesheet not found at ${stylePath}`);
@@ -40,13 +41,14 @@ export default class Theme {
         }
     }
 
-    // "Internals" :zere_zoom:
     _load() {
-
+        console.log(path.resolve(this.path, this.manifest.theme));
+        this._loadStylesheet(path.resolve(this.path, this.manifest.theme))
     }
 
     _unload() {
         console.log(this.stylesheets);
+        // ThemeManager
     }
 
     // Getters

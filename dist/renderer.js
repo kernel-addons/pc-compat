@@ -2240,7 +2240,8 @@ class Theme$1 {
 	get color() {
 		return "#7289da";
 	}
-	loadStylesheet(_path) {
+	// "Internals" :zere_zoom:
+	_loadStylesheet(_path) {
 		const stylePath = path.isAbsolute(_path) ? _path : path.resolve(this.path, _path);
 		try {
 			if (!fs.existsSync(stylePath))
@@ -2252,10 +2253,13 @@ class Theme$1 {
 			console.error(`Could not load stylesheet:`, error);
 		}
 	}
-	// "Internals" :zere_zoom:
-	_load() {}
+	_load() {
+		console.log(path.resolve(this.path, this.manifest.theme));
+		this._loadStylesheet(path.resolve(this.path, this.manifest.theme));
+	}
 	_unload() {
 		console.log(this.stylesheets);
+	// ThemeManager
 	}
 	// Getters
 	get displayName() {
@@ -4688,8 +4692,7 @@ class StyleManager extends Emitter {
 		const entityID = path.basename(location);
 		if (this.themes.get(entityID))
 			throw new Error(`Theme with ID ${entityID} already exists!`);
-		let data = {
-		};
+		let data = new Theme$1();
 		try {
 			this.clearCache(location);
 			Object.defineProperties(data, {
@@ -4720,9 +4723,27 @@ class StyleManager extends Emitter {
 		if (log) {
 			Logger$4.log(`${manifest.name} was loaded!`);
 		}
-		debugger;
 		this.themes.set(path.basename(location), data);
-		if (this.isEnabled(path.basename(location))) ;
+		if (this.isEnabled(path.basename(location))) {
+			this.startTheme(data);
+		}
+	}
+	static startTheme(addon, log = true) {
+		const theme = this.resolve(addon);
+		if (!theme) return;
+		console.log(theme);
+		try {
+			theme._load();
+			if (log) {
+				Logger$4.log(`${theme.displayName} has been loaded!`);
+			}
+		} catch (error) {
+			Logger$4.error(`Could not load ${theme.displayName}:`, error);
+		}
+		return true;
+	}
+	static get(name) {
+		return this.themes.get(name);
 	}
 }
 StyleManager.mainFiles = [
