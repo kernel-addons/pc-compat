@@ -18,7 +18,7 @@ const aliases = {
 };
 
 export default args => {
-    const {mode = "renderer", source = false} = args;
+    const {mode = "renderer", source = true} = args;
     delete args.mode;
     delete args.source;
 
