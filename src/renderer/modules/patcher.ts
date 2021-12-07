@@ -74,6 +74,7 @@ export default class Patcher {
         }
 
         module[functionName] = this.makeOverride(patch);
+        module[`__powercordOriginal_${functionName}`] = patch.originalFunction;
         Object.assign(module[functionName], patch.originalFunction, {
             toString: () => patch.originalFunction.toString(),
             __originalFunction: patch.originalFunction

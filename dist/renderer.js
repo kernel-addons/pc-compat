@@ -38,12 +38,12 @@ const Events = {
 	LOADED: "LOADED"
 };
 class Filters {
-	static byProps(...props) {
-		return (module) => props.every((prop) => prop in module
+	static byProps(...props2) {
+		return (module) => props2.every((prop) => prop in module
 		);
 	}
-	static byDisplayName(name, def = false) {
-		return (module) => (def ? module = module.default : module) && typeof module === "function" && module.displayName === name;
+	static byDisplayName(name1, def = false) {
+		return (module) => (def ? module = module.default : module) && typeof module === "function" && module.displayName === name1;
 	}
 	static byTypeString(...strings) {
 		return (module) => {
@@ -64,37 +64,37 @@ class WebpackModule {
 	get id() {
 		return "kernel-req" + Math.random().toString().slice(2, 5);
 	}
-	dispatch(event, ...args) {
+	dispatch(event, ...args1) {
 		if (!(event in _classPrivateFieldGet(this, _events)))
 			throw new Error(`Unknown Event: ${event}`);
 		for (const callback of _classPrivateFieldGet(this, _events)[event]) {
 			try {
-				callback(...args);
+				callback(...args1);
 			} catch (err) {
 				console.error(err);
 			}
 		}
 	}
-	on(event, callback) {
-		if (!(event in _classPrivateFieldGet(this, _events)))
-			throw new Error(`Unknown Event: ${event}`);
-		return _classPrivateFieldGet(this, _events)[event].add(callback), () => this.off(event, callback);
+	on(event1, callback) {
+		if (!(event1 in _classPrivateFieldGet(this, _events)))
+			throw new Error(`Unknown Event: ${event1}`);
+		return _classPrivateFieldGet(this, _events)[event1].add(callback), () => this.off(event1, callback);
 	}
-	off(event, callback) {
-		if (!(event in _classPrivateFieldGet(this, _events)))
-			throw new Error(`Unknown Event: ${event}`);
-		return _classPrivateFieldGet(this, _events)[event].delete(callback);
+	off(event2, callback1) {
+		if (!(event2 in _classPrivateFieldGet(this, _events)))
+			throw new Error(`Unknown Event: ${event2}`);
+		return _classPrivateFieldGet(this, _events)[event2].delete(callback1);
 	}
-	once(event, callback) {
-		const unlisten = this.on(event, (...args) => {
+	once(event3, callback2) {
+		const unlisten = this.on(event3, (...args) => {
 			unlisten();
-			callback(...args);
+			callback2(...args);
 		});
 	}
-	async waitFor(filter, {retries =100, all =false, delay =50} = {
+	async waitFor(filter3, {retries =100, all =false, delay =50} = {
 		}) {
 		for (let i = 0; i < retries; i++) {
-			const module = this.findModule(filter, {
+			const module = this.findModule(filter3, {
 				all,
 				cache: false
 			});
@@ -103,8 +103,8 @@ class WebpackModule {
 			);
 		}
 	}
-	request(cache = true) {
-		if (cache && _classPrivateFieldGet(this, _cache)) return _classPrivateFieldGet(this, _cache);
+	request(cache2 = true) {
+		if (cache2 && _classPrivateFieldGet(this, _cache)) return _classPrivateFieldGet(this, _cache);
 		let req = void 0;
 		if ("webpackChunkdiscord_app" in window && webpackChunkdiscord_app != null) {
 			const chunk = [
@@ -121,15 +121,15 @@ class WebpackModule {
 		_classPrivateFieldSet(this, _cache, req);
 		return req;
 	}
-	findModule(filter, {all =false, cache =true, force =false} = {
+	findModule(filter1, {all: all1 = false, cache: cache1 = true, force =false} = {
 		}) {
-		if (typeof filter !== "function") return void 0;
-		const __webpack_require__ = this.request(cache);
+		if (typeof filter1 !== "function") return void 0;
+		const __webpack_require__ = this.request(cache1);
 		const found = [];
 		if (!__webpack_require__.c) return null;
 		const wrapFilter = function(module) {
 			try {
-				return filter(module);
+				return filter1(module);
 			} catch (e) {
 				return false;
 			}
@@ -140,18 +140,18 @@ class WebpackModule {
 			switch (typeof module1) {
 				case "object": {
 					if (wrapFilter(module1)) {
-						if (!all) return module1;
+						if (!all1) return module1;
 						found.push(module1);
 					}
 					if (module1.__esModule && module1.default != null && wrapFilter(module1.default)) {
-						if (!all) return module1.default;
+						if (!all1) return module1.default;
 						found.push(module1.default);
 					}
 					if (force && module1.__esModule)
 						for (const key in module1) {
 							if (!module1[key]) continue;
 							if (wrapFilter(module1[key])) {
-								if (!all) return module1[key];
+								if (!all1) return module1[key];
 								found.push(module1[key]);
 							}
 					}
@@ -159,17 +159,17 @@ class WebpackModule {
 				}
 				case "function": {
 					if (wrapFilter(module1)) {
-						if (!all) return module1;
+						if (!all1) return module1;
 						found.push(module1);
 					}
 					break;
 				}
 			}
 		}
-		return all ? found : found[0];
+		return all1 ? found : found[0];
 	}
-	findModules(filter) {
-		return this.findModule(filter, {
+	findModules(filter2) {
+		return this.findModule(filter2, {
 			all: true
 		});
 	}
@@ -186,8 +186,8 @@ class WebpackModule {
 				}
 			});
 			if (!matches.length) return false;
-			for (const filter1 of matches) {
-				found[filters.indexOf(filter1)] = module;
+			for (const filter4 of matches) {
+				found[filters.indexOf(filter4)] = module;
 			}
 			return found.filter(Boolean).length === filters.length;
 		}, rest);
@@ -195,8 +195,8 @@ class WebpackModule {
 			);
 		return found;
 	}
-	findByProps(...options) {
-		const [props1, {bulk =false, wait =false, ...rest}] = _classPrivateMethodGet$1(this, _parseOptions, parseOptions).call(this, options);
+	findByProps(...options1) {
+		const [props1, {bulk =false, wait =false, ...rest}] = _classPrivateMethodGet$1(this, _parseOptions, parseOptions).call(this, options1);
 		const filter = (props, module) => module && props.every((prop) => prop in module
 		);
 		return bulk ? this.bulk(...props1.map((props) => filter.bind(null, props)
@@ -205,8 +205,8 @@ class WebpackModule {
 			...rest
 		})) : wait ? this.waitFor(filter.bind(null, props1)) : this.findModule(filter.bind(null, props1), rest);
 	}
-	findByDisplayName(...options) {
-		const [displayNames, {bulk =false, default: defaultExport = false, wait =false, ...rest}] = _classPrivateMethodGet$1(this, _parseOptions, parseOptions).call(this, options);
+	findByDisplayName(...options2) {
+		const [displayNames, {bulk =false, default: defaultExport = false, wait =false, ...rest}] = _classPrivateMethodGet$1(this, _parseOptions, parseOptions).call(this, options2);
 		const filter = (name, module) => {
 			var ref;
 			return defaultExport ? (module === null || module === void 0 ? void 0 : (ref = module.default) === null || ref === void 0 ? void 0 : ref.displayName) === name : (module === null || module === void 0 ? void 0 : module.displayName) === name;
@@ -217,11 +217,11 @@ class WebpackModule {
 			cache
 		})) : wait ? this.waitFor(filter.bind(null, displayNames[0]), rest) : this.findModule(filter.bind(null, displayNames[0]), rest);
 	}
-	async wait(callback = null) {
+	async wait(callback3 = null) {
 		return new Promise((resolve) => {
 			this.once(Events.LOADED, () => {
 				resolve();
-				typeof callback === "function" && callback();
+				typeof callback3 === "function" && callback3();
 			});
 		});
 	}
@@ -567,7 +567,7 @@ var Modules = {
 const DiscordModules = {
 };
 const NOOP_RET = (_) => _;
-const filters = new Promise((resolve) => {
+const filters1 = new Promise((resolve) => {
 	const result = [];
 	for (let moduleId in Modules) {
 		const module = Modules[moduleId];
@@ -631,12 +631,12 @@ const filters = new Promise((resolve) => {
 	resolve(result);
 });
 const promise = Promise.all([
-	filters,
+	filters1,
 	Webpack.whenReady
-]).then(([filters1]) => {
-	const result = Webpack.bulk(...filters1.map(({filter}) => filter
+]).then(([filters]) => {
+	const result = Webpack.bulk(...filters.map(({filter}) => filter
 	));
-	Object.assign(DiscordModules, filters1.reduce((modules, {id, map}, index) => {
+	Object.assign(DiscordModules, filters.reduce((modules, {id, map}, index) => {
 		const mapper = map !== null && map !== void 0 ? map : NOOP_RET;
 		modules[id] = mapper(result[index]);
 		return modules;
@@ -718,28 +718,28 @@ function _classPrivateMethodGet(receiver, privateSet, fn) {
 var _parseType = new WeakSet(),
 	_log = new WeakSet();
 class Logger$9 {
-	log(...message) {
-		_classPrivateMethodGet(this, _log, log).call(this, "log", ...message);
+	log(...message5) {
+		_classPrivateMethodGet(this, _log, log).call(this, "log", ...message5);
 	}
-	info(...message) {
-		_classPrivateMethodGet(this, _log, log).call(this, "info", ...message);
+	info(...message1) {
+		_classPrivateMethodGet(this, _log, log).call(this, "info", ...message1);
 	}
-	warn(...message) {
-		_classPrivateMethodGet(this, _log, log).call(this, "warn", ...message);
+	warn(...message2) {
+		_classPrivateMethodGet(this, _log, log).call(this, "warn", ...message2);
 	}
-	error(...message) {
-		_classPrivateMethodGet(this, _log, log).call(this, "error", ...message);
+	error(...message3) {
+		_classPrivateMethodGet(this, _log, log).call(this, "error", ...message3);
 	}
-	debug(...message) {
-		_classPrivateMethodGet(this, _log, log).call(this, "debug", ...message);
+	debug(...message4) {
+		_classPrivateMethodGet(this, _log, log).call(this, "debug", ...message4);
 	}
 	static create(name) {
 		return new Logger$9(name);
 	}
-	constructor(name) {
+	constructor(name1) {
 		_parseType.add(this);
 		_log.add(this);
-		this.module = name;
+		this.module = name1;
 	}
 }
 function parseType(type) {
@@ -816,9 +816,9 @@ class Patcher {
 			return returnValue;
 		};
 	}
-	static pushPatch(caller, module, functionName) {
+	static pushPatch(caller1, module, functionName) {
 		const patch = {
-			caller,
+			caller: caller1,
 			module,
 			functionName,
 			originalFunction: module[functionName],
@@ -830,21 +830,22 @@ class Patcher {
 			children: []
 		};
 		module[functionName] = this.makeOverride(patch);
+		module[`__powercordOriginal_${functionName}`] = patch.originalFunction;
 		Object.assign(module[functionName], patch.originalFunction, {
 			toString: () => patch.originalFunction.toString(),
 			__originalFunction: patch.originalFunction
 		});
 		return this._patches.push(patch), patch;
 	}
-	static doPatch(caller, module, functionName, callback, type = "after", options = {
+	static doPatch(caller2, module1, functionName1, callback, type = "after", options = {
 		}) {
 		let {displayName} = options;
 		var ref;
-		const patch = (ref = this._patches.find((e) => e.module === module && e.functionName === functionName
-		)) !== null && ref !== void 0 ? ref : this.pushPatch(caller, module, functionName);
-		if (typeof displayName !== "string") displayName || module.displayName || module.name || module.constructor.displayName || module.constructor.name;
+		const patch = (ref = this._patches.find((e) => e.module === module1 && e.functionName === functionName1
+		)) !== null && ref !== void 0 ? ref : this.pushPatch(caller2, module1, functionName1);
+		if (typeof displayName !== "string") displayName || module1.displayName || module1.name || module1.constructor.displayName || module1.constructor.name;
 		const child = {
-			caller,
+			caller: caller2,
 			type,
 			id: patch.count,
 			callback,
@@ -852,7 +853,7 @@ class Patcher {
 				patch.children.splice(patch.children.findIndex((cpatch) => cpatch.id === child.id && cpatch.type === type
 				), 1);
 				if (patch.children.length <= 0) {
-					const patchNum = this._patches.findIndex((p) => p.module == module && p.functionName == functionName
+					const patchNum = this._patches.findIndex((p) => p.module == module1 && p.functionName == functionName1
 					);
 					this._patches[patchNum].undo();
 					this._patches.splice(patchNum, 1);
@@ -863,14 +864,14 @@ class Patcher {
 		patch.count++;
 		return child.unpatch;
 	}
-	static before(caller, module, functionName, callback) {
-		return this.doPatch(caller, module, functionName, callback, "before");
+	static before(caller3, module2, functionName2, callback1) {
+		return this.doPatch(caller3, module2, functionName2, callback1, "before");
 	}
-	static after(caller, module, functionName, callback) {
-		return this.doPatch(caller, module, functionName, callback, "after");
+	static after(caller4, module3, functionName3, callback2) {
+		return this.doPatch(caller4, module3, functionName3, callback2, "after");
 	}
-	static instead(caller, module, functionName, callback) {
-		return this.doPatch(caller, module, functionName, callback, "instead");
+	static instead(caller5, module4, functionName4, callback3) {
+		return this.doPatch(caller5, module4, functionName4, callback3, "instead");
 	}
 }
 Patcher._patches = [];
@@ -1036,19 +1037,19 @@ class Store {
 	has(event) {
 		return event in this.events;
 	}
-	on(event, listener) {
-		if (!this.has(event))
-			this.events[event] = new Set();
-		this.events[event].add(listener);
-		return () => void this.off(event, listener);
+	on(event1, listener) {
+		if (!this.has(event1))
+			this.events[event1] = new Set();
+		this.events[event1].add(listener);
+		return () => void this.off(event1, listener);
 	}
-	off(event, listener) {
-		if (!this.has(event)) return;
-		return this.events[event].delete(listener);
+	off(event2, listener1) {
+		if (!this.has(event2)) return;
+		return this.events[event2].delete(listener1);
 	}
-	emit(event, ...args) {
-		if (!this.has(event)) return;
-		for (const listener of this.events[event]) {
+	emit(event3, ...args) {
+		if (!this.has(event3)) return;
+		for (const listener of this.events[event3]) {
 			try {
 				listener(...args);
 			} catch (error) {
@@ -1056,14 +1057,14 @@ class Store {
 			}
 		}
 	}
-	useEvent(event, listener) {
-		const [state, setState] = DiscordModules.React.useState(listener());
+	useEvent(event4, listener2) {
+		const [state, setState] = DiscordModules.React.useState(listener2());
 		DiscordModules.React.useEffect(() => {
-			return this.on(event, () => setState(listener())
+			return this.on(event4, () => setState(listener2())
 			);
 		}, [
-			event,
-			listener
+			event4,
+			listener2
 		]);
 		return state;
 	}
@@ -1077,19 +1078,19 @@ class Emitter {
 	static has(event) {
 		return event in this.events;
 	}
-	static on(event, listener) {
-		if (!this.has(event))
-			this.events[event] = new Set();
-		this.events[event].add(listener);
-		return this.off.bind(this, event, listener);
+	static on(event1, listener) {
+		if (!this.has(event1))
+			this.events[event1] = new Set();
+		this.events[event1].add(listener);
+		return this.off.bind(this, event1, listener);
 	}
-	static off(event, listener) {
-		if (!this.has(event)) return;
-		return this.events[event].delete(listener);
+	static off(event2, listener1) {
+		if (!this.has(event2)) return;
+		return this.events[event2].delete(listener1);
 	}
-	static emit(event, ...args) {
-		if (!this.has(event)) return;
-		for (const listener of this.events[event]) {
+	static emit(event3, ...args) {
+		if (!this.has(event3)) return;
+		for (const listener of this.events[event3]) {
 			try {
 				listener(...args);
 			} catch (error) {
@@ -1105,36 +1106,36 @@ class fs {
 	static readFileSync(path, options = "utf8") {
 		return PCCompatNative.executeJS(`require("fs").readFileSync(${JSON.stringify(path)}, ${JSON.stringify(options)});`);
 	}
-	static writeFileSync(path, data, options) {
-		return PCCompatNative.executeJS(`require("fs").writeFileSync(${JSON.stringify(path)}, ${JSON.stringify(data)}, ${JSON.stringify(options)})`);
+	static writeFileSync(path1, data, options1) {
+		return PCCompatNative.executeJS(`require("fs").writeFileSync(${JSON.stringify(path1)}, ${JSON.stringify(data)}, ${JSON.stringify(options1)})`);
 	}
-	static writeFile(path, data, options, callback) {
-		if (typeof options === "function") {
-			callback = options;
-			options = null;
+	static writeFile(path2, data1, options2, callback) {
+		if (typeof options2 === "function") {
+			callback = options2;
+			options2 = null;
 		}
 		const ret = {
 			error: null
 		};
 		try {
-			this.writeFileSync(path, data, options);
+			this.writeFileSync(path2, data1, options2);
 		} catch (error) {
 			ret.error = error;
 		}
 		callback(ret.error);
 	}
-	static readdirSync(path, options) {
-		return PCCompatNative.executeJS(`require("fs").readdirSync(${JSON.stringify(path)}, ${JSON.stringify(options)});`);
+	static readdirSync(path3, options3) {
+		return PCCompatNative.executeJS(`require("fs").readdirSync(${JSON.stringify(path3)}, ${JSON.stringify(options3)});`);
 	}
-	static existsSync(path) {
-		return PCCompatNative.executeJS(`require("fs").existsSync(${JSON.stringify(path)});`);
+	static existsSync(path4) {
+		return PCCompatNative.executeJS(`require("fs").existsSync(${JSON.stringify(path4)});`);
 	}
-	static mkdirSync(path, options) {
-		return PCCompatNative.executeJS(`require("fs").mkdirSync(${JSON.stringify(path)}, ${JSON.stringify(options)});`);
+	static mkdirSync(path5, options4) {
+		return PCCompatNative.executeJS(`require("fs").mkdirSync(${JSON.stringify(path5)}, ${JSON.stringify(options4)});`);
 	}
-	static statSync(path, options) {
+	static statSync(path6, options5) {
 		return PCCompatNative.executeJS(`
-            const stats = require("fs").statSync(${JSON.stringify(path)}, ${JSON.stringify(options)});
+            const stats = require("fs").statSync(${JSON.stringify(path6)}, ${JSON.stringify(options5)});
             const ret = {
                 ...stats,
                 isFile: () => stats.isFile(),
@@ -1143,17 +1144,17 @@ class fs {
             ret
         `);
 	}
-	static watch(path, options, callback) {
-		if (typeof options === "function") {
-			callback = options;
-			options = null;
+	static watch(path7, options6, callback1) {
+		if (typeof options6 === "function") {
+			callback1 = options6;
+			options6 = null;
 		}
 		const eventId = "bdcompat-watcher-" + Math.random().toString(36).slice(2, 10);
 		PCCompatNative.IPC.on(eventId, (event, filename) => {
-			callback(event, filename);
+			callback1(event, filename);
 		});
 		return PCCompatNative.executeJS(`
-            require("fs").watch(${JSON.stringify(path)}, ${JSON.stringify(options)}, (event, filename) => {
+            require("fs").watch(${JSON.stringify(path7)}, ${JSON.stringify(options6)}, (event, filename) => {
                 PCCompatNative.IPC.dispatch(${JSON.stringify(eventId)}, event, filename);
             });
         `);
@@ -1332,12 +1333,12 @@ class Modals {
 			}, props), typeof content === "string" ? React.createElement(Markdown, null, content) : content);
 		});
 	}
-	static prompt(title, content, options = {
+	static prompt(title1, content1, options1 = {
 		}) {
-		const {placeholder ="", onInput =() => {}} = options;
+		const {placeholder ="", onInput =() => {}} = options1;
 		let value = "";
-		return this.showConfirmationModal(title, React.createElement(this.TextInput, {
-			note: content,
+		return this.showConfirmationModal(title1, React.createElement(this.TextInput, {
+			note: content1,
 			value: value,
 			placeholder: placeholder,
 			onChange: (val) => {
@@ -1349,8 +1350,8 @@ class Modals {
 			}
 		});
 	}
-	static alert(title, content) {
-		return this.showConfirmationModal(title, content, {
+	static alert(title2, content2) {
+		return this.showConfirmationModal(title2, content2, {
 			cancelText: null
 		});
 	}
@@ -1394,8 +1395,8 @@ const ErrorBoundary = fromPromise(promise.then(() => {
 				error: error.message
 			};
 		}
-		componentDidCatch(error, errorInfo) {
-			console.error(error, errorInfo);
+		componentDidCatch(error1, errorInfo) {
+			console.error(error1, errorInfo);
 		}
 		render() {
 			if (this.state.hasError) {
@@ -1920,8 +1921,8 @@ class SettingsRenderer {
 			return true;
 		};
 	}
-	static unregisterPanel(id) {
-		const panel = this.panels.findIndex((e) => e.id === id
+	static unregisterPanel(id1) {
+		const panel = this.panels.findIndex((e) => e.id === id1
 		);
 		if (panel < 0) return;
 		this.panels.splice(panel, 1);
@@ -2079,20 +2080,20 @@ class PluginManager extends Emitter {
 			this.startPlugin(exports);
 		}
 	}
-	static unloadAddon(addon, log = true) {
-		const plugin = this.resolve(addon);
-		if (!addon) return;
+	static unloadAddon(addon1, log1 = true) {
+		const plugin = this.resolve(addon1);
+		if (!addon1) return;
 		const success = this.stopPlugin(plugin);
 		this.plugins.delete(plugin.entityID);
 		this.clearCache(plugin.path);
-		if (log) {
+		if (log1) {
 			Logger$7.log(`${plugin.displayName} was unloaded!`);
 		}
 		return success;
 	}
-	static reloadPlugin(addon) {
-		const plugin = this.resolve(addon);
-		if (!addon) return;
+	static reloadPlugin(addon2) {
+		const plugin = this.resolve(addon2);
+		if (!addon2) return;
 		const success = this.unloadAddon(plugin, false);
 		if (!success) {
 			return Logger$7.error(`Something went wrong while trying to unload ${plugin.displayName}:`);
@@ -2100,12 +2101,12 @@ class PluginManager extends Emitter {
 		this.loadPlugin(plugin.path, false);
 		Logger$7.log(`Finished reloading ${plugin.displayName}.`);
 	}
-	static startPlugin(addon, log = true) {
-		const plugin = this.resolve(addon);
+	static startPlugin(addon3, log2 = true) {
+		const plugin = this.resolve(addon3);
 		if (!plugin) return;
 		try {
 			if (typeof plugin.startPlugin === "function") plugin.startPlugin();
-			if (log) {
+			if (log2) {
 				Logger$7.log(`${plugin.displayName} has been started!`);
 			}
 		} catch (error) {
@@ -2113,12 +2114,12 @@ class PluginManager extends Emitter {
 		}
 		return true;
 	}
-	static stopPlugin(addon, log = true) {
-		const plugin = this.resolve(addon);
+	static stopPlugin(addon4, log3 = true) {
+		const plugin = this.resolve(addon4);
 		if (!plugin) return;
 		try {
 			if (typeof plugin.pluginWillUnload === "function") plugin.pluginWillUnload();
-			if (log) {
+			if (log3) {
 				Logger$7.log(`${plugin.displayName} has been stopped!`);
 			}
 		} catch (error) {
@@ -2127,37 +2128,37 @@ class PluginManager extends Emitter {
 		}
 		return true;
 	}
-	static enablePlugin(addon, log = true) {
-		const plugin = this.resolve(addon);
+	static enablePlugin(addon5, log4 = true) {
+		const plugin = this.resolve(addon5);
 		if (!plugin) return;
 		this.states[plugin.entityID] = true;
 		DataStore$1.trySaveData("plugins", this.states);
 		this.startPlugin(plugin, false);
-		if (log) {
+		if (log4) {
 			Logger$7.log(`${plugin.displayName} has been enabled!`);
 			this.emit("toggle", plugin.entityID, true);
 		}
 	}
-	static disablePlugin(addon, log = true) {
-		const plugin = this.resolve(addon);
+	static disablePlugin(addon6, log5 = true) {
+		const plugin = this.resolve(addon6);
 		if (!plugin) return;
 		this.states[plugin.entityID] = false;
 		DataStore$1.trySaveData("plugins", this.states);
 		this.stopPlugin(plugin, false);
-		if (log) {
+		if (log5) {
 			Logger$7.log(`${plugin.displayName} has been disabled!`);
 			this.emit("toggle", plugin.entityID, false);
 		}
 	}
-	static delete(addon) {
-		const plugin = this.resolve(addon);
+	static delete(addon7) {
+		const plugin = this.resolve(addon7);
 		if (!plugin) return;
 		this.unloadAddon(plugin);
 		PCCompatNative.executeJS(`require("electron").shell.trashItem(${JSON.stringify(plugin.path)})`);
 		this.emit("delete", plugin);
 	}
-	static toggle(addon) {
-		const plugin = this.resolve(addon);
+	static toggle(addon8) {
+		const plugin = this.resolve(addon8);
 		if (!plugin) return;
 		if (this.isEnabled(plugin.entityID)) this.disable(plugin);
 		else this.enable(plugin);
@@ -2205,14 +2206,14 @@ class Plugin$1 {
 	log(...messages) {
 		console.log(`%c[Powercord:Plugin:${this.constructor.name}]`, `color: ${this.color};`, ...messages);
 	}
-	debug(...messages) {
-		console.debug(`%c[Powercord:Plugin:${this.constructor.name}]`, `color: ${this.color};`, ...messages);
+	debug(...messages1) {
+		console.debug(`%c[Powercord:Plugin:${this.constructor.name}]`, `color: ${this.color};`, ...messages1);
 	}
-	warn(...messages) {
-		console.warn(`%c[Powercord:Plugin:${this.constructor.name}]`, `color: ${this.color};`, ...messages);
+	warn(...messages2) {
+		console.warn(`%c[Powercord:Plugin:${this.constructor.name}]`, `color: ${this.color};`, ...messages2);
 	}
-	error(...messages) {
-		console.error(`%c[Powercord:Plugin:${this.constructor.name}]`, `color: ${this.color};`, ...messages);
+	error(...messages3) {
+		console.error(`%c[Powercord:Plugin:${this.constructor.name}]`, `color: ${this.color};`, ...messages3);
 	}
 	// "Internals" :zere_zoom:
 	_load() {
@@ -2515,21 +2516,21 @@ var commands$1 = /*#__PURE__*/ Object.freeze({
 
 promise.then(() => {
 	const {LocaleManager, Dispatcher, Constants: {ActionTypes}} = DiscordModules;
-	locale = LocaleManager.getLocale();
+	locale1 = LocaleManager.getLocale();
 	Dispatcher.subscribe(ActionTypes.USER_SETTINGS_UPDATE, () => {
 		const partialLocale = LocaleManager.getLocale();
-		if (partialLocale !== locale) {
-			locale = partialLocale;
+		if (partialLocale !== locale1) {
+			locale1 = partialLocale;
 			LocaleManager.loadPromise.then(injectStrings);
 		}
 	});
 });
 let messages = {
 };
-let locale = null;
+let locale1 = null;
 function loadAllStrings(strings) {
-	for (let locale1 in strings) {
-		loadStrings(locale1, strings[locale1]);
+	for (let locale in strings) {
+		loadStrings(locale, strings[locale]);
 	}
 }
 function loadStrings(locale, strings) {
@@ -2542,7 +2543,7 @@ function loadStrings(locale, strings) {
 function injectStrings() {
 	if (!DiscordModules.LocaleManager) return;
 	const context = DiscordModules.LocaleManager._provider._context;
-	Object.assign(context.messages, messages[locale]);
+	Object.assign(context.messages, messages[locale1]);
 	Object.assign(context.defaultMessages, messages["en-US"]);
 }
 
@@ -2550,7 +2551,7 @@ var i18n = /*#__PURE__*/ Object.freeze({
 	__proto__: null,
 	messages: messages,
 	get locale() {
-		return locale;
+		return locale1;
 	},
 	loadAllStrings: loadAllStrings,
 	loadStrings: loadStrings,
@@ -2567,10 +2568,10 @@ class DOM {
 		node.append(...children);
 		return node;
 	}
-	static injectCSS(id, cssOrURL, options) {
+	static injectCSS(id, cssOrURL, options1) {
 		var ref;
 		switch (
-		(ref = options === null || options === void 0 ? void 0 : options.type) !== null && ref !== void 0 ? ref : "PLAIN") {
+		(ref = options1 === null || options1 === void 0 ? void 0 : options1.type) !== null && ref !== void 0 ? ref : "PLAIN") {
 			case "PLAIN":
 				var element = this.createElement("style", {
 					id,
@@ -2584,29 +2585,29 @@ class DOM {
 				});
 				break;
 		}
-		((options === null || options === void 0 ? void 0 : options.documentHead) ? document.head : this.head).appendChild(element);
+		((options1 === null || options1 === void 0 ? void 0 : options1.documentHead) ? document.head : this.head).appendChild(element);
 		this.elements[id] = element;
 		return element;
 	}
-	static injectJS(id, url, options) {
+	static injectJS(id1, url, options2) {
 		return new Promise((resolve, reject) => {
 			const script = this.createElement("script", {
-				id,
+				id: id1,
 				src: url,
 				onload: resolve,
 				onerror: reject
 			});
-			((options === null || options === void 0 ? void 0 : options.documentHead) ? document.head : this.head).appendChild(script);
-			this.elements[id] = script;
+			((options2 === null || options2 === void 0 ? void 0 : options2.documentHead) ? document.head : this.head).appendChild(script);
+			this.elements[id1] = script;
 		});
 	}
-	static getElement(id) {
-		return this.elements[id] || this.head.querySelector(`style[id="${id}"]`);
+	static getElement(id2) {
+		return this.elements[id2] || this.head.querySelector(`style[id="${id2}"]`);
 	}
-	static clearCSS(id) {
-		const element = this.getElement(id);
+	static clearCSS(id3) {
+		const element = this.getElement(id3);
 		if (element) element.remove();
-		delete this.elements[id];
+		delete this.elements[id3];
 	}
 }
 DOM.elements = {
@@ -2801,11 +2802,11 @@ class Notices {
 			id: id
 		});
 	}
-	static remove(id) {
+	static remove(id1) {
 		const state = NoticesApi.getState();
-		if (!state.notices[id])
-			throw new Error(`Notice with id ${id} already exists!`);
-		delete state.notices[id];
+		if (!state.notices[id1])
+			throw new Error(`Notice with id ${id1} already exists!`);
+		delete state.notices[id1];
 		NoticesApi.setState({
 			notices: {
 				...state.notices
@@ -3253,7 +3254,7 @@ function _extends$L() {
 	};
 	return _extends$L.apply(this, arguments);
 }
-const ColorPicker = fromPromise(Webpack.whenReady.then(() => {
+const ColorPicker1 = fromPromise(Webpack.whenReady.then(() => {
 	try {
 		const GuildFolderSettingsModal = Webpack.findByDisplayName("GuildFolderSettingsModal");
 		if (!GuildFolderSettingsModal)
@@ -3264,13 +3265,13 @@ const ColorPicker = fromPromise(Webpack.whenReady.then(() => {
 			props: {
 			}
 		});
-		const ColorPicker1 = findInReactTree(rendered, (e) => {
+		const ColorPicker = findInReactTree(rendered, (e) => {
 			var ref;
 			return (e === null || e === void 0 ? void 0 : (ref = e.props) === null || ref === void 0 ? void 0 : ref.defaultColor) != null;
 		}).type;
-		if (typeof ColorPicker1 !== "function")
+		if (typeof ColorPicker !== "function")
 			throw "ColorPicker could not be found!";
-		return (props) => /*#__PURE__*/ React.createElement(ErrorBoundary, null, /*#__PURE__*/ React.createElement(ColorPicker1, _extends$L({
+		return (props) => /*#__PURE__*/ React.createElement(ErrorBoundary, null, /*#__PURE__*/ React.createElement(ColorPicker, _extends$L({
 		}, props)));
 	} catch (error) {
 		Logger$9.error("Failed to get ColorPicker component!", error);
@@ -3285,7 +3286,7 @@ function ColorPickerInput(props) {
 		title: title,
 		required: required,
 		note: note
-	}, /*#__PURE__*/ React.createElement(ColorPicker, {
+	}, /*#__PURE__*/ React.createElement(ColorPicker1, {
 		colors: defaultColors,
 		defaultColor: typeof defaultValue === "number" ? defaultValue : DEFAULT_ROLE_COLOR,
 		onChange: onChange,
@@ -4351,7 +4352,7 @@ let Components = {
 	AsyncComponent,
 	modal: Modal,
 	Icons: Icons$1,
-	ColorPicker,
+	ColorPicker: ColorPicker1,
 	Divider
 };
 promise.then(async () => {
@@ -4573,36 +4574,36 @@ class EventEmitter {
 		this.maxListeners = count;
 		return this;
 	}
-	emit(event, ...args) {
+	emit(event, ...args1) {
 		if (!this.events[event]) return this;
 		for (const [index, listener] of this.events[event].entries()) {
 			try {
-				listener(...args);
+				listener(...args1);
 			} catch (error) {
 				Logger$9.error("Emitter", `Cannot fire listener for event ${event} at position ${index}:`, error);
 			}
 		}
 		return this;
 	}
-	off(event, callback) {
-		if (!this.events[event]) return;
-		this.events[event].delete(callback);
+	off(event1, callback) {
+		if (!this.events[event1]) return;
+		this.events[event1].delete(callback);
 		return this;
 	}
-	on(event, callback) {
-		if (!this.events[event])
-			this.events[event] = new Set();
-		this.emit("newListener", event, callback);
-		this.events[event].add(callback);
+	on(event2, callback1) {
+		if (!this.events[event2])
+			this.events[event2] = new Set();
+		this.emit("newListener", event2, callback1);
+		this.events[event2].add(callback1);
 		return this;
 	}
-	once(event, callback) {
-		this.on(event, callback);
+	once(event3, callback2) {
+		this.on(event3, callback2);
 		return this;
 	}
-	removeAllListeners(event) {
-		if (this.events[event]) {
-			this.events[event].clear();
+	removeAllListeners(event4) {
+		if (this.events[event4]) {
+			this.events[event4].clear();
 		}
 		return this;
 	}
@@ -4765,9 +4766,9 @@ var url = {
 
 const Logger$3 = Logger$9.create("HTTP");
 class HTTPError extends Error {
-	constructor(message, res) {
+	constructor(message, res1) {
 		super(message);
-		Object.assign(this, res);
+		Object.assign(this, res1);
 		this.name = this.constructor.name;
 	}
 }
@@ -4777,20 +4778,20 @@ class GenericRequest {
 			[key]: value
 		};
 	}
-	query(key, value) {
-		Object.assign(this.opts.query, this._objectify(key, value));
+	query(key1, value1) {
+		Object.assign(this.opts.query, this._objectify(key1, value1));
 		return this;
 	}
-	set(key, value) {
-		Object.assign(this.opts.headers, this._objectify(key, value));
+	set(key2, value2) {
+		Object.assign(this.opts.headers, this._objectify(key2, value2));
 		return this;
 	}
-	send(data) {
-		if (data instanceof Object) {
+	send(data1) {
+		if (data1 instanceof Object) {
 			const serialize = this.opts.headers["Content-Type"] === "application/x-www-form-urlencoded" ? querystring.encode : JSON.stringify;
-			this.opts.data = serialize(data);
+			this.opts.data = serialize(data1);
 		} else {
-			this.opts.data = data;
+			this.opts.data = data1;
 		}
 		return this;
 	}
@@ -4848,8 +4849,8 @@ class GenericRequest {
 		}
 		return this._res = this.execute().then(resolver, rejector);
 	}
-	catch(rejector) {
-		return this.then(null, rejector);
+	catch(rejector1) {
+		return this.then(null, rejector1);
 	}
 	constructor(method, uri) {
 		this.opts = {
@@ -5019,22 +5020,22 @@ class Module {
         })`);
 		wrapped(this.require, this, this.exports, this.filename, this.path, window);
 	}
-	constructor(id, parent, require) {
+	constructor(id, parent1, require1) {
 		this.id = id;
 		this.path = path.dirname(id);
 		this.exports = {
 		};
-		this.parent = parent;
+		this.parent = parent1;
 		this.filename = id;
 		this.loaded = false;
 		this.children = [];
-		this.require = require;
-		if (parent) parent.children.push(this);
+		this.require = require1;
+		if (parent1) parent1.children.push(this);
 	}
 }
-function resolve(path1) {
+function resolve(path) {
 	for (const key in cache$2) {
-		if (key.startsWith(path1)) return key;
+		if (key.startsWith(path)) return key;
 	}
 }
 function getExtension(mod) {
@@ -5186,22 +5187,22 @@ const DataStore = new class DataStore extends Store {
 			return def;
 		}
 	}
-	trySaveData(name, data, emit, event = "data-update") {
-		this.cache.set(name, data);
+	trySaveData(name1, data, emit, event = "data-update") {
+		this.cache.set(name1, data);
 		try {
-			fs.writeFileSync(path.resolve(this.configFolder, `${name}.json`), JSON.stringify(data, null, "\t"), "utf8");
+			fs.writeFileSync(path.resolve(this.configFolder, `${name1}.json`), JSON.stringify(data, null, "\t"), "utf8");
 		} catch (error) {
-			Logger$2.error(`Failed to save data of ${name}:`, error);
+			Logger$2.error(`Failed to save data of ${name1}:`, error);
 		}
-		if (emit) this.emit(event, name, data);
+		if (emit) this.emit(event, name1, data);
 	}
-	getMisc(misc = "", def) {
+	getMisc(misc = "", def1) {
 		var ref;
-		return (ref = getProps(this.tryLoadData("misc"), misc)) !== null && ref !== void 0 ? ref : def;
+		return (ref = getProps(this.tryLoadData("misc"), misc)) !== null && ref !== void 0 ? ref : def1;
 	}
-	setMisc(misc = this.getMisc("", {
+	setMisc(misc1 = this.getMisc("", {
 		}), prop, value) {
-		this.trySaveData("misc", _.set(misc, prop.split("."), value));
+		this.trySaveData("misc", _.set(misc1, prop.split("."), value));
 		this.emit("misc");
 	}
 	constructor() {
