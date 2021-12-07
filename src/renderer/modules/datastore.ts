@@ -33,13 +33,14 @@ const DataStore = new class DataStore extends Store<"misc" | "data-update"> {
             const location = path.resolve(this.configFolder, `${name}.json`);
             if (!fs.existsSync(location)) return def;
             const data = Require(location);
+            if (Object.keys(data).length === 0) return def;
             this.cache.set(name, data);
             return data;
         } catch (error) {
             Logger.error(`Data of ${name} corrupt:`, error);
             return def;
         }
-    } 
+    }
 
     trySaveData(name: string, data: any, emit?: boolean, event: any = "data-update") {
         this.cache.set(name, data);

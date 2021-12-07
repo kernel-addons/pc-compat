@@ -239,6 +239,10 @@ export default class PluginManager extends Emitter {
         else this.enable(plugin);
     }
 
+    static get(name: string) {
+        return this.plugins.get(name);
+    }
+
     static get enable() {return this.enablePlugin;}
     static get disable() {return this.disablePlugin;}
     static get reload() {return this.reloadPlugin;}
