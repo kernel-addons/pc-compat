@@ -109,8 +109,8 @@ export default class PluginManager extends Emitter {
                 },
                 settings: {
                     value: getSettings(path.basename(location)),
-                    configurable: false,
-                    writable: false
+                    configurable: true,
+                    writable: true
                 },
                 path: {
                     value: location,
@@ -237,6 +237,10 @@ export default class PluginManager extends Emitter {
 
         if (this.isEnabled(plugin.entityID)) this.disable(plugin);
         else this.enable(plugin);
+    }
+
+    static get(name: string) {
+        return this.plugins.get(name);
     }
 
     static get enable() {return this.enablePlugin;}

@@ -1,292 +1,4 @@
-function _classPrivateFieldGet(receiver, privateMap) {
-	if (!privateMap.has(receiver)) {
-		throw new TypeError("attempted to get private field on non-instance");
-	}
-	return privateMap.get(receiver).value;
-}
-function _classPrivateFieldSet(receiver, privateMap, value) {
-	if (!privateMap.has(receiver)) {
-		throw new TypeError("attempted to set private field on non-instance");
-	}
-	var descriptor = privateMap.get(receiver);
-	if (!descriptor.writable) {
-		throw new TypeError("attempted to set read only private field");
-	}
-	descriptor.value = value;
-	return value;
-}
-function _classPrivateMethodGet(receiver, privateSet, fn) {
-	if (!privateSet.has(receiver)) {
-		throw new TypeError("attempted to get private field on non-instance");
-	}
-	return fn;
-}
-// @ts-nocheck
-if (typeof Array.prototype.at !== "function") {
-	Array.prototype.at = function(index) {
-		return index < 0 ? this[this.length - Math.abs(index)] : this[index];
-	};
-}
-if (typeof setImmediate === "undefined") {
-	window.setImmediate = (callback) => setTimeout(callback, 0)
-	;
-}
-const Events = {
-	CREATE: "CREATE",
-	LENGTH_CHANGE: "LENGTH_CHANGE",
-	PUSH: "PUSH",
-	LOADED: "LOADED"
-};
-var _parseOptions = new WeakSet();
-class WebpackModule {
-	get Events() {
-		return Events;
-	}
-	get chunkName() {
-		return "webpackChunkdiscord_app";
-	}
-	get id() {
-		return "kernel-req" + Math.random().toString().slice(2, 5);
-	}
-	dispatch(event, ...args1) {
-		if (!(event in _classPrivateFieldGet(this, _events)))
-			throw new Error(`Unknown Event: ${event}`);
-		for (const callback of _classPrivateFieldGet(this, _events)[event]) {
-			try {
-				callback(...args1);
-			} catch (err) {
-				console.error(err);
-			}
-		}
-	}
-	on(event1, callback) {
-		if (!(event1 in _classPrivateFieldGet(this, _events)))
-			throw new Error(`Unknown Event: ${event1}`);
-		return _classPrivateFieldGet(this, _events)[event1].add(callback), () => this.off(event1, callback);
-	}
-	off(event2, callback1) {
-		if (!(event2 in _classPrivateFieldGet(this, _events)))
-			throw new Error(`Unknown Event: ${event2}`);
-		return _classPrivateFieldGet(this, _events)[event2].delete(callback1);
-	}
-	once(event3, callback2) {
-		const unlisten = this.on(event3, (...args) => {
-			unlisten();
-			callback2(...args);
-		});
-	}
-	async waitFor(filter3, {retries =100, all =false, delay =50} = {
-		}) {
-		for (let i = 0; i < retries; i++) {
-			const module = this.findModule(filter3, {
-				all,
-				cache: false
-			});
-			if (module) return module;
-			await new Promise((res) => setTimeout(res, delay)
-			);
-		}
-	}
-	request(cache2 = true) {
-		if (cache2 && _classPrivateFieldGet(this, _cache)) return _classPrivateFieldGet(this, _cache);
-		let req = void 0;
-		if ("webpackChunkdiscord_app" in window && webpackChunkdiscord_app != null) {
-			const chunk = [
-				[
-					this.id
-				],
-				{
-				},
-				(__webpack_require__) => req = __webpack_require__
-			];
-			webpackChunkdiscord_app.push(chunk);
-			webpackChunkdiscord_app.splice(webpackChunkdiscord_app.indexOf(chunk), 1);
-		}
-		_classPrivateFieldSet(this, _cache, req);
-		return req;
-	}
-	findModule(filter1, {all: all1 = false, cache: cache1 = true, force =false} = {
-		}) {
-		if (typeof filter1 !== "function") return void 0;
-		const __webpack_require__ = this.request(cache1);
-		const found = [];
-		const wrapFilter = function(module) {
-			try {
-				return filter1(module);
-			} catch (e) {
-				return false;
-			}
-		};
-		for (const id in __webpack_require__.c) {
-			var module1 = __webpack_require__.c[id].exports;
-			if (!module1 || module1 === window) continue;
-			switch (typeof module1) {
-				case "object": {
-					if (wrapFilter(module1)) {
-						if (!all1) return module1;
-						found.push(module1);
-					}
-					if (module1.__esModule && module1.default != null && wrapFilter(module1.default)) {
-						if (!all1) return module1.default;
-						found.push(module1.default);
-					}
-					if (force && module1.__esModule)
-						for (const key in module1) {
-							if (!module1[key]) continue;
-							if (wrapFilter(module1[key])) {
-								if (!all1) return module1[key];
-								found.push(module1[key]);
-							}
-					}
-					break;
-				}
-				case "function": {
-					if (wrapFilter(module1)) {
-						if (!all1) return module1;
-						found.push(module1);
-					}
-					break;
-				}
-			}
-		}
-		return all1 ? found : found[0];
-	}
-	findModules(filter2) {
-		return this.findModule(filter2, {
-			all: true
-		});
-	}
-	bulk(...options) {
-		const [filters, {wait =false, ...rest}] = _classPrivateMethodGet(this, _parseOptions, parseOptions).call(this, options);
-		const found = new Array(filters.length);
-		const searchFunction = wait ? this.waitFor : this.findModule;
-		const returnValue = searchFunction.call(this, (module) => {
-			const matches = filters.filter((filter) => {
-				try {
-					return filter(module);
-				} catch (e) {
-					return false;
-				}
-			});
-			if (!matches.length) return false;
-			for (const filter4 of matches) {
-				found[filters.indexOf(filter4)] = module;
-			}
-			return found.filter(Boolean).length === filters.length;
-		}, rest);
-		if (wait) return returnValue.then(() => found
-			);
-		return found;
-	}
-	findByProps(...options1) {
-		const [props1, {bulk =false, wait =false, ...rest}] = _classPrivateMethodGet(this, _parseOptions, parseOptions).call(this, options1);
-		const filter = (props, module) => module && props.every((prop) => prop in module
-		);
-		return bulk ? this.bulk(...props1.map((props) => filter.bind(null, props)
-		).concat({
-			wait,
-			...rest
-		})) : wait ? this.waitFor(filter.bind(null, props1)) : this.findModule(filter.bind(null, props1), rest);
-	}
-	findByDisplayName(...options2) {
-		const [displayNames, {bulk =false, default: defaultExport = false, wait =false, ...rest}] = _classPrivateMethodGet(this, _parseOptions, parseOptions).call(this, options2);
-		const filter = (name, module) => {
-			var ref;
-			return defaultExport ? (module === null || module === void 0 ? void 0 : (ref = module.default) === null || ref === void 0 ? void 0 : ref.displayName) === name : (module === null || module === void 0 ? void 0 : module.displayName) === name;
-		};
-		return bulk ? this.bulk(...displayNames.map((name) => filter.bind(null, name)
-		).concat({
-			wait,
-			cache
-		})) : wait ? this.waitFor(filter.bind(null, displayNames[0]), rest) : this.findModule(filter.bind(null, displayNames[0]), rest);
-	}
-	async wait(callback3 = null) {
-		return new Promise((resolve) => {
-			this.once(Events.LOADED, () => {
-				resolve();
-				typeof callback3 === "function" && callback3();
-			});
-		});
-	}
-	get whenExists() {
-		return new Promise((resolve) => {
-			this.once(Events.CREATE, resolve);
-		});
-	}
-	constructor() {
-		_events.set(this, {
-			writable: true,
-			value: Object.fromEntries(Object.keys(Events).map((key) => [
-				key,
-				new Set()
-			]
-			))
-		});
-		_cache.set(this, {
-			writable: true,
-			value: null
-		});
-		_parseOptions.add(this);
-		this.whenReady = null;
-		Object.defineProperty(window, this.chunkName, {
-			get() {
-				return void 0;
-			},
-			set: (value) => {
-				setImmediate(() => {
-					this.dispatch(Events.CREATE);
-				});
-				const originalPush = value.push;
-				value.push = (...values) => {
-					this.dispatch(Events.LENGTH_CHANGE, value.length + values.length);
-					this.dispatch(Events.PUSH, values);
-					return Reflect.apply(originalPush, value, values);
-				};
-				Object.defineProperty(window, this.chunkName, {
-					value,
-					configurable: true,
-					writable: true
-				});
-				return value;
-			},
-			configurable: true
-		});
-		let listener = (shouldUnsubscribe, Dispatcher, ActionTypes, event) => {
-			if (shouldUnsubscribe) {
-				Dispatcher.unsubscribe(ActionTypes.START_SESSION, listener);
-			}
-			this.dispatch(Events.LOADED);
-		};
-		this.once(Events.PUSH, async () => {
-			const [Dispatcher, Constants] = await this.findByProps([
-				"dirtyDispatch"
-			], [
-				"API_HOST",
-				"ActionTypes"
-			], {
-				cache: false,
-				bulk: true,
-				wait: true
-			});
-			Dispatcher.subscribe(Constants.ActionTypes.START_SESSION, listener = listener.bind(null, true, Dispatcher, Constants.ActionTypes));
-		});
-	}
-}
-var _events = new WeakMap();
-var _cache = new WeakMap();
-function parseOptions(args, filter = (thing) => typeof thing === "object" && thing != null && !Array.isArray(thing)
-) {
-	return [
-		args,
-		filter(args.at(-1)) ? args.pop() : {
-		}
-	];
-}
-var _Webpack;
-const Webpack = (_Webpack = window.Webpack) !== null && _Webpack !== void 0 ? _Webpack : window.Webpack = new WebpackModule;
-if (!Webpack.whenReady)
-	Webpack.whenReady = Webpack.wait();
-
+const FONTAWESOME_BASEURL = "https://kit-pro.fontawesome.com/releases/v5.15.2/css/pro.min.css";
 const MONACO_BASEURL = "https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.20.0/min";
 
 var Modules = {
@@ -547,6 +259,312 @@ var Modules = {
 	}
 };
 
+function _classPrivateFieldGet(receiver, privateMap) {
+	if (!privateMap.has(receiver)) {
+		throw new TypeError("attempted to get private field on non-instance");
+	}
+	return privateMap.get(receiver).value;
+}
+function _classPrivateFieldSet(receiver, privateMap, value) {
+	if (!privateMap.has(receiver)) {
+		throw new TypeError("attempted to set private field on non-instance");
+	}
+	var descriptor = privateMap.get(receiver);
+	if (!descriptor.writable) {
+		throw new TypeError("attempted to set read only private field");
+	}
+	descriptor.value = value;
+	return value;
+}
+function _classPrivateMethodGet$1(receiver, privateSet, fn) {
+	if (!privateSet.has(receiver)) {
+		throw new TypeError("attempted to get private field on non-instance");
+	}
+	return fn;
+}
+// @ts-nocheck
+if (typeof Array.prototype.at !== "function") {
+	Array.prototype.at = function(index) {
+		return index < 0 ? this[this.length - Math.abs(index)] : this[index];
+	};
+}
+if (typeof setImmediate === "undefined") {
+	window.setImmediate = (callback) => setTimeout(callback, 0)
+	;
+}
+const Events = {
+	CREATE: "CREATE",
+	LENGTH_CHANGE: "LENGTH_CHANGE",
+	PUSH: "PUSH",
+	LOADED: "LOADED"
+};
+class Filters {
+	static byProps(...props2) {
+		return (module) => props2.every((prop) => prop in module
+		);
+	}
+	static byDisplayName(name1, def = false) {
+		return (module) => (def ? module = module.default : module) && typeof module === "function" && module.displayName === name1;
+	}
+	static byTypeString(...strings) {
+		return (module) => {
+			var ref;
+			return module.type && (module = (ref = module.type) === null || ref === void 0 ? void 0 : ref.toString()) && strings.every((str) => module.indexOf(str) > -1
+				);
+		};
+	}
+}
+var _parseOptions = new WeakSet();
+class WebpackModule {
+	get Events() {
+		return Events;
+	}
+	get chunkName() {
+		return "webpackChunkdiscord_app";
+	}
+	get id() {
+		return "kernel-req" + Math.random().toString().slice(2, 5);
+	}
+	dispatch(event, ...args1) {
+		if (!(event in _classPrivateFieldGet(this, _events)))
+			throw new Error(`Unknown Event: ${event}`);
+		for (const callback of _classPrivateFieldGet(this, _events)[event]) {
+			try {
+				callback(...args1);
+			} catch (err) {
+				console.error(err);
+			}
+		}
+	}
+	on(event1, callback) {
+		if (!(event1 in _classPrivateFieldGet(this, _events)))
+			throw new Error(`Unknown Event: ${event1}`);
+		return _classPrivateFieldGet(this, _events)[event1].add(callback), () => this.off(event1, callback);
+	}
+	off(event2, callback1) {
+		if (!(event2 in _classPrivateFieldGet(this, _events)))
+			throw new Error(`Unknown Event: ${event2}`);
+		return _classPrivateFieldGet(this, _events)[event2].delete(callback1);
+	}
+	once(event3, callback2) {
+		const unlisten = this.on(event3, (...args) => {
+			unlisten();
+			callback2(...args);
+		});
+	}
+	async waitFor(filter3, {retries =100, all =false, delay =50} = {
+		}) {
+		for (let i = 0; i < retries; i++) {
+			const module = this.findModule(filter3, {
+				all,
+				cache: false
+			});
+			if (module) return module;
+			await new Promise((res) => setTimeout(res, delay)
+			);
+		}
+	}
+	request(cache2 = true) {
+		if (cache2 && _classPrivateFieldGet(this, _cache)) return _classPrivateFieldGet(this, _cache);
+		let req = void 0;
+		if ("webpackChunkdiscord_app" in window && webpackChunkdiscord_app != null) {
+			const chunk = [
+				[
+					this.id
+				],
+				{
+				},
+				(__webpack_require__) => req = __webpack_require__
+			];
+			webpackChunkdiscord_app.push(chunk);
+			webpackChunkdiscord_app.splice(webpackChunkdiscord_app.indexOf(chunk), 1);
+		}
+		_classPrivateFieldSet(this, _cache, req);
+		return req;
+	}
+	findModule(filter1, {all: all1 = false, cache: cache1 = true, force =false} = {
+		}) {
+		if (typeof filter1 !== "function") return void 0;
+		const __webpack_require__ = this.request(cache1);
+		const found = [];
+		if (!__webpack_require__.c) return null;
+		const wrapFilter = function(module) {
+			try {
+				return filter1(module);
+			} catch (e) {
+				return false;
+			}
+		};
+		for (const id in __webpack_require__.c) {
+			var module1 = __webpack_require__.c[id].exports;
+			if (!module1 || module1 === window) continue;
+			switch (typeof module1) {
+				case "object": {
+					if (wrapFilter(module1)) {
+						if (!all1) return module1;
+						found.push(module1);
+					}
+					if (module1.__esModule && module1.default != null && wrapFilter(module1.default)) {
+						if (!all1) return module1.default;
+						found.push(module1.default);
+					}
+					if (force && module1.__esModule)
+						for (const key in module1) {
+							if (!module1[key]) continue;
+							if (wrapFilter(module1[key])) {
+								if (!all1) return module1[key];
+								found.push(module1[key]);
+							}
+					}
+					break;
+				}
+				case "function": {
+					if (wrapFilter(module1)) {
+						if (!all1) return module1;
+						found.push(module1);
+					}
+					break;
+				}
+			}
+		}
+		return all1 ? found : found[0];
+	}
+	findModules(filter2) {
+		return this.findModule(filter2, {
+			all: true
+		});
+	}
+	bulk(...options) {
+		const [filters, {wait =false, ...rest}] = _classPrivateMethodGet$1(this, _parseOptions, parseOptions).call(this, options);
+		const found = new Array(filters.length);
+		const searchFunction = wait ? this.waitFor : this.findModule;
+		const returnValue = searchFunction.call(this, (module) => {
+			const matches = filters.filter((filter) => {
+				try {
+					return filter(module);
+				} catch (e) {
+					return false;
+				}
+			});
+			if (!matches.length) return false;
+			for (const filter4 of matches) {
+				found[filters.indexOf(filter4)] = module;
+			}
+			return found.filter(Boolean).length === filters.length;
+		}, rest);
+		if (wait) return returnValue.then(() => found
+			);
+		return found;
+	}
+	findByProps(...options1) {
+		const [props1, {bulk =false, wait =false, ...rest}] = _classPrivateMethodGet$1(this, _parseOptions, parseOptions).call(this, options1);
+		const filter = (props, module) => module && props.every((prop) => prop in module
+		);
+		return bulk ? this.bulk(...props1.map((props) => filter.bind(null, props)
+		).concat({
+			wait,
+			...rest
+		})) : wait ? this.waitFor(filter.bind(null, props1)) : this.findModule(filter.bind(null, props1), rest);
+	}
+	findByDisplayName(...options2) {
+		const [displayNames, {bulk =false, default: defaultExport = false, wait =false, ...rest}] = _classPrivateMethodGet$1(this, _parseOptions, parseOptions).call(this, options2);
+		const filter = (name, module) => {
+			var ref;
+			return defaultExport ? (module === null || module === void 0 ? void 0 : (ref = module.default) === null || ref === void 0 ? void 0 : ref.displayName) === name : (module === null || module === void 0 ? void 0 : module.displayName) === name;
+		};
+		return bulk ? this.bulk(...displayNames.map((name) => filter.bind(null, name)
+		).concat({
+			wait,
+			cache
+		})) : wait ? this.waitFor(filter.bind(null, displayNames[0]), rest) : this.findModule(filter.bind(null, displayNames[0]), rest);
+	}
+	async wait(callback3 = null) {
+		return new Promise((resolve) => {
+			this.once(Events.LOADED, () => {
+				resolve();
+				typeof callback3 === "function" && callback3();
+			});
+		});
+	}
+	get whenExists() {
+		return new Promise((resolve) => {
+			this.once(Events.CREATE, resolve);
+		});
+	}
+	constructor() {
+		_events.set(this, {
+			writable: true,
+			value: Object.fromEntries(Object.keys(Events).map((key) => [
+				key,
+				new Set()
+			]
+			))
+		});
+		_cache.set(this, {
+			writable: true,
+			value: null
+		});
+		_parseOptions.add(this);
+		this.whenReady = null;
+		Object.defineProperty(window, this.chunkName, {
+			get() {
+				return void 0;
+			},
+			set: (value) => {
+				setImmediate(() => {
+					this.dispatch(Events.CREATE);
+				});
+				const originalPush = value.push;
+				value.push = (...values) => {
+					this.dispatch(Events.LENGTH_CHANGE, value.length + values.length);
+					this.dispatch(Events.PUSH, values);
+					return Reflect.apply(originalPush, value, values);
+				};
+				Object.defineProperty(window, this.chunkName, {
+					value,
+					configurable: true,
+					writable: true
+				});
+				return value;
+			},
+			configurable: true
+		});
+		let listener = (shouldUnsubscribe, Dispatcher, ActionTypes, event) => {
+			if (shouldUnsubscribe) {
+				Dispatcher.unsubscribe(ActionTypes.START_SESSION, listener);
+			}
+			this.dispatch(Events.LOADED);
+		};
+		this.once(Events.PUSH, async () => {
+			const [Dispatcher, Constants] = await this.findByProps([
+				"dirtyDispatch"
+			], [
+				"API_HOST",
+				"ActionTypes"
+			], {
+				cache: false,
+				bulk: true,
+				wait: true
+			});
+			Dispatcher.subscribe(Constants.ActionTypes.START_SESSION, listener = listener.bind(null, true, Dispatcher, Constants.ActionTypes));
+		});
+	}
+}
+var _events = new WeakMap();
+var _cache = new WeakMap();
+function parseOptions(args, filter = (thing) => typeof thing === "object" && thing != null && !Array.isArray(thing)
+) {
+	return [
+		args,
+		filter(args.at(-1)) ? args.pop() : {
+		}
+	];
+}
+var _Webpack;
+const Webpack = (_Webpack = window.Webpack) !== null && _Webpack !== void 0 ? _Webpack : window.Webpack = new WebpackModule;
+if (!Webpack.whenReady)
+	Webpack.whenReady = Webpack.wait();
+
 const DiscordModules = {
 };
 const NOOP_RET = (_) => _;
@@ -692,33 +710,37 @@ function matchAll(regex, input, parent = false) {
 	return output;
 }
 
-function _classStaticPrivateMethodGet(receiver, classConstructor, method) {
-	_classCheckPrivateStaticAccess(receiver, classConstructor);
-	return method;
+function _classPrivateMethodGet(receiver, privateSet, fn) {
+	if (!privateSet.has(receiver)) {
+		throw new TypeError("attempted to get private field on non-instance");
+	}
+	return fn;
 }
-function _classCheckPrivateStaticAccess(receiver, classConstructor) {
-	if (receiver !== classConstructor) {
-		throw new TypeError("Private static access of wrong provenance");
+var _parseType = new WeakSet(),
+	_log = new WeakSet();
+class Logger$9 {
+	log(...message5) {
+		_classPrivateMethodGet(this, _log, log).call(this, "log", ...message5);
 	}
-}
-class Logger {
-	static _log(type1, module, ...message) {
-		console[_classStaticPrivateMethodGet(this, Logger, parseType).call(Logger, type1)](`%c[Powercord:${module}]%c`, "color: #7289da; font-weight: 700;", "", ...message);
+	info(...message1) {
+		_classPrivateMethodGet(this, _log, log).call(this, "info", ...message1);
 	}
-	static log(module1, ...message1) {
-		this._log("log", module1, ...message1);
+	warn(...message2) {
+		_classPrivateMethodGet(this, _log, log).call(this, "warn", ...message2);
 	}
-	static info(module2, ...message2) {
-		this._log("info", module2, ...message2);
+	error(...message3) {
+		_classPrivateMethodGet(this, _log, log).call(this, "error", ...message3);
 	}
-	static warn(module3, ...message3) {
-		this._log("warn", module3, ...message3);
+	debug(...message4) {
+		_classPrivateMethodGet(this, _log, log).call(this, "debug", ...message4);
 	}
-	static error(module4, ...message4) {
-		this._log("error", module4, ...message4);
+	static create(name) {
+		return new Logger$9(name);
 	}
-	static debug(module5, ...message5) {
-		this._log("debug", module5, ...message5);
+	constructor(name1) {
+		_parseType.add(this);
+		_log.add(this);
+		this.module = name1;
 	}
 }
 function parseType(type) {
@@ -732,7 +754,11 @@ function parseType(type) {
 			return "log";
 	}
 }
+function log(type, ...message) {
+	console[_classPrivateMethodGet(this, _parseType, parseType).call(this, type)](`%c[Powercord:${this.module}]%c`, "color: #7289da; font-weight: 700;", "", ...message);
+}
 
+const Logger$8 = Logger$9.create("Patcher");
 class Patcher {
 	static getPatchesByCaller(id) {
 		if (!id) return [];
@@ -760,7 +786,7 @@ class Patcher {
 					if (Array.isArray(tempArgs))
 						args = tempArgs;
 				} catch (error) {
-					Logger.error(`Patcher:${patch.functionName}:${beforePatch.caller}`, error);
+					Logger$8.error(`Could not fire before patch for ${patch.functionName} of ${beforePatch.caller}`, error);
 				}
 			}
 			const insteadPatches = patch.children.filter((e) => e.type === "instead"
@@ -774,7 +800,7 @@ class Patcher {
 						if (typeof tempReturn !== "undefined")
 							returnValue = tempReturn;
 					} catch (error) {
-						Logger.error(`Patcher:${patch.functionName}:${insteadPatch.caller}`, error);
+						Logger$8.error(`Could not fire instead patch for ${patch.functionName} of ${insteadPatch.caller}`, error);
 					}
 			}
 			for (const afterPatch of patch.children.filter((e) => e.type === "after"
@@ -785,7 +811,7 @@ class Patcher {
 					if (typeof tempReturn !== "undefined")
 						returnValue = tempReturn;
 				} catch (error) {
-					Logger.error(`Patcher:${patch.functionName}:${afterPatch.caller}`, error);
+					Logger$8.error(`Could not fire after patch for ${patch.functionName} of ${afterPatch.caller}`, error);
 				}
 			}
 			return returnValue;
@@ -805,6 +831,7 @@ class Patcher {
 			children: []
 		};
 		module[functionName] = this.makeOverride(patch);
+		module[`__powercordOriginal_${functionName}`] = patch.originalFunction;
 		Object.assign(module[functionName], patch.originalFunction, {
 			toString: () => patch.originalFunction.toString(),
 			__originalFunction: patch.originalFunction
@@ -955,8 +982,8 @@ var util$1 = /*#__PURE__*/ Object.freeze({
 	waitFor: waitFor
 });
 
-function _extends$T() {
-	_extends$T = Object.assign || function(target) {
+function _extends$U() {
+	_extends$U = Object.assign || function(target) {
 		for (var i = 1; i < arguments.length; i++) {
 			var source = arguments[i];
 			for (var key in source) {
@@ -967,7 +994,7 @@ function _extends$T() {
 		}
 		return target;
 	};
-	return _extends$T.apply(this, arguments);
+	return _extends$U.apply(this, arguments);
 }
 const patchAvatars = function() {
 	var ref5,
@@ -984,7 +1011,7 @@ const patchAvatars = function() {
 		return res;
 	});
 	Patcher.after("pc-utility-classes-animated-avatar", Avatar.AnimatedAvatar, "type", (_, args, res) => {
-		return ( /*#__PURE__*/ React.createElement(Avatar.default, _extends$T({
+		return ( /*#__PURE__*/ React.createElement(Avatar.default, _extends$U({
 		}, res.props)));
 	});
 	const AvatarWrapper = (ref2 = (ref5 = Webpack.findByProps([
@@ -999,7 +1026,7 @@ const injectMessageName = function() {
 		var ref;
 		return ((ref = m === null || m === void 0 ? void 0 : m.toString()) === null || ref === void 0 ? void 0 : ref.indexOf("childrenSystemMessage")) > -1;
 	});
-	if (!Message) return Logger.warn("ComponentPatcher", "Message Component was not found!");
+	if (!Message) return Logger$9.warn("ComponentPatcher", "Message Component was not found!");
 	Message.displayName = "Message";
 };
 promise.then(() => {
@@ -1027,7 +1054,7 @@ class Store {
 			try {
 				listener(...args);
 			} catch (error) {
-				Logger.error(`Store:${this.constructor.name}`, error);
+				Logger$9.error(`Store:${this.constructor.name}`, error);
 			}
 		}
 	}
@@ -1068,7 +1095,7 @@ class Emitter {
 			try {
 				listener(...args);
 			} catch (error) {
-				Logger.error(`Store:${this.constructor.name}`, "Could not fire callback:", error);
+				Logger$9.error(`Store:${this.constructor.name}`, "Could not fire callback:", error);
 			}
 		}
 	}
@@ -1156,6 +1183,37 @@ const electron = {
 	clipboard
 };
 
+function _extends$T() {
+	_extends$T = Object.assign || function(target) {
+		for (var i = 1; i < arguments.length; i++) {
+			var source = arguments[i];
+			for (var key in source) {
+				if (Object.prototype.hasOwnProperty.call(source, key)) {
+					target[key] = source[key];
+				}
+			}
+		}
+		return target;
+	};
+	return _extends$T.apply(this, arguments);
+}
+const cache$4 = new Map();
+function DiscordIcon({name, ...props}) {
+	var ref,
+		ref1;
+	const IconComponent = (ref1 = (ref = cache$4.get(name)) !== null && ref !== void 0 ? ref : (cache$4.set(name, Webpack.findByDisplayName(name)), cache$4.get(name))) !== null && ref1 !== void 0 ? ref1 : () => null;
+	return ( /*#__PURE__*/ React.createElement(IconComponent, _extends$T({
+	}, props)));
+}
+
+function memoize(target, key, value) {
+	Object.defineProperty(target, key, {
+		value: value,
+		configurable: true
+	});
+	return value;
+}
+
 function _extends$S() {
 	_extends$S = Object.assign || function(target) {
 		for (var i = 1; i < arguments.length; i++) {
@@ -1170,37 +1228,6 @@ function _extends$S() {
 	};
 	return _extends$S.apply(this, arguments);
 }
-const cache$4 = new Map();
-function DiscordIcon({name, ...props}) {
-	var ref,
-		ref1;
-	const IconComponent = (ref1 = (ref = cache$4.get(name)) !== null && ref !== void 0 ? ref : (cache$4.set(name, Webpack.findByDisplayName(name)), cache$4.get(name))) !== null && ref1 !== void 0 ? ref1 : () => null;
-	return ( /*#__PURE__*/ React.createElement(IconComponent, _extends$S({
-	}, props)));
-}
-
-function memoize(target, key, value) {
-	Object.defineProperty(target, key, {
-		value: value,
-		configurable: true
-	});
-	return value;
-}
-
-function _extends$R() {
-	_extends$R = Object.assign || function(target) {
-		for (var i = 1; i < arguments.length; i++) {
-			var source = arguments[i];
-			for (var key in source) {
-				if (Object.prototype.hasOwnProperty.call(source, key)) {
-					target[key] = source[key];
-				}
-			}
-		}
-		return target;
-	};
-	return _extends$R.apply(this, arguments);
-}
 function AsyncComponent({_provider, _fallback, ...props}) {
 	const [Component, setComponent] = DiscordModules.React.useState(() => _fallback !== null && _fallback !== void 0 ? _fallback : () => null
 	);
@@ -1212,7 +1239,7 @@ function AsyncComponent({_provider, _fallback, ...props}) {
 		_provider,
 		_fallback
 	]);
-	return ( /*#__PURE__*/ React.createElement(Component, _extends$R({
+	return ( /*#__PURE__*/ React.createElement(Component, _extends$S({
 	}, props)));
 }
 function from(promise, fallback) {
@@ -1259,8 +1286,8 @@ const FormItem = fromPromise(promise.then(() => {
 	};
 }));
 
-function _extends$Q() {
-	_extends$Q = Object.assign || function(target) {
+function _extends$R() {
+	_extends$R = Object.assign || function(target) {
 		for (var i = 1; i < arguments.length; i++) {
 			var source = arguments[i];
 			for (var key in source) {
@@ -1271,7 +1298,7 @@ function _extends$Q() {
 		}
 		return target;
 	};
-	return _extends$Q.apply(this, arguments);
+	return _extends$R.apply(this, arguments);
 }
 function TextInput(props) {
 	const {TextInput: TextInput1} = DiscordModules;
@@ -1282,7 +1309,7 @@ function TextInput(props) {
 		note: note,
 		required: required,
 		noteHasMargin: true
-	}, /*#__PURE__*/ React.createElement(TextInput1, _extends$Q({
+	}, /*#__PURE__*/ React.createElement(TextInput1, _extends$R({
 	}, props, {
 		required: required
 	}))));
@@ -1477,8 +1504,7 @@ promise.then(() => {
 				} else {
 					this.settings[id] = value;
 				}
-				DataStore$1.trySaveData(this.id, this.settings);
-				this.emitChange();
+				this.save();
 			};
 			this.save = () => {
 				DataStore$1.trySaveData(this.id, this.settings);
@@ -1508,7 +1534,7 @@ promise.then(() => {
 });
 function registerSettings(id, options) {
 	id = options.category || id;
-	options.render = connectStores(options.category)(options.render);
+	options.render = connectStores(id)(options.render);
 	settings.set(id, options);
 }
 function unregisterSettings(id) {
@@ -1535,8 +1561,8 @@ var settings$1 = /*#__PURE__*/ Object.freeze({
 	connectStores: connectStores
 });
 
-function _extends$P() {
-	_extends$P = Object.assign || function(target) {
+function _extends$Q() {
+	_extends$Q = Object.assign || function(target) {
 		for (var i = 1; i < arguments.length; i++) {
 			var source = arguments[i];
 			for (var key in source) {
@@ -1547,14 +1573,14 @@ function _extends$P() {
 		}
 		return target;
 	};
-	return _extends$P.apply(this, arguments);
+	return _extends$Q.apply(this, arguments);
 }
 function ToolButton({label, icon, onClick, danger =false, disabled =false}) {
 	const {Button, Tooltips: {Tooltip}} = DiscordModules;
 	return ( /*#__PURE__*/ React.createElement(Tooltip, {
 		text: label,
 		position: "top"
-	}, (props) => /*#__PURE__*/ React.createElement(Button, _extends$P({
+	}, (props) => /*#__PURE__*/ React.createElement(Button, _extends$Q({
 	}, props, {
 		className: "pc-settings-toolbutton",
 		look: Button.Looks.BLANK,
@@ -1667,8 +1693,8 @@ function AddonCard({addon, manager, openSettings, hasSettings, type}) {
 		}, /*#__PURE__*/ React.createElement(Markdown, null, addon.manifest.description))));
 }
 
-function _extends$O() {
-	_extends$O = Object.assign || function(target) {
+function _extends$P() {
+	_extends$P = Object.assign || function(target) {
 		for (var i = 1; i < arguments.length; i++) {
 			var source = arguments[i];
 			for (var key in source) {
@@ -1679,7 +1705,7 @@ function _extends$O() {
 		}
 		return target;
 	};
-	return _extends$O.apply(this, arguments);
+	return _extends$P.apply(this, arguments);
 }
 const sortLabels = [
 	"name",
@@ -1707,7 +1733,7 @@ async function sortAddons(addons, order, query, searchOptions, sortBy) {
 			"name",
 			"author",
 			"description"
-		].some((type) => searchOptions[type] && ~String((_type = manifest[type]) !== null && _type !== void 0 ? _type : "").toLowerCase().indexOf(query)
+		].some((type) => searchOptions[type] && String((_type = manifest[type]) !== null && _type !== void 0 ? _type : "").toLowerCase().includes(query.toLowerCase())
 		);
 	}).sort((a, b) => {
 		var _sortBy;
@@ -1725,11 +1751,13 @@ function OverflowContextMenu({type: addonType}) {
 	const [sortBy, searchOptions, order] = DataStore$1.useEvent("misc", () => [
 		DataStore$1.getMisc(`${addonType}.sortBy`, "name"),
 		DataStore$1.getMisc(`${addonType}.searchOption`, {
+			author: true,
+			name: true,
+			description: true
 		}),
 		DataStore$1.getMisc(`${addonType}.order`, "descending")
 	]
 	);
-	var _type1;
 	return ( /*#__PURE__*/ React.createElement(ContextMenu.Menu, {
 		navId: "OverflowContextMenu"
 	}, /*#__PURE__*/ React.createElement(ContextMenu.ControlItem, {
@@ -1779,10 +1807,9 @@ function OverflowContextMenu({type: addonType}) {
 		key: "search-" + type,
 		id: "search-" + type,
 		label: type[0].toUpperCase() + type.slice(1),
-		checked: (_type1 = searchOptions[type]) !== null && _type1 !== void 0 ? _type1 : true,
+		checked: searchOptions[type],
 		action: () => {
-			var _type;
-			DataStore$1.setMisc(void 0, `${addonType}.searchOption.${type}`, !((_type = searchOptions[type]) !== null && _type !== void 0 ? _type : true));
+			DataStore$1.setMisc(void 0, `${addonType}.searchOption.${type}`, !searchOptions[type]);
 		}
 	})
 	))));
@@ -1794,6 +1821,9 @@ function AddonPanel({manager, type}) {
 	const [sortBy, searchOptions, order] = DataStore$1.useEvent("misc", () => [
 		DataStore$1.getMisc(`${type}.sortBy`, "name"),
 		DataStore$1.getMisc(`${type}.searchOption`, {
+			author: true,
+			name: true,
+			description: true
 		}),
 		DataStore$1.getMisc(`${type}.order`, "descending")
 	]
@@ -1806,11 +1836,7 @@ function AddonPanel({manager, type}) {
 		manager
 	]);
 	React1.useEffect(() => {
-		sortAddons(Array.from(manager.addons), order !== null && order !== void 0 ? order : "descending", query, searchOptions !== null && searchOptions !== void 0 ? searchOptions : {
-			author: true,
-			name: true,
-			description: true
-		}, sortBy).then((addons) => setAddons(addons)
+		sortAddons(Array.from(manager.addons), order, query, searchOptions, sortBy).then((addons) => setAddons(addons)
 		);
 	}, [
 		query,
@@ -1835,7 +1861,7 @@ function AddonPanel({manager, type}) {
 	}), /*#__PURE__*/ React.createElement(Tooltips.Tooltip, {
 		text: "Options",
 		position: "bottom"
-	}, (props) => /*#__PURE__*/ React.createElement(Button, _extends$O({
+	}, (props) => /*#__PURE__*/ React.createElement(Button, _extends$P({
 	}, props, {
 		size: Button.Sizes.NONE,
 		look: Button.Looks.BLANK,
@@ -1944,6 +1970,7 @@ SettingsRenderer.defaultPanels = [
 ];
 SettingsRenderer.panels = [];
 
+const Logger$7 = Logger$9.create("PluginManager");
 class PluginManager extends Emitter {
 	static get folder() {
 		return path.resolve(DataStore$1.baseDir, "plugins");
@@ -1969,11 +1996,11 @@ class PluginManager extends Emitter {
 			try {
 				fs.mkdirSync(this.folder);
 			} catch (error) {
-				return void Logger.error("PluginsManager", `Failed to create plugins folder:`, error);
+				return void Logger$7.error("PluginsManager", `Failed to create plugins folder:`, error);
 			}
 		}
-		if (!fs.statSync(this.folder).isDirectory()) return void Logger.error("PluginsManager", `Plugins dir isn't a folder.`);
-		Logger.log("PluginsManager", "Loading plugins...");
+		if (!fs.statSync(this.folder).isDirectory()) return void Logger$7.error("PluginsManager", `Plugins dir isn't a folder.`);
+		Logger$7.log("PluginsManager", "Loading plugins...");
 		for (const file of fs.readdirSync(this.folder, "utf8")) {
 			const location = path.resolve(this.folder, file);
 			if (!fs.statSync(location).isDirectory()) continue;
@@ -1985,7 +2012,7 @@ class PluginManager extends Emitter {
 			try {
 				this.loadPlugin(location);
 			} catch (error) {
-				Logger.error("PluginsManager", `Failed to load ${file}:`, error);
+				Logger$7.error(`Failed to load ${file}:`, error);
 			}
 		}
 	}
@@ -2044,10 +2071,10 @@ class PluginManager extends Emitter {
 			});
 			exports = new data(path.basename(location), location);
 		} catch (error) {
-			return void Logger.error("PluginsManager", `Failed to compile ${manifest.name || path.basename(location)}:`, error);
+			return void Logger$7.error(`Failed to compile ${manifest.name || path.basename(location)}:`, error);
 		}
 		if (log) {
-			Logger.log("PluginsManager", `${manifest.name} was loaded!`);
+			Logger$7.log(`${manifest.name} was loaded!`);
 		}
 		this.plugins.set(path.basename(location), exports);
 		if (this.isEnabled(path.basename(location))) {
@@ -2061,7 +2088,7 @@ class PluginManager extends Emitter {
 		this.plugins.delete(plugin.entityID);
 		this.clearCache(plugin.path);
 		if (log1) {
-			Logger.log("PluginsManager", `${plugin.displayName} was unloaded!`);
+			Logger$7.log(`${plugin.displayName} was unloaded!`);
 		}
 		return success;
 	}
@@ -2070,10 +2097,10 @@ class PluginManager extends Emitter {
 		if (!addon2) return;
 		const success = this.unloadAddon(plugin, false);
 		if (!success) {
-			return Logger.error("PluginsManager", `Something went wrong while trying to unload ${plugin.displayName}:`);
+			return Logger$7.error(`Something went wrong while trying to unload ${plugin.displayName}:`);
 		}
 		this.loadPlugin(plugin.path, false);
-		Logger.log("PluginsManager", `Finished reloading ${plugin.displayName}.`);
+		Logger$7.log(`Finished reloading ${plugin.displayName}.`);
 	}
 	static startPlugin(addon3, log2 = true) {
 		const plugin = this.resolve(addon3);
@@ -2081,10 +2108,10 @@ class PluginManager extends Emitter {
 		try {
 			if (typeof plugin.startPlugin === "function") plugin.startPlugin();
 			if (log2) {
-				Logger.log("PluginsManager", `${plugin.displayName} has been started!`);
+				Logger$7.log(`${plugin.displayName} has been started!`);
 			}
 		} catch (error) {
-			Logger.error("PluginsManager", `Could not start ${plugin.displayName}:`, error);
+			Logger$7.error(`Could not start ${plugin.displayName}:`, error);
 		}
 		return true;
 	}
@@ -2094,10 +2121,10 @@ class PluginManager extends Emitter {
 		try {
 			if (typeof plugin.pluginWillUnload === "function") plugin.pluginWillUnload();
 			if (log3) {
-				Logger.log("PluginsManager", `${plugin.displayName} has been stopped!`);
+				Logger$7.log(`${plugin.displayName} has been stopped!`);
 			}
 		} catch (error) {
-			Logger.error("PluginsManager", `Could not stop ${plugin.displayName}:`, error);
+			Logger$7.error(`Could not stop ${plugin.displayName}:`, error);
 			return false;
 		}
 		return true;
@@ -2109,7 +2136,7 @@ class PluginManager extends Emitter {
 		DataStore$1.trySaveData("plugins", this.states);
 		this.startPlugin(plugin, false);
 		if (log4) {
-			Logger.log("PluginsManager", `${plugin.displayName} has been enabled!`);
+			Logger$7.log(`${plugin.displayName} has been enabled!`);
 			this.emit("toggle", plugin.entityID, true);
 		}
 	}
@@ -2120,7 +2147,7 @@ class PluginManager extends Emitter {
 		DataStore$1.trySaveData("plugins", this.states);
 		this.stopPlugin(plugin, false);
 		if (log5) {
-			Logger.log("PluginsManager", `${plugin.displayName} has been disabled!`);
+			Logger$7.log(`${plugin.displayName} has been disabled!`);
 			this.emit("toggle", plugin.entityID, false);
 		}
 	}
@@ -2137,6 +2164,9 @@ class PluginManager extends Emitter {
 		if (this.isEnabled(plugin.entityID)) this.disable(plugin);
 		else this.enable(plugin);
 	}
+	static get(name) {
+		return this.plugins.get(name);
+	}
 	static get enable() {
 		return this.enablePlugin;
 	}
@@ -2148,6 +2178,11 @@ class PluginManager extends Emitter {
 	}
 	static get remount() {
 		return this.reloadPlugin;
+	}
+	static get getPlugins() {
+		return [
+			...this.plugins.keys()
+		];
 	}
 }
 PluginManager.mainFiles = [
@@ -2306,6 +2341,7 @@ class Clyde {
 	}
 }
 
+const Logger$6 = Logger$9.create("Commands");
 const [useCommandsStore, CommandsApi] = createStore({
 	header: "",
 	active: false,
@@ -2421,7 +2457,7 @@ function registerCommand(options) {
 											});
 										}
 									} catch (error) {
-										Logger.error("Commands", `Could not executor for ${options.command}-${command}:`, error);
+										Logger$6.error(`Could not executor for ${options.command}-${command}:`, error);
 										Clyde.sendMessage(void 0, {
 											content: ":x: An error occurred while running this command. Check your console."
 										});
@@ -2435,7 +2471,7 @@ function registerCommand(options) {
 					executor(args);
 				}
 			} catch (error) {
-				Logger.error("Commands", error);
+				Logger$6.error(error);
 			}
 		},
 		applicationId: section.id,
@@ -2451,11 +2487,11 @@ Webpack.whenReady.then(() => {
 		var ref;
 		return (m === null || m === void 0 ? void 0 : (ref = m.type) === null || ref === void 0 ? void 0 : ref.toString().indexOf("useAndTrackNonFriendDMAccept")) > -1;
 	});
-	if (!ChannelChatMemo) return void Logger.warn("Commands", "ChannelChat memo component not found!");
+	if (!ChannelChatMemo) return void Logger$6.warn("Commands", "ChannelChat memo component not found!");
 	const unpatch = Patcher.after("Commands", ChannelChatMemo, "type", (_, __, returnValue1) => {
 		unpatch();
 		const ChannelChat = returnValue1.type;
-		if (!ChannelChat) return void Logger.error("Commands", "Could no extract ChannelChat nested command!");
+		if (!ChannelChat) return void Logger$6.error("Commands", "Could no extract ChannelChat nested command!");
 		Patcher.after("Commands", ChannelChat.prototype, "render", (_, __, returnValue) => {
 			var ref,
 				ref2;
@@ -2581,6 +2617,7 @@ class DOM {
 DOM.elements = {
 };
 
+const Logger$5 = Logger$9.create("FLuxDispatcher");
 function createDispatcher() {
 	const events = {
 	};
@@ -2592,7 +2629,7 @@ function createDispatcher() {
 				try {
 					callback(event);
 				} catch (error) {
-					Logger.error("FluxDispatcher", `Could not fire callback for ${event}:`, error);
+					Logger$5.error(`Could not fire callback for ${event}:`, error);
 				}
 			}
 		},
@@ -2623,8 +2660,8 @@ function createDispatcher() {
 	return API;
 }
 
-function _extends$N() {
-	_extends$N = Object.assign || function(target) {
+function _extends$O() {
+	_extends$O = Object.assign || function(target) {
 		for (var i = 1; i < arguments.length; i++) {
 			var source = arguments[i];
 			for (var key in source) {
@@ -2635,7 +2672,7 @@ function _extends$N() {
 		}
 		return target;
 	};
-	return _extends$N.apply(this, arguments);
+	return _extends$O.apply(this, arguments);
 }
 const [useNoticesStore, NoticesApi] = createStore({
 	notices: {
@@ -2699,9 +2736,9 @@ function Notice(props) {
 		onClick: startClosing
 	}, /*#__PURE__*/ React.createElement(DiscordIcon, {
 		name: "Close"
-	}))), /*#__PURE__*/ React.createElement("div", {
-		className: "pc-notice-content"
-	}, typeof props.content === "string" ? /*#__PURE__*/ React.createElement(Markdown, null, props.content) : props.content), Array.isArray(props.buttons) && /*#__PURE__*/ React.createElement("div", {
+	}))), props.content && /*#__PURE__*/ React.createElement("div", {
+			className: "pc-notice-content"
+		}, typeof props.content === "string" ? /*#__PURE__*/ React.createElement(Markdown, null, props.content) : props.content), Array.isArray(props.buttons) && /*#__PURE__*/ React.createElement("div", {
 			className: "pc-notice-footer"
 		}, props.buttons.map((button, i) => {
 			var ref,
@@ -2731,7 +2768,7 @@ function Notice(props) {
 function NoticesContainer() {
 	const notices = useNoticesStore((s) => Object.entries(s.notices)
 	);
-	return ( /*#__PURE__*/ React.createElement(ErrorBoundary, null, notices.map(([id, notice]) => /*#__PURE__*/ React.createElement(Notice, _extends$N({
+	return ( /*#__PURE__*/ React.createElement(ErrorBoundary, null, notices.map(([id, notice]) => /*#__PURE__*/ React.createElement(Notice, _extends$O({
 		id: id
 	}, notice, {
 		key: id
@@ -2787,6 +2824,166 @@ Notices.container = DOM.createElement("div", {
 promise.then(() => Notices.initialize()
 );
 
+function _extends$N() {
+	_extends$N = Object.assign || function(target) {
+		for (var i = 1; i < arguments.length; i++) {
+			var source = arguments[i];
+			for (var key in source) {
+				if (Object.prototype.hasOwnProperty.call(source, key)) {
+					target[key] = source[key];
+				}
+			}
+		}
+		return target;
+	};
+	return _extends$N.apply(this, arguments);
+}
+const Logger$4 = Logger$9.create("Announcements");
+const [useAnnouncements, AnnouncementsApi] = createStore({
+	elements: {
+	}
+});
+let classNames = null,
+	ClickableComponent = (props) => null;
+function Announcement(props) {
+	var _color;
+	const className = [
+		classNames.notice,
+		(_color = classNames.colors[props.color]) !== null && _color !== void 0 ? _color : classNames.colors.blurple,
+	];
+	const handleClick = function(func) {
+		closeAnnouncement(props.id);
+		if (typeof func === "function") func();
+	};
+	return ( /*#__PURE__*/ React.createElement("div", {
+		className: joinClassNames("powercord-notice", ...className),
+		id: props.id
+	}, props.message, /*#__PURE__*/ React.createElement(ClickableComponent, {
+		className: classNames.closeButton,
+		onClick: handleClick.bind(null, props.onClose)
+	}), props.button && /*#__PURE__*/ React.createElement("button", {
+			className: classNames.button,
+			onClick: handleClick.bind(null, props.button.onClick)
+		}, props.button.text)));
+}
+promise.then(() => {
+	let renderRoute = (props) => null;
+	const [{Switch} = {
+		}, AppView, Notices, AppClasses, NoticeClasses, Clickable] = Webpack.bulk(Filters.byProps("Router", "Switch"), Filters.byDisplayName("AppView", false), Filters.byTypeString("PrimaryCTANoticeButton"), Filters.byProps("app", "layers"), Filters.byProps("colorStreamerMode"), Filters.byDisplayName("Clickable"));
+	ClickableComponent = Clickable;
+	classNames = {
+		...NoticeClasses,
+		colors: {
+			blurple: NoticeClasses.colorBrand,
+			red: NoticeClasses.colorDanger,
+			organge: NoticeClasses.colorDefault,
+			blue: NoticeClasses.colorInfo,
+			dark: NoticeClasses.colorDark,
+			blurple_gradient: NoticeClasses.colorPremiumTier1,
+			spotify: NoticeClasses.colorSpotify,
+			purple: NoticeClasses.colorStreamerMode,
+			green: NoticeClasses.colorSuccess
+		}
+	};
+	function PatchedAnnouncements() {
+		const elements = useAnnouncements((s) => Object.entries(s.elements)
+		);
+		return ( /*#__PURE__*/ React.createElement(React.Fragment, null, /*#__PURE__*/ React.createElement(Notices, null), elements.map(([id, options]) => /*#__PURE__*/ React.createElement(Announcement, _extends$N({
+			key: id,
+			id: id
+		}, options))
+		)));
+	}
+	function PatchedViews(props) {
+		const returnValue = AppView(props);
+		try {
+			const notices = findInReactTree(returnValue, (n) => {
+				return (n === null || n === void 0 ? void 0 : n.type) === Notices;
+			});
+			if (!notices) return returnValue;
+			notices.type = React.memo(PatchedAnnouncements);
+		} catch (error) {
+			Logger$4.log("Error in NoticesContainer patch:", error);
+		}
+		return returnValue;
+	}
+	function PatchedChat({__pc_original, ...props}) {
+		const returnValue = __pc_original(props);
+		try {
+			const layer = returnValue.props.children[0];
+			if (!layer) return returnValue;
+			const clonedChild = React.cloneElement(layer.props.children);
+			clonedChild.type = PatchedViews;
+			layer.props.children = clonedChild;
+		} catch (error) {
+			Logger$4.error("Error in PatchedChat:", error);
+		}
+		return returnValue;
+	}
+	function patchedRenderRoute(props) {
+		const returnValue = renderRoute(props);
+		if (!returnValue) return;
+		try {
+			const original = returnValue.type.type;
+			if (typeof original !== "function") return returnValue;
+			returnValue.type = React.memo(PatchedChat);
+			returnValue.props.__pc_original = original;
+		} catch (error) {
+			Logger$4.error("Announcements");
+		}
+		return returnValue;
+	}
+	Patcher.after("Announcements", Switch.prototype, "render", (_this, _, ret) => {
+		var ref,
+			ref1;
+		const childs = _this.props.children;
+		if (!Array.isArray(childs) || !((ref = childs[1]) === null || ref === void 0 ? void 0 : (ref1 = ref.some) === null || ref1 === void 0 ? void 0 : ref1.call(ref, (c) => {
+				return (c === null || c === void 0 ? void 0 : c.key) === "/app";
+			}))) return;
+		const original = ret.props.children;
+		ret.props.children = (props) => {
+			const returnValue = original(props);
+			if (returnValue.props.render === patchedRenderRoute) return returnValue;
+			try {
+				renderRoute = returnValue.props.render;
+				returnValue.props.render = patchedRenderRoute;
+			} catch (error) {
+				Logger$4.error("Failed to patch Router Switch:", error);
+			}
+			return returnValue;
+		};
+	});
+	const [node] = document.getElementsByClassName(AppClasses.app);
+	if (!node) return Logger$4.warn("DOM Element for app was not found!");
+	const instance1 = getOwnerInstance(node, (instance) => {
+		var ref;
+		return (instance === null || instance === void 0 ? void 0 : (ref = instance.constructor) === null || ref === void 0 ? void 0 : ref.displayName) === "ViewsWithMainInterface";
+	});
+	if (instance1) instance1.forceUpdate();
+//TODO: Patch the notice store to make sidebar rounded.
+}).catch((error) => {
+	Logger$4.error("Failed to initialize:", error);
+});
+function sendAnnouncement(id, options) {
+	const state = AnnouncementsApi.getState();
+	if (state.elements[id])
+		throw `Announcement with id ${id} already exists!`;
+	AnnouncementsApi.setState({
+		...state,
+		elements: {
+			...state.elements,
+			[id]: options
+		}
+	});
+}
+function closeAnnouncement(id) {
+	const state = AnnouncementsApi.getState();
+	if (!state.elements[id]) return false;
+	delete state.elements[id];
+	AnnouncementsApi.setState(Object.assign({
+	}, state));
+}
+
 function sendToast(id, options) {
 	return Notices.show(Object.assign(options, {
 		id
@@ -2799,7 +2996,10 @@ function closeToast(id) {
 var notices = /*#__PURE__*/ Object.freeze({
 	__proto__: null,
 	sendToast: sendToast,
-	closeToast: closeToast
+	closeToast: closeToast,
+	Announcement: Announcement,
+	sendAnnouncement: sendAnnouncement,
+	closeAnnouncement: closeAnnouncement
 });
 
 var index$2 = /*#__PURE__*/ Object.freeze({
@@ -3078,7 +3278,7 @@ const ColorPicker1 = fromPromise(Webpack.whenReady.then(() => {
 		return (props) => /*#__PURE__*/ React.createElement(ErrorBoundary, null, /*#__PURE__*/ React.createElement(ColorPicker, _extends$L({
 		}, props)));
 	} catch (error) {
-		Logger.error("Failed to get ColorPicker component!", error);
+		Logger$9.error("Failed to get ColorPicker component!", error);
 		return () => null;
 	}
 }));
@@ -4098,8 +4298,29 @@ var VerifiedBadge = ((props) => {
 	})));
 });
 
-var FrontAwesome = (() => null
-);
+const styles = [
+	"regular",
+	"light",
+	"duotone",
+	"brands"
+];
+const stylePrefixes = [
+	"far",
+	"fal",
+	"fad",
+	"fab"
+];
+var FontAwesome = ((props) => {
+	const style1 = styles.find((style) => style === props.icon.split(" ")[0].match(/[a-z]+(?!.*-)/)[0]
+	);
+	var ref;
+	const stylePrefix = (ref = stylePrefixes[styles.indexOf(style1)]) !== null && ref !== void 0 ? ref : "fas";
+	const iconName = props.icon.replace(`-${style1}`, "");
+	var _className;
+	return ( /*#__PURE__*/ React.createElement("span", {
+		className: joinClassNames(stylePrefix, `fa-${iconName}`, (_className = props.className) !== null && _className !== void 0 ? _className : "").trim()
+	}));
+});
 
 var Icons$1 = /*#__PURE__*/ Object.freeze({
 	__proto__: null,
@@ -4140,7 +4361,7 @@ var Icons$1 = /*#__PURE__*/ Object.freeze({
 	Unpin: Unpin,
 	Verified: Verified,
 	VerifiedBadge: VerifiedBadge,
-	FontAwesome: FrontAwesome
+	FontAwesome: FontAwesome
 });
 
 let Components = {
@@ -4384,7 +4605,7 @@ class EventEmitter {
 			try {
 				listener(...args1);
 			} catch (error) {
-				Logger.error("Emitter", `Cannot fire listener for event ${event} at position ${index}:`, error);
+				Logger$9.error("Emitter", `Cannot fire listener for event ${event} at position ${index}:`, error);
 			}
 		}
 		return this;
@@ -4568,6 +4789,7 @@ var url = {
     `)
 };
 
+const Logger$3 = Logger$9.create("HTTP");
 class HTTPError extends Error {
 	constructor(message, res1) {
 		super(message);
@@ -4602,7 +4824,7 @@ class GenericRequest {
 		return new Promise((resolve, reject) => {
 			const opts = Object.assign({
 			}, this.opts);
-			Logger.debug("HTTP", "Performing request to", opts.uri);
+			Logger$3.debug("Performing request to", opts.uri);
 			const {request} = opts.uri.startsWith("https") ? https : http;
 			if (Object.keys(opts.query)[0]) {
 				opts.uri += `?${querystring.encode(opts.query)}`;
@@ -4689,6 +4911,27 @@ var index$1 = {
 	}
 };
 
+const constants = {
+	WEBSITE: "https://github.com/strencher-kernel/pc-compat",
+	I18N_WEBSITE: "https://example.com",
+	REPO_URL: "strencher-kernel/pc-compat",
+	SETTINGS_FOLDER: null,
+	CACHE_FOLDER: null,
+	LOGS_FOLDER: null,
+	DISCORD_INVITE: "8mPTjTZ4SZ",
+	GUILD_ID: "891039687785996328",
+	SpecialChannels: {
+		KNOWN_ISSUES: "891039688352219198",
+		SUPPORT_INSTALLATION: "891053581136982056",
+		SUPPORT_PLUGINS: "891053581136982056",
+		SUPPORT_MISC: "891053581136982056",
+		STORE_PLUGINS: "649571600764633088",
+		STORE_THEMES: "649571547350302741",
+		CSS_SNIPPETS: "755005803303403570",
+		JS_SNIPPETS: "896214131525443635"
+	}
+};
+
 let initialized = false;
 Webpack.whenReady.then(() => {
 	initialized = true;
@@ -4715,7 +4958,8 @@ var powercord$1 = /*#__PURE__*/ Object.freeze({
 	webpack: webpack,
 	injector: injector,
 	pluginManager: PluginManager,
-	http: index$1
+	http: index$1,
+	constants: constants
 });
 
 // Main
@@ -4956,6 +5200,7 @@ const NodeModule = {
 
 var Require = createRequire(path.resolve(PCCompatNative.getBasePath(), "plugins"));
 
+const Logger$2 = Logger$9.create("DataStore");
 const DataStore = new class DataStore extends Store {
 	tryLoadData(name, def = {
 		}) {
@@ -4963,9 +5208,13 @@ const DataStore = new class DataStore extends Store {
 		try {
 			const location = path.resolve(this.configFolder, `${name}.json`);
 			if (!fs.existsSync(location)) return def;
-			return Require(location);
+			const data = Require(location);
+			if (Object.keys(data).length === 0) return def;
+			this.cache.set(name, data);
+			return data;
 		} catch (error) {
-			Logger.error("DataStore", `Data of ${name} corrupt:`, error);
+			Logger$2.error(`Data of ${name} corrupt:`, error);
+			return def;
 		}
 	}
 	trySaveData(name1, data, emit, event = "data-update") {
@@ -4973,7 +5222,7 @@ const DataStore = new class DataStore extends Store {
 		try {
 			fs.writeFileSync(path.resolve(this.configFolder, `${name1}.json`), JSON.stringify(data, null, "\t"), "utf8");
 		} catch (error) {
-			Logger.error("DataStore", `Failed to save data of ${name1}:`, error);
+			Logger$2.error(`Failed to save data of ${name1}:`, error);
 		}
 		if (emit) this.emit(event, name1, data);
 	}
@@ -4995,7 +5244,7 @@ const DataStore = new class DataStore extends Store {
 			try {
 				fs.mkdirSync(this.configFolder);
 			} catch (error) {
-				Logger.error("Failed to create config folder:", error);
+				Logger$2.error("Failed to create config folder:", error);
 			}
 		}
 	}
@@ -5065,12 +5314,13 @@ const [usePanelStore, PanelAPI] = createStore({
 	selectedFile: null
 });
 
+const Logger$1 = Logger$9.create("QuickCSS:util");
 const filesPath = path.resolve(PCCompatNative.getBasePath(), "config", "quickcss");
 const createStorage = function() {
 	try {
 		fs.mkdirSync(filesPath);
 	} catch (error) {
-		Logger.error("QuickCSS", "Failed to create QuickCSS folder:", error);
+		Logger$1.error("Failed to create QuickCSS folder:", error);
 	}
 	return [];
 };
@@ -5408,7 +5658,7 @@ function SideBar() {
 						selectedFile: location
 					});
 				} catch (error) {
-					Logger.error("QuickCSS", "Failed to create file " + value, error);
+					Logger$9.error("QuickCSS", "Failed to create file " + value, error);
 				}
 			}
 		});
@@ -5629,6 +5879,7 @@ function QuickCSSPanel() {
 	})())));
 }
 
+const Logger = Logger$9.create("QuickCSS");
 class QuickCSS {
 	static async initialize() {
 		const {Lodash} = DiscordModules;
@@ -5697,7 +5948,7 @@ class QuickCSS {
 		amdLoader([
 			"vs/editor/editor.main"
 		], () => {});
-		Logger.log("QuickCSS", "Module loaded!");
+		Logger.log("Module loaded!");
 	}
 	static dispose() {
 		DataStore$1.off("data-update", this.onDataUpdate);
@@ -5725,6 +5976,10 @@ var index = new class PCCompat {
 			writable: false
 		});
 		DOM.injectCSS("core", Require(path.resolve(PCCompatNative.getBasePath(), "src/renderer/styles", "index.scss")));
+		DOM.injectCSS("font-awesome", FONTAWESOME_BASEURL, {
+			type: "URL",
+			documentHead: true
+		});
 		SettingsRenderer.patchSettingsView();
 		QuickCSS.initialize();
 		PluginManager.initialize();

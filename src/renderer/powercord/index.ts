@@ -9,6 +9,7 @@ export * as api from "./api/index";
 export * as util from "./util";
 export * as modal from "./modal";
 export {default as http} from "./http/index";
+export {default as constants} from "./constants";
 
 export let initialized = false;
 

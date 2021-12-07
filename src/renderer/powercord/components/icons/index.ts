@@ -35,4 +35,4 @@ export { default as Unlink } from "./Unlink";
 export { default as Unpin } from "./Unpin";
 export { default as Verified } from "./Verified";
 export { default as VerifiedBadge } from "./VerifiedBadge";
-export {default as FontAwesome} from "./FrontAwesome";
+export { default as FontAwesome } from "./FontAwesome";
