@@ -5,14 +5,13 @@ import LoggerModule from "@modules/logger";
 import {fs, Module, path, require as Require} from "@node";
 import Emitter from "../classes/staticemitter";
 import Theme from "@powercord/classes/theme";
-import Plugin from "@powercord/classes/plugin";
 
 const Logger = LoggerModule.create("StyleManager");
 
 export default class StyleManager extends Emitter {
     static get folder() {return path.resolve(DataStore.baseDir, "themes")};
 
-    static mainFiles = ["manifest.json", "powercord_manifest.json"];
+    static mainFiles = ["powercord_manifest.json", "manifest.json"];
 
     static themes = new Map();
 
@@ -129,11 +128,37 @@ export default class StyleManager extends Emitter {
         }
     }
 
+    static unloadAddon(addon: any, log = true) {
+        const theme = this.resolve(addon);
+        if (!addon) return;
+
+        const success = this.stopTheme(theme);
+        this.themes.delete(theme.entityID);
+        this.clearCache(theme.path);
+
+        if (log) {
+            Logger.log(`${theme.displayName} was unloaded!`);
+        }
+
+        return success;
+    }
+
+    static reloadTheme(addon: any) {
+        const theme = this.resolve(addon);
+        if (!addon) return;
+
+        const success = this.unloadAddon(theme, false);
+        if (!success) {
+            return Logger.error(`Something went wrong while trying to unload ${theme.displayName}:`);
+        }
+        this.startTheme(theme, false);
+        Logger.log(`Finished reloading ${theme.displayName}.`);
+    }
+
     static startTheme(addon: any, log = true) {
         const theme = this.resolve(addon);
         if (!theme) return;
 
-        console.log(theme);
         try {
             theme._load();
             if (log) {
@@ -146,13 +171,75 @@ export default class StyleManager extends Emitter {
         return true;
     }
 
+    static stopTheme(addon: any, log = true) {
+        const theme = this.resolve(addon);
+        if (!theme) return;
+
+        try {
+            theme._unload();
+            if (log) {
+                Logger.log(`${theme.displayName} has been stopped!`);
+            }
+        } catch (error) {
+            Logger.error(`Could not stop ${theme.displayName}:`, error);
+            return false;
+        }
+
+        return true;
+    }
+
+    static enableTheme(addon: any, log = true) {
+        const theme: Theme = this.resolve(addon);
+        if (!theme) return;
+
+        this.states[theme.entityID] = true;
+        DataStore.trySaveData("themes", this.states);
+        this.startTheme(theme, false);
+
+        if (log) {
+            Logger.log(`${theme.displayName} has been enabled!`);
+            this.emit("toggle", theme.entityID, true);
+        }
+    }
+
+    static disableTheme(addon: any, log = true) {
+        const theme: Theme = this.resolve(addon);
+        if (!theme) return;
+
+        this.states[theme.entityID] = false;
+        DataStore.trySaveData("themes", this.states);
+        this.stopTheme(theme, false);
+
+        if (log) {
+            Logger.log(`${theme.displayName} has been disabled!`);
+            this.emit("toggle", theme.entityID, false);
+        }
+    }
+
+    static delete(addon: any) {
+        const theme: Theme = this.resolve(addon);
+        if (!theme) return;
+
+        this.unloadAddon(theme);
+        PCCompatNative.executeJS(`require("electron").shell.trashItem(${JSON.stringify(theme.path)})`);
+        this.emit("delete", theme)
+    }
+
+    static toggle(addon: any) {
+        const theme = this.resolve(addon);
+        if (!theme) return;
+
+        if (this.isEnabled(theme.entityID)) this.disable(theme);
+        else this.enable(theme);
+    }
+
     static get(name: string) {
         return this.themes.get(name);
     }
 
-    // static get enable() {return this.enableTheme;}
-    // static get disable() {return this.disableTheme;}
-    // static get reload() {return this.reloadTheme;}
-    // static get remount() {return this.reloadTheme;}
-    // static get getThemes() {return [...this.themes.keys()];}
+    static get enable() {return this.enableTheme;}
+    static get disable() {return this.disableTheme;}
+    static get reload() {return this.reloadTheme;}
+    static get remount() {return this.reloadTheme;}
+    static get getThemes() {return [...this.themes.keys()];}
 }

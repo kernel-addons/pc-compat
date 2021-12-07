@@ -1,6 +1,5 @@
-import {DOM, memoize, Utilities} from "../../modules";
+import {DOM, Utilities} from "../../modules";
 import {fs, path, require as Require} from "../../node";
-import ThemeManager from "../stylemanager";
 
 export type ThemeManifest = {
     name: string;
@@ -42,13 +41,16 @@ export default class Theme {
     }
 
     _load() {
-        console.log(path.resolve(this.path, this.manifest.theme));
         this._loadStylesheet(path.resolve(this.path, this.manifest.theme))
     }
 
     _unload() {
-        console.log(this.stylesheets);
-        // ThemeManager
+        const keys = Object.keys(this.stylesheets);
+
+        for (let i = 0; i < keys.length; i++) {
+            this.stylesheets[keys[i]].remove();
+            delete this.stylesheets[keys[i]];
+        }
     }
 
     // Getters

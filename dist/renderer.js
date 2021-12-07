@@ -2254,12 +2254,14 @@ class Theme$1 {
 		}
 	}
 	_load() {
-		console.log(path.resolve(this.path, this.manifest.theme));
 		this._loadStylesheet(path.resolve(this.path, this.manifest.theme));
 	}
 	_unload() {
-		console.log(this.stylesheets);
-	// ThemeManager
+		const keys = Object.keys(this.stylesheets);
+		for (let i = 0; i < keys.length; i++) {
+			this.stylesheets[keys[i]].remove();
+			delete this.stylesheets[keys[i]];
+		}
 	}
 	// Getters
 	get displayName() {
@@ -4728,10 +4730,30 @@ class StyleManager extends Emitter {
 			this.startTheme(data);
 		}
 	}
+	static unloadAddon(addon, log = true) {
+		const theme = this.resolve(addon);
+		if (!addon) return;
+		const success = this.stopTheme(theme);
+		this.themes.delete(theme.entityID);
+		this.clearCache(theme.path);
+		if (log) {
+			Logger$4.log(`${theme.displayName} was unloaded!`);
+		}
+		return success;
+	}
+	static reloadTheme(addon) {
+		const theme = this.resolve(addon);
+		if (!addon) return;
+		const success = this.unloadAddon(theme, false);
+		if (!success) {
+			return Logger$4.error(`Something went wrong while trying to unload ${theme.displayName}:`);
+		}
+		this.startTheme(theme, false);
+		Logger$4.log(`Finished reloading ${theme.displayName}.`);
+	}
 	static startTheme(addon, log = true) {
 		const theme = this.resolve(addon);
 		if (!theme) return;
-		console.log(theme);
 		try {
 			theme._load();
 			if (log) {
@@ -4742,13 +4764,79 @@ class StyleManager extends Emitter {
 		}
 		return true;
 	}
+	static stopTheme(addon, log = true) {
+		const theme = this.resolve(addon);
+		if (!theme) return;
+		try {
+			theme._unload();
+			if (log) {
+				Logger$4.log(`${theme.displayName} has been stopped!`);
+			}
+		} catch (error) {
+			Logger$4.error(`Could not stop ${theme.displayName}:`, error);
+			return false;
+		}
+		return true;
+	}
+	static enableTheme(addon, log = true) {
+		const theme = this.resolve(addon);
+		if (!theme) return;
+		this.states[theme.entityID] = true;
+		DataStore$1.trySaveData("themes", this.states);
+		this.startTheme(theme, false);
+		if (log) {
+			Logger$4.log(`${theme.displayName} has been enabled!`);
+			this.emit("toggle", theme.entityID, true);
+		}
+	}
+	static disableTheme(addon, log = true) {
+		const theme = this.resolve(addon);
+		if (!theme) return;
+		this.states[theme.entityID] = false;
+		DataStore$1.trySaveData("themes", this.states);
+		this.stopTheme(theme, false);
+		if (log) {
+			Logger$4.log(`${theme.displayName} has been disabled!`);
+			this.emit("toggle", theme.entityID, false);
+		}
+	}
+	static delete(addon) {
+		const theme = this.resolve(addon);
+		if (!theme) return;
+		this.unloadAddon(theme);
+		PCCompatNative.executeJS(`require("electron").shell.trashItem(${JSON.stringify(theme.path)})`);
+		this.emit("delete", theme);
+	}
+	static toggle(addon) {
+		const theme = this.resolve(addon);
+		if (!theme) return;
+		if (this.isEnabled(theme.entityID)) this.disable(theme);
+		else this.enable(theme);
+	}
 	static get(name) {
 		return this.themes.get(name);
 	}
+	static get enable() {
+		return this.enableTheme;
+	}
+	static get disable() {
+		return this.disableTheme;
+	}
+	static get reload() {
+		return this.reloadTheme;
+	}
+	static get remount() {
+		return this.reloadTheme;
+	}
+	static get getThemes() {
+		return [
+			...this.themes.keys()
+		];
+	}
 }
 StyleManager.mainFiles = [
-	"manifest.json",
-	"powercord_manifest.json"
+	"powercord_manifest.json",
+	"manifest.json"
 ];
 StyleManager.themes = new Map();
 
