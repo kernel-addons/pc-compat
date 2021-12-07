@@ -1,3 +1,264 @@
+const FONTAWESOME_BASEURL = "https://kit-pro.fontawesome.com/releases/v5.15.2/css/pro.min.css";
+const MONACO_BASEURL = "https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.20.0/min";
+
+var Modules = {
+	// React, Modules & Constants
+	Constants: {
+		props: [
+			"API_HOST",
+			"ActionTypes"
+		]
+	},
+	React: {
+		props: [
+			"createElement",
+			"isValidElement"
+		]
+	},
+	ReactDOM: {
+		props: [
+			"render",
+			"createPortal"
+		]
+	},
+	ReactSpring: {
+		props: [
+			"useSpring",
+			"Controller",
+			"animated"
+		]
+	},
+	Flux: {
+		type: "MERGE",
+		props: [
+			[
+				"Store",
+				"Dispatcher"
+			],
+			[
+				"connectStores"
+			]
+		]
+	},
+	Dispatcher: {
+		props: [
+			"dirtyDispatch"
+		]
+	},
+	ContextMenuActions: {
+		props: [
+			"openContextMenu"
+		]
+	},
+	ModalsApi: {
+		props: [
+			"openModal",
+			"useModalsStore"
+		]
+	},
+	ModalStack: {
+		props: [
+			"push",
+			"popAll"
+		]
+	},
+	LocaleManager: {
+		props: [
+			"Messages",
+			"getAvailableLocales"
+		],
+		ensure: (mod) => mod.Messages.CLOSE
+	},
+	Lodash: {
+		props: [
+			"zipObjectDeep"
+		]
+	},
+	MessageCreators: {
+		props: [
+			"createBotMessage"
+		]
+	},
+	MessageActions: {
+		props: [
+			"receiveMessage"
+		]
+	},
+	AvatarDefaults: {
+		props: [
+			"BOT_AVATARS"
+		]
+	},
+	// Stores
+	SelectedChannelStore: {
+		props: [
+			"_dispatchToken",
+			"getChannelId",
+			"getLastSelectedChannelId"
+		]
+	},
+	// Components
+	ModalComponents: {
+		props: [
+			"ModalRoot",
+			"ModalHeader"
+		]
+	},
+	Switch: {
+		name: "Switch"
+	},
+	SwitchItem: {
+		name: "SwitchItem"
+	},
+	TextInput: {
+		name: "TextInput"
+	},
+	Tooltips: {
+		props: [
+			"TooltipContainer"
+		],
+		rename: [
+			{
+				from: "default",
+				to: "Tooltip"
+			},
+			{
+				from: "TooltipContainer",
+				to: "Container"
+			},
+			{
+				from: "TooltipColors",
+				to: "Colors"
+			},
+			{
+				from: "TooltipPositions",
+				to: "Positions"
+			},
+			{
+				from: "TooltipLayer",
+				to: "Layer"
+			},
+		]
+	},
+	Button: {
+		props: [
+			"BorderColors",
+			"Colors"
+		]
+	},
+	Slider: {
+		name: "Slider"
+	},
+	ConfirmationModal: {
+		name: "ConfirmModal"
+	},
+	Text: {
+		name: "Text"
+	},
+	Markdown: {
+		name: "Markdown",
+		props: [
+			"rules"
+		]
+	},
+	Caret: {
+		name: "Caret"
+	},
+	Forms: {
+		props: [
+			"FormItem",
+			"FormTitle"
+		]
+	},
+	Flex: {
+		name: "Flex"
+	},
+	SearchBar: {
+		name: "SearchBar"
+	},
+	Spinner: {
+		name: "Spinner"
+	},
+	Scrollers: {
+		props: [
+			"ScrollerAuto",
+			"ScrollerThin",
+			"default"
+		]
+	},
+	// Classes
+	Margins: {
+		props: [
+			"marginXLarge"
+		]
+	},
+	FormClasses: {
+		props: [
+			"formText",
+			"description"
+		]
+	},
+	// ContextMenu
+	ContextMenu: {
+		type: "MERGE",
+		props: [
+			[
+				"openContextMenu"
+			],
+			[
+				"MenuItem",
+				"MenuControlItem"
+			]
+		],
+		rename: [
+			{
+				from: "default",
+				to: "Menu"
+			},
+			{
+				from: "MenuItem",
+				to: "Item"
+			},
+			{
+				from: "MenuGroup",
+				to: "Group"
+			},
+			{
+				from: "MenuCheckboxItem",
+				to: "CheckboxItem"
+			},
+			{
+				from: "MenuSeparator",
+				to: "Separator"
+			},
+			{
+				from: "MenuCheckboxItem",
+				to: "CheckboxItem"
+			},
+			{
+				from: "MenuRadioItem",
+				to: "RadioItem"
+			},
+			{
+				from: "MenuStyle",
+				to: "Style"
+			},
+			{
+				from: "MenuControlItem",
+				to: "ControlItem"
+			},
+			{
+				from: "openContextMenu",
+				to: "open"
+			},
+			{
+				from: "closeContextMenu",
+				to: "close"
+			},
+		]
+	}
+};
+
 function _classPrivateFieldGet(receiver, privateMap) {
 	if (!privateMap.has(receiver)) {
 		throw new TypeError("attempted to get private field on non-instance");
@@ -303,266 +564,6 @@ var _Webpack;
 const Webpack = (_Webpack = window.Webpack) !== null && _Webpack !== void 0 ? _Webpack : window.Webpack = new WebpackModule;
 if (!Webpack.whenReady)
 	Webpack.whenReady = Webpack.wait();
-
-const MONACO_BASEURL = "https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.20.0/min";
-
-var Modules = {
-	// React, Modules & Constants
-	Constants: {
-		props: [
-			"API_HOST",
-			"ActionTypes"
-		]
-	},
-	React: {
-		props: [
-			"createElement",
-			"isValidElement"
-		]
-	},
-	ReactDOM: {
-		props: [
-			"render",
-			"createPortal"
-		]
-	},
-	ReactSpring: {
-		props: [
-			"useSpring",
-			"Controller",
-			"animated"
-		]
-	},
-	Flux: {
-		type: "MERGE",
-		props: [
-			[
-				"Store",
-				"Dispatcher"
-			],
-			[
-				"connectStores"
-			]
-		]
-	},
-	Dispatcher: {
-		props: [
-			"dirtyDispatch"
-		]
-	},
-	ContextMenuActions: {
-		props: [
-			"openContextMenu"
-		]
-	},
-	ModalsApi: {
-		props: [
-			"openModal",
-			"useModalsStore"
-		]
-	},
-	ModalStack: {
-		props: [
-			"push",
-			"popAll"
-		]
-	},
-	LocaleManager: {
-		props: [
-			"Messages",
-			"getAvailableLocales"
-		],
-		ensure: (mod) => mod.Messages.CLOSE
-	},
-	Lodash: {
-		props: [
-			"zipObjectDeep"
-		]
-	},
-	MessageCreators: {
-		props: [
-			"createBotMessage"
-		]
-	},
-	MessageActions: {
-		props: [
-			"receiveMessage"
-		]
-	},
-	AvatarDefaults: {
-		props: [
-			"BOT_AVATARS"
-		]
-	},
-	// Stores
-	SelectedChannelStore: {
-		props: [
-			"_dispatchToken",
-			"getChannelId",
-			"getLastSelectedChannelId"
-		]
-	},
-	// Components
-	ModalComponents: {
-		props: [
-			"ModalRoot",
-			"ModalHeader"
-		]
-	},
-	Switch: {
-		name: "Switch"
-	},
-	SwitchItem: {
-		name: "SwitchItem"
-	},
-	TextInput: {
-		name: "TextInput"
-	},
-	Tooltips: {
-		props: [
-			"TooltipContainer"
-		],
-		rename: [
-			{
-				from: "default",
-				to: "Tooltip"
-			},
-			{
-				from: "TooltipContainer",
-				to: "Container"
-			},
-			{
-				from: "TooltipColors",
-				to: "Colors"
-			},
-			{
-				from: "TooltipPositions",
-				to: "Positions"
-			},
-			{
-				from: "TooltipLayer",
-				to: "Layer"
-			},
-		]
-	},
-	Button: {
-		props: [
-			"BorderColors",
-			"Colors"
-		]
-	},
-	Slider: {
-		name: "Slider"
-	},
-	ConfirmationModal: {
-		name: "ConfirmModal"
-	},
-	Text: {
-		name: "Text"
-	},
-	Markdown: {
-		name: "Markdown",
-		props: [
-			"rules"
-		]
-	},
-	Caret: {
-		name: "Caret"
-	},
-	Forms: {
-		props: [
-			"FormItem",
-			"FormTitle"
-		]
-	},
-	Flex: {
-		name: "Flex"
-	},
-	SearchBar: {
-		name: "SearchBar"
-	},
-	Spinner: {
-		name: "Spinner"
-	},
-	Scrollers: {
-		props: [
-			"ScrollerAuto",
-			"ScrollerThin",
-			"default"
-		]
-	},
-	// Classes
-	Margins: {
-		props: [
-			"marginXLarge"
-		]
-	},
-	FormClasses: {
-		props: [
-			"formText",
-			"description"
-		]
-	},
-	// ContextMenu
-	ContextMenu: {
-		type: "MERGE",
-		props: [
-			[
-				"openContextMenu"
-			],
-			[
-				"MenuItem",
-				"MenuControlItem"
-			]
-		],
-		rename: [
-			{
-				from: "default",
-				to: "Menu"
-			},
-			{
-				from: "MenuItem",
-				to: "Item"
-			},
-			{
-				from: "MenuGroup",
-				to: "Group"
-			},
-			{
-				from: "MenuCheckboxItem",
-				to: "CheckboxItem"
-			},
-			{
-				from: "MenuSeparator",
-				to: "Separator"
-			},
-			{
-				from: "MenuCheckboxItem",
-				to: "CheckboxItem"
-			},
-			{
-				from: "MenuRadioItem",
-				to: "RadioItem"
-			},
-			{
-				from: "MenuStyle",
-				to: "Style"
-			},
-			{
-				from: "MenuControlItem",
-				to: "ControlItem"
-			},
-			{
-				from: "openContextMenu",
-				to: "open"
-			},
-			{
-				from: "closeContextMenu",
-				to: "close"
-			},
-		]
-	}
-};
 
 const DiscordModules = {
 };
@@ -1732,7 +1733,7 @@ async function sortAddons(addons, order, query, searchOptions, sortBy) {
 			"name",
 			"author",
 			"description"
-		].some((type) => searchOptions[type] && ~String((_type = manifest[type]) !== null && _type !== void 0 ? _type : "").toLowerCase().indexOf(query)
+		].some((type) => searchOptions[type] && String((_type = manifest[type]) !== null && _type !== void 0 ? _type : "").toLowerCase().includes(query.toLowerCase())
 		);
 	}).sort((a, b) => {
 		var _sortBy;
@@ -1750,11 +1751,13 @@ function OverflowContextMenu({type: addonType}) {
 	const [sortBy, searchOptions, order] = DataStore$1.useEvent("misc", () => [
 		DataStore$1.getMisc(`${addonType}.sortBy`, "name"),
 		DataStore$1.getMisc(`${addonType}.searchOption`, {
+			author: true,
+			name: true,
+			description: true
 		}),
 		DataStore$1.getMisc(`${addonType}.order`, "descending")
 	]
 	);
-	var _type1;
 	return ( /*#__PURE__*/ React.createElement(ContextMenu.Menu, {
 		navId: "OverflowContextMenu"
 	}, /*#__PURE__*/ React.createElement(ContextMenu.ControlItem, {
@@ -1804,10 +1807,9 @@ function OverflowContextMenu({type: addonType}) {
 		key: "search-" + type,
 		id: "search-" + type,
 		label: type[0].toUpperCase() + type.slice(1),
-		checked: (_type1 = searchOptions[type]) !== null && _type1 !== void 0 ? _type1 : true,
+		checked: searchOptions[type],
 		action: () => {
-			var _type;
-			DataStore$1.setMisc(void 0, `${addonType}.searchOption.${type}`, !((_type = searchOptions[type]) !== null && _type !== void 0 ? _type : true));
+			DataStore$1.setMisc(void 0, `${addonType}.searchOption.${type}`, !searchOptions[type]);
 		}
 	})
 	))));
@@ -1819,6 +1821,9 @@ function AddonPanel({manager, type}) {
 	const [sortBy, searchOptions, order] = DataStore$1.useEvent("misc", () => [
 		DataStore$1.getMisc(`${type}.sortBy`, "name"),
 		DataStore$1.getMisc(`${type}.searchOption`, {
+			author: true,
+			name: true,
+			description: true
 		}),
 		DataStore$1.getMisc(`${type}.order`, "descending")
 	]
@@ -1831,11 +1836,7 @@ function AddonPanel({manager, type}) {
 		manager
 	]);
 	React1.useEffect(() => {
-		sortAddons(Array.from(manager.addons), order !== null && order !== void 0 ? order : "descending", query, searchOptions !== null && searchOptions !== void 0 ? searchOptions : {
-			author: true,
-			name: true,
-			description: true
-		}, sortBy).then((addons) => setAddons(addons)
+		sortAddons(Array.from(manager.addons), order, query, searchOptions, sortBy).then((addons) => setAddons(addons)
 		);
 	}, [
 		query,
@@ -2162,6 +2163,9 @@ class PluginManager extends Emitter {
 		if (!plugin) return;
 		if (this.isEnabled(plugin.entityID)) this.disable(plugin);
 		else this.enable(plugin);
+	}
+	static get(name) {
+		return this.plugins.get(name);
 	}
 	static get enable() {
 		return this.enablePlugin;
@@ -4294,8 +4298,29 @@ var VerifiedBadge = ((props) => {
 	})));
 });
 
-var FrontAwesome = (() => null
-);
+const styles = [
+	"regular",
+	"light",
+	"duotone",
+	"brands"
+];
+const stylePrefixes = [
+	"far",
+	"fal",
+	"fad",
+	"fab"
+];
+var FontAwesome = ((props) => {
+	const style1 = styles.find((style) => style === props.icon.split(" ")[0].match(/[a-z]+(?!.*-)/)[0]
+	);
+	var ref;
+	const stylePrefix = (ref = stylePrefixes[styles.indexOf(style1)]) !== null && ref !== void 0 ? ref : "fas";
+	const iconName = props.icon.replace(`-${style1}`, "");
+	var _className;
+	return ( /*#__PURE__*/ React.createElement("span", {
+		className: joinClassNames(stylePrefix, `fa-${iconName}`, (_className = props.className) !== null && _className !== void 0 ? _className : "").trim()
+	}));
+});
 
 var Icons$1 = /*#__PURE__*/ Object.freeze({
 	__proto__: null,
@@ -4336,7 +4361,7 @@ var Icons$1 = /*#__PURE__*/ Object.freeze({
 	Unpin: Unpin,
 	Verified: Verified,
 	VerifiedBadge: VerifiedBadge,
-	FontAwesome: FrontAwesome
+	FontAwesome: FontAwesome
 });
 
 let Components = {
@@ -5184,6 +5209,7 @@ const DataStore = new class DataStore extends Store {
 			const location = path.resolve(this.configFolder, `${name}.json`);
 			if (!fs.existsSync(location)) return def;
 			const data = Require(location);
+			if (Object.keys(data).length === 0) return def;
 			this.cache.set(name, data);
 			return data;
 		} catch (error) {
@@ -5950,6 +5976,10 @@ var index = new class PCCompat {
 			writable: false
 		});
 		DOM.injectCSS("core", Require(path.resolve(PCCompatNative.getBasePath(), "src/renderer/styles", "index.scss")));
+		DOM.injectCSS("font-awesome", FONTAWESOME_BASEURL, {
+			type: "URL",
+			documentHead: true
+		});
 		SettingsRenderer.patchSettingsView();
 		QuickCSS.initialize();
 		PluginManager.initialize();
