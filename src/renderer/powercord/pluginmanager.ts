@@ -109,8 +109,8 @@ export default class PluginManager extends Emitter {
                 },
                 settings: {
                     value: getSettings(path.basename(location)),
-                    configurable: false,
-                    writable: false
+                    configurable: true,
+                    writable: true
                 },
                 path: {
                     value: location,
