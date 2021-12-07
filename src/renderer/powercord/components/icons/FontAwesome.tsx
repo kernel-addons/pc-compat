@@ -3,8 +3,8 @@ const stylePrefixes = ["far", "fal", "fad", "fab"];
 
 export default (props) => {
     const style = styles.find(style => style === props.icon.split(" ")[0].match(/[a-z]+(?!.*-)/)[0]);
-    const stylePrefix = stylePrefixes[style] ?? "fas";
+    const stylePrefix = stylePrefixes[styles.indexOf(style)] ?? "fas";
     const iconName = props.icon.replace(`-${style}`, "");
 
-    return <span className={`${stylePrefix} fa-${iconName} ${props.className}`.trim()} />
+    return <span className={`${stylePrefix} fa-${iconName} ${props.className ?? ""}`.trim()} />
 };
