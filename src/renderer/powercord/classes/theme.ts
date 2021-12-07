@@ -4,7 +4,7 @@ import ThemeManager from "../stylemanager";
 import {getSettings} from './settings';
 
 export type ThemeManifest = {
-    dependencies?: string[];
+    effectiveTheme: string;
     name: string;
     description: string;
     version: string;
@@ -25,9 +25,7 @@ export default class Theme {
 
     settings: any;
 
-    startPlugin?: Function;
-
-    pluginWillUnload?: Function;
+    themeIdentifier?: string;
 
     loadStylesheet(_path: string): void {
         const stylePath = path.isAbsolute(_path) ? _path : path.resolve(this.path, _path);
@@ -42,29 +40,13 @@ export default class Theme {
         }
     }
 
-    log(...messages: any[]): void {
-        console.log(`%c[Powercord:Theme:${this.constructor.name}]`, `color: ${this.color};`, ...messages);
-    }
-
-    debug(...messages: any[]): void {
-        console.debug(`%c[Powercord:Theme:${this.constructor.name}]`, `color: ${this.color};`, ...messages);
-    }
-
-    warn(...messages: any[]): void {
-        console.warn(`%c[Powercord:Theme:${this.constructor.name}]`, `color: ${this.color};`, ...messages);
-    }
-
-    error(...messages: any[]): void {
-        console.error(`%c[Powercord:Theme:${this.constructor.name}]`, `color: ${this.color};`, ...messages);
-    }
-
     // "Internals" :zere_zoom:
     _load() {
-        // ThemeManager.startPlugin(this);
+
     }
 
     _unload() {
-        // ThemeManager.stopPlugin(this);
+        console.log(this.stylesheets);
     }
 
     // Getters

@@ -4,7 +4,7 @@ import SettingsRenderer from "@modules/settings";
 import LoggerModule from "@modules/logger";
 import {fs, Module, path, require as Require} from "@node";
 import Emitter from "../classes/staticemitter";
-import Plugin from "@powercord/classes/plugin";
+import Theme from "@powercord/classes/theme";
 
 const Logger = LoggerModule.create("StyleManager");
 
@@ -16,6 +16,8 @@ export default class StyleManager extends Emitter {
     static themes = new Map();
 
     static states: object;
+
+    static get addons() {return Array.from(this.themes, e => e[1]);}
 
     static initialize() {
         SettingsRenderer.registerPanel("themes", {
@@ -43,8 +45,6 @@ export default class StyleManager extends Emitter {
         for (const file of fs.readdirSync(this.folder, "utf8")) {
             const location = path.resolve(this.folder, file);
             if (!fs.statSync(location).isDirectory()) continue;
-            if (!fs.existsSync(path.join(location, "manifest.json"))) continue;
-            if (!fs.statSync(path.join(location, "manifest.json")).isFile()) continue;
             if (!this.mainFiles.some(f => fs.existsSync(path.join(location, f)))) continue;
 
             try {
@@ -64,7 +64,7 @@ export default class StyleManager extends Emitter {
         }
     }
 
-    static resolve(themeOrName: any): Plugin {
+    static resolve(themeOrName: any): Theme {
         if (typeof (themeOrName) === "string") return this.themes.get(themeOrName);
 
         return themeOrName;
@@ -83,17 +83,17 @@ export default class StyleManager extends Emitter {
 
     static loadTheme(location: string, log = true) {
         const _path = path.resolve(location, this.mainFiles.find(f => fs.existsSync(path.resolve(location, f))));
-        const manifest = Object.freeze(Require(path.resolve(location, "manifest.json")));
-        if (this.themes.get(manifest.name)) throw new Error(`Theme with name ${manifest.name} already exists!`);
+        const manifest = Object.freeze(Require(_path));
+        const entityID = path.basename(location);
+        if (this.themes.get(entityID)) throw new Error(`Theme with ID ${entityID} already exists!`);
 
-        let exports = {};
+        let data = {};
         try {
             this.clearCache(location);
-            const data = Require(_path);
 
-            Object.defineProperties(data.prototype, {
+            Object.defineProperties(data, {
                 entityID: {
-                    value: path.basename(location),
+                    value: entityID,
                     configurable: false,
                     writable: false
                 },
@@ -113,7 +113,6 @@ export default class StyleManager extends Emitter {
                     writable: false
                 }
             });
-            exports = new data(path.basename(location), location);
         } catch (error) {
             return void Logger.error(`Failed to compile ${manifest.name || path.basename(location)}:`, error);
         }
@@ -122,7 +121,8 @@ export default class StyleManager extends Emitter {
             Logger.log(`${manifest.name} was loaded!`);
         }
 
-        this.themes.set(path.basename(location), exports);
+        debugger;
+        this.themes.set(path.basename(location), data);
 
         if (this.isEnabled(path.basename(location))) {
             // this.startPlugin(exports);

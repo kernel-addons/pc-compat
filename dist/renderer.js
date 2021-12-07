@@ -2252,24 +2252,10 @@ class Theme$1 {
 			console.error(`Could not load stylesheet:`, error);
 		}
 	}
-	log(...messages) {
-		console.log(`%c[Powercord:Theme:${this.constructor.name}]`, `color: ${this.color};`, ...messages);
-	}
-	debug(...messages) {
-		console.debug(`%c[Powercord:Theme:${this.constructor.name}]`, `color: ${this.color};`, ...messages);
-	}
-	warn(...messages) {
-		console.warn(`%c[Powercord:Theme:${this.constructor.name}]`, `color: ${this.color};`, ...messages);
-	}
-	error(...messages) {
-		console.error(`%c[Powercord:Theme:${this.constructor.name}]`, `color: ${this.color};`, ...messages);
-	}
 	// "Internals" :zere_zoom:
-	_load() {
-		// ThemeManager.startPlugin(this);
-	}
+	_load() {}
 	_unload() {
-		// ThemeManager.stopPlugin(this);
+		console.log(this.stylesheets);
 	}
 	// Getters
 	get displayName() {
@@ -4458,7 +4444,7 @@ promise.then(async () => {
 		}
 		if (Array.isArray(options.rename)) {
 			for (const {from, to} of options.rename) {
-				data[to] = component[ from ];
+				data[to] = component[from];
 			}
 		}
 		if (!Array.isArray(options.rename) && !options.prop) {
@@ -4637,6 +4623,10 @@ class StyleManager extends Emitter {
 	static get folder() {
 		return path.resolve(DataStore$1.baseDir, "themes");
 	}
+	static get addons() {
+		return Array. from (this.themes, (e) => e[1]
+		);
+	}
 	static initialize() {
 		SettingsRenderer.registerPanel("themes", {
 			label: "Themes",
@@ -4662,8 +4652,6 @@ class StyleManager extends Emitter {
 		for (const file of fs.readdirSync(this.folder, "utf8")) {
 			const location = path.resolve(this.folder, file);
 			if (!fs.statSync(location).isDirectory()) continue;
-			if (!fs.existsSync(path.join(location, "manifest.json"))) continue;
-			if (!fs.statSync(path.join(location, "manifest.json")).isFile()) continue;
 			if (!this.mainFiles.some((f) => fs.existsSync(path.join(location, f))
 				)) continue;
 			try {
@@ -4696,17 +4684,17 @@ class StyleManager extends Emitter {
 	static loadTheme(location, log = true) {
 		const _path = path.resolve(location, this.mainFiles.find((f) => fs.existsSync(path.resolve(location, f))
 		));
-		const manifest = Object.freeze(Require(path.resolve(location, "manifest.json")));
-		if (this.themes.get(manifest.name))
-			throw new Error(`Theme with name ${manifest.name} already exists!`);
-		let exports = {
+		const manifest = Object.freeze(Require(_path));
+		const entityID = path.basename(location);
+		if (this.themes.get(entityID))
+			throw new Error(`Theme with ID ${entityID} already exists!`);
+		let data = {
 		};
 		try {
 			this.clearCache(location);
-			const data = Require(_path);
-			Object.defineProperties(data.prototype, {
+			Object.defineProperties(data, {
 				entityID: {
-					value: path.basename(location),
+					value: entityID,
 					configurable: false,
 					writable: false
 				},
@@ -4726,14 +4714,14 @@ class StyleManager extends Emitter {
 					writable: false
 				}
 			});
-			exports = new data(path.basename(location), location);
 		} catch (error) {
 			return void Logger$4.error(`Failed to compile ${manifest.name || path.basename(location)}:`, error);
 		}
 		if (log) {
 			Logger$4.log(`${manifest.name} was loaded!`);
 		}
-		this.themes.set(path.basename(location), exports);
+		debugger;
+		this.themes.set(path.basename(location), data);
 		if (this.isEnabled(path.basename(location))) ;
 	}
 }
