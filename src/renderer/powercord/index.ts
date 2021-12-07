@@ -4,6 +4,7 @@ export {default as components} from "./components/index";
 export {default as webpack} from "./webpack";
 export {default as injector} from "./injector";
 export {default as pluginManager} from "./pluginmanager"
+export {default as styleManager} from "./stylemanager"
 export * as entities from "./entities";
 export * as api from "./api/index";
 export * as util from "./util";
