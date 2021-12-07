@@ -1,3 +1,5 @@
+import { joinClassNames } from "@modules/utilities";
+
 const styles = ["regular", "light", "duotone", "brands"];
 const stylePrefixes = ["far", "fal", "fad", "fab"];
 
@@ -6,5 +8,5 @@ export default (props) => {
     const stylePrefix = stylePrefixes[styles.indexOf(style)] ?? "fas";
     const iconName = props.icon.replace(`-${style}`, "");
 
-    return <span className={`${stylePrefix} fa-${iconName} ${props.className ?? ""}`.trim()} />
+    return <span className={joinClassNames(stylePrefix, `fa-${iconName}`, props.className ?? "").trim()} />
 };
