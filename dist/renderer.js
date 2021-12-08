@@ -5227,9 +5227,37 @@ const util = PCCompatNative.executeJS(`require("util")`);
 
 const zlib = PCCompatNative.executeJS(`require("zlib")`);
 
-const stream = PCCompatNative.executeJS(`require("stream")`);
+const methods$3 = PCCompatNative.executeJS(`Object.keys(require("stream"))`);
+const stream = {
+};
+for (const key of methods$3){
+    // @ts-ignore
+    stream[key] = PCCompatNative.executeJS(`require("stream").${key}`);
+}
 
-PCCompatNative.executeJS(`require("crypto")`);
+const methods$2 = PCCompatNative.executeJS(`Object.keys(require("crypto"))`);
+const crypto = {
+};
+for (const key of methods$2){
+    // @ts-ignore
+    crypto[key] = PCCompatNative.executeJS(`require("crypto").${key}`);
+}
+
+const methods$1 = PCCompatNative.executeJS(`Object.keys(require("net"))`);
+const net = {
+};
+for (const key of methods$1){
+    // @ts-ignore
+    net[key] = PCCompatNative.executeJS(`require("net").${key}`);
+}
+
+const methods = PCCompatNative.executeJS(`Object.keys(require("tls"))`);
+const tls = {
+};
+for (const key of methods){
+    // @ts-ignore
+    tls[key] = PCCompatNative.executeJS(`require("tls").${key}`);
+}
 
 const cache$2 = {
 };
@@ -5349,9 +5377,12 @@ function createRequire(_path) {
                 return querystring;
             case "url":
                 return url;
-            // case "net":
-            // case "tls":
+            case "net":
+                return net;
+            case "tls":
+                return tls;
             case "crypto":
+                return crypto;
             default:
                 {
                     if (mod.startsWith("powercord/")) {

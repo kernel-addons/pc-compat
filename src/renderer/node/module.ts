@@ -14,6 +14,8 @@ import querystring from "./querystring";
 import url from "./url";
 import * as http from "./http";
 import crypto from "./crypto";
+import net from "./net";
+import tls from './tls';
 
 export const cache = {};
 export const globalPaths = [
@@ -133,9 +135,9 @@ export function createRequire(_path: string): Require {
             case "stream": return stream;
             case "querystring": return querystring;
             case "url": return url;
-            // case "net":
-            // case "tls":
-            case "crypto": crypto;
+            case "net": return net;
+            case "tls": return tls;
+            case "crypto": return crypto;
 
             default: {
                 if (mod.startsWith("powercord/")) {
@@ -172,12 +174,12 @@ function getParent(_path: string, mod: string) {
         ? concatPath
         : fs.existsSync(globalPath)
             ? globalPath
-            : ""; 
+            : "";
 }
 
 export function resolveMain(_path: string, mod: string): string {
     const parent = hasExtension(_path) ? path.dirname(_path) : getParent(_path, mod);
-    
+
     if (!fs.existsSync(parent)) throw new Error(`Cannot find module ${mod}\ntree:\n\r-${_path}`);
     const files = fs.readdirSync(parent, "utf8");
 
@@ -196,9 +198,9 @@ export function resolveMain(_path: string, mod: string): string {
 
     if (mod.startsWith("./")) return null;
     const globalMod = globalPaths.find(pth => fs.existsSync(path.join(pth, mod)));
-    
+
     if (globalMod) return resolveMain(globalMod, mod);
-    
+
     return globalPaths.find(pth => getExtension(path.join(pth, mod)));
 };
 
