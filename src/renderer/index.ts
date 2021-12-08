@@ -5,6 +5,7 @@ import * as IPCEvents from "@common/ipcevents";
 import {require as Require, path} from "@node";
 import {init as initializeWebpack} from "@powercord/webpack";
 import PluginManager from "@powercord/pluginmanager";
+import StyleManager from "@powercord/stylemanager";
 import SettingsRenderer from "@modules/settings";
 import {promise} from "@modules/discord";
 import QuickCSS from "@ui/quickcss";
@@ -35,6 +36,7 @@ export default new class PCCompat {
         SettingsRenderer.patchSettingsView();
         QuickCSS.initialize();
         PluginManager.initialize();
+        StyleManager.initialize();
     }
 
     expose(name: string, namespace: any) {
