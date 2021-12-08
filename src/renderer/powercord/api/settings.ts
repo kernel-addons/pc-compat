@@ -13,7 +13,7 @@ promise.then(() => {
 });
 
 export function registerSettings(id: string, options: any) {
-    id = options.category || id;
+    id = id || options.category;
 
     options.render = connectStores(id)(options.render);
     settings.set(id, options);
