@@ -43,3 +43,19 @@
         padding-bottom: 5px;
     }
 }
+
+.pc-settings-empty {
+   display: flex;
+   align-items: center;
+   flex-direction: column;
+
+    div {
+        margin-bottom: 25px;
+    }
+
+    p {
+        font-size: 18px;
+        margin-bottom: 0;
+        opacity: .7;
+    }
+}

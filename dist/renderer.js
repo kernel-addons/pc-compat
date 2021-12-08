@@ -256,6 +256,12 @@ var Modules = {
 				to: "close"
 			},
 		]
+	},
+	PlaceholderClasses: {
+		props: [
+			"emptyStateImage",
+			"emptyStateSubtext"
+		]
 	}
 };
 
@@ -1530,7 +1536,12 @@ function getSettings(id) {
 let store = null;
 let settings = new Map();
 promise.then(() => {
-	store = getSettings("powercord");
+	store = Object.assign(getSettings("powercord"), {
+		// powerCord momento
+		_fluxProps(id) {
+			return getSettings(id).makeProps();
+		}
+	});
 });
 function registerSettings(id, options) {
 	id = options.category || id;
@@ -1815,7 +1826,8 @@ function OverflowContextMenu({type: addonType}) {
 	))));
 }
 function AddonPanel({manager, type}) {
-	const {React: React1, Button, ContextMenu, Tooltips, Spinner, SearchBar} = DiscordModules;
+	const {React: React1, Button, ContextMenu, Tooltips, SearchBar, PlaceholderClasses} = DiscordModules;
+	const {i18n: {Messages}} = powercord.webpack;
 	const [query, setQuery] = React1.useState("");
 	const [addons1, setAddons] = React1.useState(null);
 	const [sortBy, searchOptions, order] = DataStore$1.useEvent("misc", () => [
@@ -1877,7 +1889,7 @@ function AddonPanel({manager, type}) {
 	}))
 	)), /*#__PURE__*/ React.createElement("div", {
 		className: "pc-settings-card-scroller"
-	}, addons1 ? addons1.map((addon) => /*#__PURE__*/ React.createElement(AddonCard, {
+	}, (addons1 === null || addons1 === void 0 ? void 0 : addons1.length) ? addons1.map((addon) => /*#__PURE__*/ React.createElement(AddonCard, {
 		addon: addon,
 		hasSettings: false,
 		manager: manager,
@@ -1885,9 +1897,11 @@ function AddonPanel({manager, type}) {
 		key: addon.manifest.name,
 		openSettings: () => {}
 	})
-	) : /*#__PURE__*/ React.createElement(Spinner, {
-		type: Spinner.Type.WANDERING_CUBES
-	}))));
+	) : /*#__PURE__*/ React.createElement("div", {
+		className: "pc-settings-empty"
+	}, /*#__PURE__*/ React.createElement("div", {
+		className: PlaceholderClasses.emptyStateImage
+	}), /*#__PURE__*/ React.createElement("p", null, Messages.GIFT_CONFIRMATION_HEADER_FAIL), /*#__PURE__*/ React.createElement("p", null, Messages.SEARCH_NO_RESULTS)))));
 }
 
 class SettingsRenderer {
@@ -2060,8 +2074,8 @@ class PluginManager extends Emitter {
 				},
 				settings: {
 					value: getSettings(path.basename(location)),
-					configurable: false,
-					writable: false
+					configurable: true,
+					writable: true
 				},
 				path: {
 					value: location,

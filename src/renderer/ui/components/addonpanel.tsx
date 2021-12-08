@@ -112,7 +112,8 @@ export function OverflowContextMenu({type: addonType}) {
 };
 
 export default function AddonPanel({manager, type}) {
-    const {React, Button, ContextMenu, Tooltips, Spinner, SearchBar} = DiscordModules;
+    const {React, Button, ContextMenu, Tooltips, SearchBar, PlaceholderClasses} = DiscordModules;
+    const {i18n: {Messages}} = powercord.webpack;
 
     const [query, setQuery] = React.useState("");
     const [addons, setAddons] = React.useState(null);
@@ -168,7 +169,7 @@ export default function AddonPanel({manager, type}) {
                 </Tooltips.Tooltip>
             </div>
             <div className="pc-settings-card-scroller">
-                {addons
+                {addons?.length
                     ? addons.map(addon => <AddonCard
                         addon={addon}
                         hasSettings={false}
@@ -177,7 +178,11 @@ export default function AddonPanel({manager, type}) {
                         key={addon.manifest.name}
                         openSettings={() => {}}
                     />)
-                    : <Spinner type={Spinner.Type.WANDERING_CUBES} />
+                    : <div className='pc-settings-empty'>
+                        <div className={PlaceholderClasses.emptyStateImage} />
+                        <p>{Messages.GIFT_CONFIRMATION_HEADER_FAIL}</p>
+                        <p>{Messages.SEARCH_NO_RESULTS}</p>
+                    </div>
                 }
             </div>
         </div>

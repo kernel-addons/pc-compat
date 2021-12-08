@@ -135,5 +135,8 @@ export default {
             {from: "openContextMenu", to: "open"},
             {from: "closeContextMenu", to: "close"},
         ]
+    },
+    PlaceholderClasses: {
+        props: ["emptyStateImage", "emptyStateSubtext"]
     }
 }
