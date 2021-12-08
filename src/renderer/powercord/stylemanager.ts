@@ -22,7 +22,7 @@ export default class StyleManager extends Emitter {
     static initialize() {
         SettingsRenderer.registerPanel("themes", {
             label: "Themes",
-            order: 1,
+            order: 2,
             render: () => DiscordModules.React.createElement(AddonPanel, {type: "theme", manager: this})
         });
 

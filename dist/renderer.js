@@ -4636,7 +4636,7 @@ class StyleManager extends Emitter {
 	static initialize() {
 		SettingsRenderer.registerPanel("themes", {
 			label: "Themes",
-			order: 1,
+			order: 2,
 			render: () => DiscordModules.React.createElement(AddonPanel, {
 				type: "theme",
 				manager: this
@@ -6145,7 +6145,7 @@ class QuickCSS {
 			label: "QuickCSS",
 			render: () => DiscordModules.React.createElement(QuickCSSPanel, {
 			}),
-			order: 2
+			order: 3
 		});
 		this.loadMonaco();
 		DataStore$1.on("QUICK_CSS_UPDATE", this.onDataUpdate);

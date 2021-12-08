@@ -1,4 +1,4 @@
-import {DOM, Utilities} from "../../modules";
+import {DOM, Utilities} from "@modules";
 import {fs, path, require as Require} from "../../node";
 
 export type ThemeManifest = {
