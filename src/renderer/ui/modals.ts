@@ -1,6 +1,6 @@
 import memoize from "@modules/memoize.js";
 import {createUpdateWrapper} from "@modules/utilities";
-import TextInput from "@powercord/components/textinput";
+import TextInput from "@powercord/components/settings/textinput";
 import DiscordModules from "../modules/discord";
 
 export default class Modals {

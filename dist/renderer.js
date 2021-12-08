@@ -113,6 +113,9 @@ var Modules = {
     TextInput: {
         name: "TextInput"
     },
+    SelectInput: {
+        name: "SelectTempWrapper"
+    },
     Tooltips: {
         props: [
             "TooltipContainer"
@@ -984,8 +987,8 @@ var util$1 = /*#__PURE__*/Object.freeze({
     waitFor: waitFor
 });
 
-function _extends$U() {
-    _extends$U = Object.assign || function(target) {
+function _extends$V() {
+    _extends$V = Object.assign || function(target) {
         for(var i = 1; i < arguments.length; i++){
             var source = arguments[i];
             for(var key in source){
@@ -996,7 +999,7 @@ function _extends$U() {
         }
         return target;
     };
-    return _extends$U.apply(this, arguments);
+    return _extends$V.apply(this, arguments);
 }
 const patchAvatars = function() {
     var ref5, ref1, ref2;
@@ -1010,7 +1013,7 @@ const patchAvatars = function() {
         return res;
     });
     Patcher.after("pc-utility-classes-animated-avatar", Avatar.AnimatedAvatar, "type", (_, args, res)=>{
-        return(/*#__PURE__*/ React.createElement(Avatar.default, _extends$U({
+        return(/*#__PURE__*/ React.createElement(Avatar.default, _extends$V({
         }, res.props)));
     });
     const AvatarWrapper = (ref2 = (ref5 = Webpack.findByProps([
@@ -1181,6 +1184,37 @@ const electron = {
     clipboard
 };
 
+function _extends$U() {
+    _extends$U = Object.assign || function(target) {
+        for(var i = 1; i < arguments.length; i++){
+            var source = arguments[i];
+            for(var key in source){
+                if (Object.prototype.hasOwnProperty.call(source, key)) {
+                    target[key] = source[key];
+                }
+            }
+        }
+        return target;
+    };
+    return _extends$U.apply(this, arguments);
+}
+const cache$4 = new Map();
+function DiscordIcon({ name , ...props }) {
+    var ref, ref1;
+    const IconComponent = (ref1 = (ref = cache$4.get(name)) !== null && ref !== void 0 ? ref : (cache$4.set(name, Webpack.findByDisplayName(name)), cache$4.get(name))) !== null && ref1 !== void 0 ? ref1 : ()=>null
+    ;
+    return(/*#__PURE__*/ React.createElement(IconComponent, _extends$U({
+    }, props)));
+}
+
+function memoize(target, key, value) {
+    Object.defineProperty(target, key, {
+        value: value,
+        configurable: true
+    });
+    return value;
+}
+
 function _extends$T() {
     _extends$T = Object.assign || function(target) {
         for(var i = 1; i < arguments.length; i++){
@@ -1195,37 +1229,6 @@ function _extends$T() {
     };
     return _extends$T.apply(this, arguments);
 }
-const cache$4 = new Map();
-function DiscordIcon({ name , ...props }) {
-    var ref, ref1;
-    const IconComponent = (ref1 = (ref = cache$4.get(name)) !== null && ref !== void 0 ? ref : (cache$4.set(name, Webpack.findByDisplayName(name)), cache$4.get(name))) !== null && ref1 !== void 0 ? ref1 : ()=>null
-    ;
-    return(/*#__PURE__*/ React.createElement(IconComponent, _extends$T({
-    }, props)));
-}
-
-function memoize(target, key, value) {
-    Object.defineProperty(target, key, {
-        value: value,
-        configurable: true
-    });
-    return value;
-}
-
-function _extends$S() {
-    _extends$S = Object.assign || function(target) {
-        for(var i = 1; i < arguments.length; i++){
-            var source = arguments[i];
-            for(var key in source){
-                if (Object.prototype.hasOwnProperty.call(source, key)) {
-                    target[key] = source[key];
-                }
-            }
-        }
-        return target;
-    };
-    return _extends$S.apply(this, arguments);
-}
 function AsyncComponent({ _provider , _fallback , ...props }) {
     const [Component, setComponent] = DiscordModules.React.useState(()=>_fallback !== null && _fallback !== void 0 ? _fallback : ()=>null
     );
@@ -1237,7 +1240,7 @@ function AsyncComponent({ _provider , _fallback , ...props }) {
         _provider,
         _fallback
     ]);
-    return(/*#__PURE__*/ React.createElement(Component, _extends$S({
+    return(/*#__PURE__*/ React.createElement(Component, _extends$T({
     }, props)));
 }function from(promise, fallback) {
     return (props)=>DiscordModules.React.createElement(AsyncComponent, {
@@ -1285,8 +1288,8 @@ const FormItem = fromPromise(promise.then(()=>{
     };
 }));
 
-function _extends$R() {
-    _extends$R = Object.assign || function(target) {
+function _extends$S() {
+    _extends$S = Object.assign || function(target) {
         for(var i = 1; i < arguments.length; i++){
             var source = arguments[i];
             for(var key in source){
@@ -1297,7 +1300,7 @@ function _extends$R() {
         }
         return target;
     };
-    return _extends$R.apply(this, arguments);
+    return _extends$S.apply(this, arguments);
 }
 function TextInput(props) {
     const { TextInput: TextInput1  } = DiscordModules;
@@ -1308,7 +1311,7 @@ function TextInput(props) {
         note: note,
         required: required,
         noteHasMargin: true
-    }, /*#__PURE__*/ React.createElement(TextInput1, _extends$R({
+    }, /*#__PURE__*/ React.createElement(TextInput1, _extends$S({
     }, props, {
         required: required
     }))));
@@ -1539,7 +1542,7 @@ promise.then(()=>{
     });
 });
 function registerSettings(id, options) {
-    id = options.category || id;
+    id = id || options.category;
     options.render = connectStores(id)(options.render);
     settings.set(id, options);
 }
@@ -1565,8 +1568,8 @@ var settings$1 = /*#__PURE__*/Object.freeze({
     connectStores: connectStores
 });
 
-function _extends$Q() {
-    _extends$Q = Object.assign || function(target) {
+function _extends$R() {
+    _extends$R = Object.assign || function(target) {
         for(var i = 1; i < arguments.length; i++){
             var source = arguments[i];
             for(var key in source){
@@ -1577,14 +1580,14 @@ function _extends$Q() {
         }
         return target;
     };
-    return _extends$Q.apply(this, arguments);
+    return _extends$R.apply(this, arguments);
 }
 function ToolButton({ label , icon , onClick , danger =false , disabled =false  }) {
     const { Button , Tooltips: { Tooltip  }  } = DiscordModules;
     return(/*#__PURE__*/ React.createElement(Tooltip, {
         text: label,
         position: "top"
-    }, (props)=>/*#__PURE__*/ React.createElement(Button, _extends$Q({
+    }, (props)=>/*#__PURE__*/ React.createElement(Button, _extends$R({
         }, props, {
             className: "pc-settings-toolbutton",
             look: Button.Looks.BLANK,
@@ -1694,8 +1697,8 @@ function AddonCard({ addon , manager , openSettings , hasSettings , type  }) {
     }, /*#__PURE__*/ React.createElement(Markdown, null, addon.manifest.description))));
 }
 
-function _extends$P() {
-    _extends$P = Object.assign || function(target) {
+function _extends$Q() {
+    _extends$Q = Object.assign || function(target) {
         for(var i = 1; i < arguments.length; i++){
             var source = arguments[i];
             for(var key in source){
@@ -1706,7 +1709,7 @@ function _extends$P() {
         }
         return target;
     };
-    return _extends$P.apply(this, arguments);
+    return _extends$Q.apply(this, arguments);
 }
 const sortLabels = [
     "name",
@@ -1865,7 +1868,7 @@ function AddonPanel({ manager , type  }) {
     }), /*#__PURE__*/ React.createElement(Tooltips.Tooltip, {
         text: "Options",
         position: "bottom"
-    }, (props)=>/*#__PURE__*/ React.createElement(Button, _extends$P({
+    }, (props)=>/*#__PURE__*/ React.createElement(Button, _extends$Q({
         }, props, {
             size: Button.Sizes.NONE,
             look: Button.Looks.BLANK,
@@ -2697,8 +2700,8 @@ function createDispatcher() {
     return API;
 }
 
-function _extends$O() {
-    _extends$O = Object.assign || function(target) {
+function _extends$P() {
+    _extends$P = Object.assign || function(target) {
         for(var i = 1; i < arguments.length; i++){
             var source = arguments[i];
             for(var key in source){
@@ -2709,7 +2712,7 @@ function _extends$O() {
         }
         return target;
     };
-    return _extends$O.apply(this, arguments);
+    return _extends$P.apply(this, arguments);
 }
 const [useNoticesStore, NoticesApi] = createStore({
     notices: {
@@ -2806,7 +2809,7 @@ function Notice(props) {
 function NoticesContainer() {
     const notices = useNoticesStore((s)=>Object.entries(s.notices)
     );
-    return(/*#__PURE__*/ React.createElement(ErrorBoundary, null, notices.map(([id, notice])=>/*#__PURE__*/ React.createElement(Notice, _extends$O({
+    return(/*#__PURE__*/ React.createElement(ErrorBoundary, null, notices.map(([id, notice])=>/*#__PURE__*/ React.createElement(Notice, _extends$P({
             id: id
         }, notice, {
             key: id
@@ -2859,8 +2862,8 @@ Notices.container = DOM.createElement("div", {
 promise.then(()=>Notices.initialize()
 );
 
-function _extends$N() {
-    _extends$N = Object.assign || function(target) {
+function _extends$O() {
+    _extends$O = Object.assign || function(target) {
         for(var i = 1; i < arguments.length; i++){
             var source = arguments[i];
             for(var key in source){
@@ -2871,7 +2874,7 @@ function _extends$N() {
         }
         return target;
     };
-    return _extends$N.apply(this, arguments);
+    return _extends$O.apply(this, arguments);
 }
 const Logger$5 = Logger$a.create("Announcements");
 const [useAnnouncements, AnnouncementsApi] = createStore({
@@ -2924,7 +2927,7 @@ promise.then(()=>{
     function PatchedAnnouncements() {
         const elements = useAnnouncements((s)=>Object.entries(s.elements)
         );
-        return(/*#__PURE__*/ React.createElement(React.Fragment, null, /*#__PURE__*/ React.createElement(Notices, null), elements.map(([id, options])=>/*#__PURE__*/ React.createElement(Announcement, _extends$N({
+        return(/*#__PURE__*/ React.createElement(React.Fragment, null, /*#__PURE__*/ React.createElement(Notices, null), elements.map(([id, options])=>/*#__PURE__*/ React.createElement(Announcement, _extends$O({
                 key: id,
                 id: id
             }, options))
@@ -3216,6 +3219,30 @@ var __cache = {
     }
 };
 
+function _extends$N() {
+    _extends$N = Object.assign || function(target) {
+        for(var i = 1; i < arguments.length; i++){
+            var source = arguments[i];
+            for(var key in source){
+                if (Object.prototype.hasOwnProperty.call(source, key)) {
+                    target[key] = source[key];
+                }
+            }
+        }
+        return target;
+    };
+    return _extends$N.apply(this, arguments);
+}
+function RadioGroup({ children: title , note , required , ...props }) {
+    const RadioGroup1 = Components$1.get("RadioGroup");
+    return(/*#__PURE__*/ React.createElement(FormItem, {
+        title: title,
+        note: note,
+        required: required
+    }, /*#__PURE__*/ React.createElement(RadioGroup1, _extends$N({
+    }, props))));
+}
+
 function _extends$M() {
     _extends$M = Object.assign || function(target) {
         for(var i = 1; i < arguments.length; i++){
@@ -3230,14 +3257,19 @@ function _extends$M() {
     };
     return _extends$M.apply(this, arguments);
 }
-function RadioGroup({ children: title , note , required , ...props }) {
-    const RadioGroup1 = Components$1.get("RadioGroup");
+function SelectInput(props) {
+    const { SelectInput: SelectInput1  } = DiscordModules;
+    const { children: title , note , required  } = props;
+    delete props.children;
     return(/*#__PURE__*/ React.createElement(FormItem, {
         title: title,
         note: note,
+        required: required,
+        noteHasMargin: true
+    }, /*#__PURE__*/ React.createElement(SelectInput1, _extends$M({
+    }, props, {
         required: required
-    }, /*#__PURE__*/ React.createElement(RadioGroup1, _extends$M({
-    }, props))));
+    }))));
 }
 
 var Category = fromPromise(promise.then(()=>{
@@ -4400,7 +4432,8 @@ let Components = {
         Category,
         ColorPickerInput,
         SliderInput,
-        FormItem
+        FormItem,
+        SelectInput
     },
     Icon: Icon$1,
     AsyncComponent,

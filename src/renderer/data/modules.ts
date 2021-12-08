@@ -64,6 +64,9 @@ export default {
     TextInput: {
         name: "TextInput"
     },
+    SelectInput: {
+        name: "SelectTempWrapper"
+    },
     Tooltips: {
         props: ["TooltipContainer"],
         rename: [

@@ -3,13 +3,15 @@ import components from "../data/components";
 import {promise} from '../../modules/discord';
 import {createUpdateWrapper} from "../../modules/utilities";
 
-import TextInput from "./textinput";
-import RadioGroup from "./radiogroup";
-import Category from './category';
+import TextInput from "./settings/textinput";
+import RadioGroup from "./settings/radiogroup";
+import SelectInput from "./settings/selectinput";
+import Category from './settings/category';
 import Divider from "./divider"
-import ColorPicker, {ColorPickerInput} from "./colorpicker";
-import SliderInput from "./slider";
-import FormItem from "./formitem";
+import ColorPicker, {ColorPickerInput} from "./settings/colorpicker";
+import SliderInput from "./settings/slider";
+import FormItem from "./settings/formitem";
+import Checkbox from "./settings/checkbox";
 import Icon from "./icon";
 
 import AsyncComponent from "./asynccomponent";
@@ -23,7 +25,9 @@ let Components = {
         Category,
         ColorPickerInput,
         SliderInput,
-        FormItem
+        FormItem,
+        SelectInput,
+        Checkbox
     },
     Icon,
     AsyncComponent,

@@ -1,8 +1,8 @@
-import {DiscordModules, Webpack} from "../../modules";
-import Logger from "../../modules/logger";
-import {findInReactTree} from "../util";
-import {fromPromise} from "./asynccomponent";
-import ErrorBoundary from "./errorboundary";
+import {DiscordModules, Webpack} from "../../../modules";
+import Logger from "../../../modules/logger";
+import {findInReactTree} from "../../util";
+import {fromPromise} from "../asynccomponent";
+import ErrorBoundary from "../errorboundary";
 import FormItem from "./formitem"
 
 const ColorPicker = fromPromise(Webpack.whenReady.then(() => {

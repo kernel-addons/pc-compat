@@ -1,5 +1,5 @@
-import DiscordModules, {promise} from "../../modules/discord";
-import {fromPromise} from "./asynccomponent";
+import DiscordModules, {promise} from "../../../modules/discord";
+import {fromPromise} from "../asynccomponent";
 import FormItem from './formitem';
 
 const SliderInput = fromPromise(promise.then(() => {
