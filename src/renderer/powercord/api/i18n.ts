@@ -5,14 +5,17 @@ promise.then(() => {
 
     locale = LocaleManager.getLocale();
 
-    Dispatcher.subscribe(ActionTypes.USER_SETTINGS_UPDATE, () => {
+    const handler = () => {
         const partialLocale = LocaleManager.getLocale();
 
         if (partialLocale !== locale) {
             locale = partialLocale;
             LocaleManager.loadPromise.then(injectStrings);
         }
-    });
+    }
+
+    Dispatcher.subscribe(ActionTypes.USER_SETTINGS_UPDATE, handler);
+    Dispatcher.subscribe(ActionTypes.CONNECTION_OPEN, handler);
 });
 
 export let messages = {};

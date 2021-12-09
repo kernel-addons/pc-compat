@@ -2565,13 +2565,15 @@ var commands$1 = /*#__PURE__*/Object.freeze({
 promise.then(()=>{
     const { LocaleManager , Dispatcher , Constants: { ActionTypes  }  } = DiscordModules;
     locale1 = LocaleManager.getLocale();
-    Dispatcher.subscribe(ActionTypes.USER_SETTINGS_UPDATE, ()=>{
+    const handler = ()=>{
         const partialLocale = LocaleManager.getLocale();
         if (partialLocale !== locale1) {
             locale1 = partialLocale;
             LocaleManager.loadPromise.then(injectStrings);
         }
-    });
+    };
+    Dispatcher.subscribe(ActionTypes.USER_SETTINGS_UPDATE, handler);
+    Dispatcher.subscribe(ActionTypes.CONNECTION_OPEN, handler);
 });
 let messages = {
 };
