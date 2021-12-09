@@ -1,21 +1,18 @@
-import DiscordModules, {promise} from "../../modules/discord";
+import DiscordModules, {promise} from "@modules/discord";
 
 promise.then(() => {
-    const {LocaleManager, Dispatcher, Constants: {ActionTypes}} = DiscordModules;
+    const { LocaleManager } = DiscordModules;
 
     locale = LocaleManager.getLocale();
 
-    const handler = () => {
-        const partialLocale = LocaleManager.getLocale();
-
-        if (partialLocale !== locale) {
-            locale = partialLocale;
+    LocaleManager.addChangeListener(() => {
+        if (LocaleManager.locale !== locale) {
+            locale = LocaleManager.locale;
             LocaleManager.loadPromise.then(injectStrings);
         }
-    }
+    });
 
-    Dispatcher.subscribe(ActionTypes.USER_SETTINGS_UPDATE, handler);
-    Dispatcher.subscribe(ActionTypes.CONNECTION_OPEN, handler);
+    injectStrings();
 });
 
 export let messages = {};
