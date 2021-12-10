@@ -1,4 +1,4 @@
-import Webpack from "../modules/webpack.js";
+import Webpack from "./webpack";
 
 export default class Components {
     static #_cache = {};
