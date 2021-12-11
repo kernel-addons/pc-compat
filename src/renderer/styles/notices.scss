@@ -20,7 +20,7 @@
         &.pc-notice-closing {
             animation: .6s close ease-out;
         }
-        
+
         .pc-notice-header {
             padding: 15px;
             display: flex;
@@ -32,7 +32,7 @@
             padding: 15px;
             padding-top: 0;
         }
-    
+
         .pc-notice-progress {
             z-index: 10;
             width: 100%;
@@ -42,20 +42,20 @@
             left: 0;
             right: 0;
         }
-    
+
         .pc-notice-progress-bar {
             background: var(--brand-experiment);
             height: 2px;
         }
-    
+
         .pc-notice-header-name {
             font-size: 17px;
             font-weight: 600;
         }
-    
+
         .pc-notice-close {
             margin-left: 10px;
-            
+
             > div {
                 display: inline-flex;
             }
@@ -82,6 +82,14 @@
                 margin-left: 5px;
             }
         }
+    }
+}
+
+.pc-announcement {
+    border-radius: 0;
+
+    &:first-child {
+        border-radius: 8px 0 0 !important;
     }
 }
 

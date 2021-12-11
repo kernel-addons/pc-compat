@@ -268,29 +268,6 @@ var Modules = {
     }
 };
 
-function _classPrivateFieldGet(receiver, privateMap) {
-    if (!privateMap.has(receiver)) {
-        throw new TypeError("attempted to get private field on non-instance");
-    }
-    return privateMap.get(receiver).value;
-}
-function _classPrivateFieldSet(receiver, privateMap, value) {
-    if (!privateMap.has(receiver)) {
-        throw new TypeError("attempted to set private field on non-instance");
-    }
-    var descriptor = privateMap.get(receiver);
-    if (!descriptor.writable) {
-        throw new TypeError("attempted to set read only private field");
-    }
-    descriptor.value = value;
-    return value;
-}
-function _classPrivateMethodGet$1(receiver, privateSet, fn) {
-    if (!privateSet.has(receiver)) {
-        throw new TypeError("attempted to get private field on non-instance");
-    }
-    return fn;
-}
 // @ts-nocheck
 if (typeof Array.prototype.at !== "function") {
     Array.prototype.at = function(index) {
@@ -301,12 +278,6 @@ if (typeof setImmediate === "undefined") {
     window.setImmediate = (callback)=>setTimeout(callback, 0)
     ;
 }
-const Events = {
-    CREATE: "CREATE",
-    LENGTH_CHANGE: "LENGTH_CHANGE",
-    PUSH: "PUSH",
-    LOADED: "LOADED"
-};
 class Filters {
     static byProps(...props) {
         return (module)=>props.every((prop)=>prop in module
@@ -325,10 +296,9 @@ class Filters {
         };
     }
 }
-var _parseOptions = new WeakSet();
-class WebpackModule {
-    get Events() {
-        return Events;
+var Webpack = new class Webpack {
+    get Filters() {
+        return Filters;
     }
     get chunkName() {
         return "webpackChunkdiscord_app";
@@ -336,34 +306,9 @@ class WebpackModule {
     get id() {
         return "kernel-req" + Math.random().toString().slice(2, 5);
     }
-    dispatch(event, ...args) {
-        if (!(event in _classPrivateFieldGet(this, _events))) throw new Error(`Unknown Event: ${event}`);
-        for (const callback of _classPrivateFieldGet(this, _events)[event]){
-            try {
-                callback(...args);
-            } catch (err) {
-                console.error(err);
-            }
-        }
-    }
-    on(event, callback) {
-        if (!(event in _classPrivateFieldGet(this, _events))) throw new Error(`Unknown Event: ${event}`);
-        return _classPrivateFieldGet(this, _events)[event].add(callback), ()=>this.off(event, callback)
-        ;
-    }
-    off(event, callback) {
-        if (!(event in _classPrivateFieldGet(this, _events))) throw new Error(`Unknown Event: ${event}`);
-        return _classPrivateFieldGet(this, _events)[event].delete(callback);
-    }
-    once(event, callback) {
-        const unlisten = this.on(event, (...args)=>{
-            unlisten();
-            callback(...args);
-        });
-    }
-    async waitFor(filter, { retries =100 , all =false , delay =50  } = {
+    async waitFor(filter, { retries =100 , all =false , forever =false , delay =50  } = {
     }) {
-        for(let i = 0; i < retries; i++){
+        for(let i = 0; i < retries || forever; i++){
             const module = this.findModule(filter, {
                 all,
                 cache: false
@@ -373,10 +318,18 @@ class WebpackModule {
             );
         }
     }
+    parseOptions(args, filter = (thing)=>typeof thing === "object" && thing != null && !Array.isArray(thing)
+    ) {
+        return [
+            args,
+            filter(args.at(-1)) ? args.pop() : {
+            }
+        ];
+    }
     request(cache = true) {
-        if (cache && _classPrivateFieldGet(this, _cache)) return _classPrivateFieldGet(this, _cache);
-        let req = void 0;
-        if ("webpackChunkdiscord_app" in window && webpackChunkdiscord_app != null) {
+        if (cache && this.cache) return this.cache;
+        let req = undefined;
+        if (Array.isArray(window[this.chunkName])) {
             const chunk = [
                 [
                     this.id
@@ -388,7 +341,8 @@ class WebpackModule {
             webpackChunkdiscord_app.push(chunk);
             webpackChunkdiscord_app.splice(webpackChunkdiscord_app.indexOf(chunk), 1);
         }
-        _classPrivateFieldSet(this, _cache, req);
+        if (!req) console.warn("[Webpack] Got empty cache.");
+        if (cache) this.cache = req;
         return req;
     }
     findModule(filter, { all =false , cache =true , force =false  } = {
@@ -396,42 +350,42 @@ class WebpackModule {
         if (typeof filter !== "function") return void 0;
         const __webpack_require__ = this.request(cache);
         const found = [];
-        if (!__webpack_require__.c) return null;
-        const wrapFilter = function(module) {
+        if (!__webpack_require__) return;
+        const wrapFilter = function(module, index) {
             try {
-                return filter(module);
+                return filter(module, index);
             } catch (e) {
                 return false;
             }
         };
         for(const id in __webpack_require__.c){
-            var module1 = __webpack_require__.c[id].exports;
-            if (!module1 || module1 === window) continue;
-            switch(typeof module1){
+            const module = __webpack_require__.c[id].exports;
+            if (!module || module === window) continue;
+            switch(typeof module){
                 case "object":
                     {
-                        if (wrapFilter(module1)) {
-                            if (!all) return module1;
-                            found.push(module1);
+                        if (wrapFilter(module, id)) {
+                            if (!all) return module;
+                            found.push(module);
                         }
-                        if (module1.__esModule && module1.default != null && wrapFilter(module1.default)) {
-                            if (!all) return module1.default;
-                            found.push(module1.default);
+                        if (module.__esModule && module.default != null && wrapFilter(module.default, id)) {
+                            if (!all) return module.default;
+                            found.push(module.default);
                         }
-                        if (force && module1.__esModule) for(const key in module1){
-                            if (!module1[key]) continue;
-                            if (wrapFilter(module1[key])) {
-                                if (!all) return module1[key];
-                                found.push(module1[key]);
+                        if (force && module.__esModule) for(const key in module){
+                            if (!module[key]) continue;
+                            if (wrapFilter(module[key], id)) {
+                                if (!all) return module[key];
+                                found.push(module[key]);
                             }
                         }
                         break;
                     }
                 case "function":
                     {
-                        if (wrapFilter(module1)) {
-                            if (!all) return module1;
-                            found.push(module1);
+                        if (wrapFilter(module, id)) {
+                            if (!all) return module;
+                            found.push(module);
                         }
                         break;
                     }
@@ -445,135 +399,125 @@ class WebpackModule {
         });
     }
     bulk(...options) {
-        const [filters, { wait =false , ...rest }] = _classPrivateMethodGet$1(this, _parseOptions, parseOptions).call(this, options);
+        const [filters, { wait =false , ...rest }] = this.parseOptions(options);
         const found = new Array(filters.length);
         const searchFunction = wait ? this.waitFor : this.findModule;
-        const returnValue = searchFunction.call(this, (module)=>{
-            const matches = filters.filter((filter)=>{
+        const wrappedFilters = filters.map((filter)=>(m)=>{
                 try {
-                    return filter(module);
-                } catch (e) {
+                    return filter(m);
+                } catch (error) {
                     return false;
                 }
-            });
-            if (!matches.length) return false;
-            for (const filter1 of matches){
-                found[filters.indexOf(filter1)] = module;
             }
-            return found.filter(Boolean).length === filters.length;
+        );
+        const returnValue = searchFunction.call(this, (module)=>{
+            for(let i = 0; i < wrappedFilters.length; i++){
+                const filter = wrappedFilters[i];
+                if (typeof filter !== "function" || !filter(module) || found[i] != null) continue;
+                found[i] = module;
+            }
+            return found.filter(String).length === filters.length;
         }, rest);
         if (wait) return returnValue.then(()=>found
         );
         return found;
     }
     findByProps(...options) {
-        const [props1, { bulk =false , wait =false , ...rest }] = _classPrivateMethodGet$1(this, _parseOptions, parseOptions).call(this, options);
-        const filter = (props, module)=>module && props.every((prop)=>prop in module
-            )
-        ;
-        return bulk ? this.bulk(...props1.map((props)=>filter.bind(null, props)
-        ).concat({
-            wait,
-            ...rest
-        })) : wait ? this.waitFor(filter.bind(null, props1)) : this.findModule(filter.bind(null, props1), rest);
+        const [props, { bulk =false , wait =false , ...rest }] = this.parseOptions(options);
+        if (!bulk && !wait) {
+            return this.findModule(Filters.byProps(...props), rest);
+        }
+        if (wait && !bulk) {
+            return this.waitFor(Filters.byProps(...props), rest);
+        }
+        if (bulk) {
+            const filters = props.map((propsArray)=>Filters.byProps(...propsArray)
+            ).concat({
+                wait,
+                ...rest
+            });
+            return this.bulk(...filters);
+        }
+        return null;
     }
     findByDisplayName(...options) {
-        const [displayNames, { bulk =false , default: defaultExport = false , wait =false , ...rest }] = _classPrivateMethodGet$1(this, _parseOptions, parseOptions).call(this, options);
-        const filter = (name, module)=>{
-            var ref;
-            return defaultExport ? (module === null || module === void 0 ? void 0 : (ref = module.default) === null || ref === void 0 ? void 0 : ref.displayName) === name : (module === null || module === void 0 ? void 0 : module.displayName) === name;
-        };
-        return bulk ? this.bulk(...displayNames.map((name)=>filter.bind(null, name)
-        ).concat({
-            wait,
-            cache
-        })) : wait ? this.waitFor(filter.bind(null, displayNames[0]), rest) : this.findModule(filter.bind(null, displayNames[0]), rest);
-    }
-    async wait(callback = null) {
-        return new Promise((resolve)=>{
-            this.once(Events.LOADED, ()=>{
-                resolve();
-                typeof callback === "function" && callback();
+        const [displayNames, { bulk =false , default: defaultExport = false , wait =false , ...rest }] = this.parseOptions(options);
+        if (!bulk && !wait) {
+            return this.findModule(Filters.byDisplayName(displayNames[0]), rest);
+        }
+        if (wait && !bulk) {
+            return this.waitFor(Filters.byDisplayName(displayNames[0]), rest);
+        }
+        if (bulk) {
+            const filters = displayNames.map(filters.map(Filters.byDisplayName)).concat({
+                wait,
+                cache
             });
+            return this.bulk(...filters);
+        }
+        return null;
+    }
+    findIndex(filter) {
+        let foundIndex = -1;
+        this.findModule((module, index)=>{
+            if (filter(module)) foundIndex = index;
+        });
+        return foundIndex;
+    }
+    atIndex(index) {
+        var ref;
+        return (ref = this.request(true)) === null || ref === void 0 ? void 0 : ref.c[index];
+    }
+    get waitForGlobal() {
+        return new Promise(async (onExists)=>{
+            while(!Array.isArray(window[this.chunkName])){
+                await new Promise(setImmediate);
+            }
+            onExists();
         });
     }
-    get whenExists() {
-        return new Promise((resolve)=>{
-            this.once(Events.CREATE, resolve);
+    /**@deprecated Use Webpack.whenReady.then(() => {}) instead. */ async wait(callback = null) {
+        return this.whenReady.then(()=>{
+            typeof callback === "function" && callback();
         });
+    }
+    /**@deprecated Use Webpack.whenReady.then(() => {}) instead. */ get whenExists() {
+        return this.waitForGlobal;
+    }
+    /**@deprecated Use Webpack.whenReady.then(() => {}) instead. */ on(event, listener) {
+        switch(event){
+            case "LOADED":
+                return this.whenReady.then(listener);
+        }
+    }
+    /**@deprecated @see Webpack.on */ get once() {
+        return this.on;
     }
     constructor(){
-        _events.set(this, {
-            writable: true,
-            value: Object.fromEntries(Object.keys(Events).map((key)=>[
-                    key,
-                    new Set()
-                ]
-            ))
-        });
-        _cache.set(this, {
-            writable: true,
-            value: null
-        });
-        _parseOptions.add(this);
-        this.whenReady = null;
-        Object.defineProperty(window, this.chunkName, {
-            get () {
-                return void 0;
-            },
-            set: (value)=>{
-                setImmediate(()=>{
-                    this.dispatch(Events.CREATE);
+        this.cache = null;
+        this.whenReady = this.waitForGlobal.then(()=>new Promise(async (onReady)=>{
+                const [Dispatcher, { ActionTypes  } = {
+                }] = await this.findByProps([
+                    "dirtyDispatch"
+                ], [
+                    "API_HOST",
+                    "ActionTypes"
+                ], {
+                    cache: false,
+                    bulk: true,
+                    wait: true,
+                    forever: true
                 });
-                const originalPush = value.push;
-                value.push = (...values)=>{
-                    this.dispatch(Events.LENGTH_CHANGE, value.length + values.length);
-                    this.dispatch(Events.PUSH, values);
-                    return Reflect.apply(originalPush, value, values);
+                const listener = function() {
+                    Dispatcher.unsubscribe(ActionTypes.START_SESSION, listener);
+                    onReady();
                 };
-                Object.defineProperty(window, this.chunkName, {
-                    value,
-                    configurable: true,
-                    writable: true
-                });
-                return value;
-            },
-            configurable: true
-        });
-        let listener = (shouldUnsubscribe, Dispatcher, ActionTypes, event)=>{
-            if (shouldUnsubscribe) {
-                Dispatcher.unsubscribe(ActionTypes.START_SESSION, listener);
-            }
-            this.dispatch(Events.LOADED);
-        };
-        this.once(Events.PUSH, async ()=>{
-            const [Dispatcher, Constants] = await this.findByProps([
-                "dirtyDispatch"
-            ], [
-                "API_HOST",
-                "ActionTypes"
-            ], {
-                cache: false,
-                bulk: true,
-                wait: true
-            });
-            Dispatcher.subscribe(Constants.ActionTypes.START_SESSION, listener = listener.bind(null, true, Dispatcher, Constants.ActionTypes));
-        });
+                Dispatcher.subscribe(ActionTypes.START_SESSION, listener);
+            })
+        );
+        window.Webpack = this;
     }
-}
-var _events = new WeakMap();
-var _cache = new WeakMap();
-function parseOptions(args, filter = (thing)=>typeof thing === "object" && thing != null && !Array.isArray(thing)
-) {
-    return [
-        args,
-        filter(args.at(-1)) ? args.pop() : {
-        }
-    ];
-}
-var _Webpack;
-const Webpack = (_Webpack = window.Webpack) !== null && _Webpack !== void 0 ? _Webpack : window.Webpack = new WebpackModule;
-if (!Webpack.whenReady) Webpack.whenReady = Webpack.wait();
+};
 
 const DiscordModules = {
 };
@@ -729,7 +673,7 @@ function _classPrivateMethodGet(receiver, privateSet, fn) {
     return fn;
 }
 var _parseType = new WeakSet(), _log = new WeakSet();
-class Logger$a {
+class Logger$b {
     log(...message) {
         _classPrivateMethodGet(this, _log, log).call(this, "log", ...message);
     }
@@ -746,7 +690,7 @@ class Logger$a {
         _classPrivateMethodGet(this, _log, log).call(this, "debug", ...message);
     }
     static create(name) {
-        return new Logger$a(name);
+        return new Logger$b(name);
     }
     constructor(name){
         _parseType.add(this);
@@ -769,7 +713,7 @@ function log(type, ...message) {
     console[_classPrivateMethodGet(this, _parseType, parseType).call(this, type)](`%c[Powercord:${this.module}]%c`, "color: #7289da; font-weight: 700;", "", ...message);
 }
 
-const Logger$9 = Logger$a.create("Patcher");
+const Logger$a = Logger$b.create("Patcher");
 class Patcher {
     static getPatchesByCaller(id) {
         if (!id) return [];
@@ -793,7 +737,7 @@ class Patcher {
                     const tempArgs = beforePatch.callback(this, args, patch.originalFunction.bind(this));
                     if (Array.isArray(tempArgs)) args = tempArgs;
                 } catch (error) {
-                    Logger$9.error(`Could not fire before patch for ${patch.functionName} of ${beforePatch.caller}`, error);
+                    Logger$a.error(`Could not fire before patch for ${patch.functionName} of ${beforePatch.caller}`, error);
                 }
             }
             const insteadPatches = patch.children.filter((e)=>e.type === "instead"
@@ -804,7 +748,7 @@ class Patcher {
                     const tempReturn = insteadPatch.callback(this, args, patch.originalFunction.bind(this));
                     if (typeof tempReturn !== "undefined") returnValue = tempReturn;
                 } catch (error) {
-                    Logger$9.error(`Could not fire instead patch for ${patch.functionName} of ${insteadPatch.caller}`, error);
+                    Logger$a.error(`Could not fire instead patch for ${patch.functionName} of ${insteadPatch.caller}`, error);
                 }
             }
             for (const afterPatch of patch.children.filter((e)=>e.type === "after"
@@ -814,7 +758,7 @@ class Patcher {
                     );
                     if (typeof tempReturn !== "undefined") returnValue = tempReturn;
                 } catch (error) {
-                    Logger$9.error(`Could not fire after patch for ${patch.functionName} of ${afterPatch.caller}`, error);
+                    Logger$a.error(`Could not fire after patch for ${patch.functionName} of ${afterPatch.caller}`, error);
                 }
             }
             return returnValue;
@@ -1028,7 +972,7 @@ const injectMessageName = function() {
         var ref;
         return ((ref = m === null || m === void 0 ? void 0 : m.toString()) === null || ref === void 0 ? void 0 : ref.indexOf("childrenSystemMessage")) > -1;
     });
-    if (!Message) return Logger$a.warn("ComponentPatcher", "Message Component was not found!");
+    if (!Message) return Logger$b.warn("ComponentPatcher", "Message Component was not found!");
     Message.displayName = "Message";
 };
 promise.then(()=>{
@@ -1056,7 +1000,7 @@ class Store {
             try {
                 listener(...args);
             } catch (error) {
-                Logger$a.error(`Store:${this.constructor.name}`, error);
+                Logger$b.error(`Store:${this.constructor.name}`, error);
             }
         }
     }
@@ -1096,7 +1040,7 @@ class Emitter {
             try {
                 listener(...args);
             } catch (error) {
-                Logger$a.error(`Store:${this.constructor.name}`, "Could not fire callback:", error);
+                Logger$b.error(`Store:${this.constructor.name}`, "Could not fire callback:", error);
             }
         }
     }
@@ -1979,7 +1923,7 @@ SettingsRenderer.defaultPanels = [
 ];
 SettingsRenderer.panels = [];
 
-const Logger$8 = Logger$a.create("PluginManager");
+const Logger$9 = Logger$b.create("PluginManager");
 class PluginManager extends Emitter {
     static get folder() {
         return path.resolve(DataStore$1.baseDir, "plugins");
@@ -2005,11 +1949,11 @@ class PluginManager extends Emitter {
             try {
                 fs.mkdirSync(this.folder);
             } catch (error) {
-                return void Logger$8.error("PluginsManager", `Failed to create plugins folder:`, error);
+                return void Logger$9.error("PluginsManager", `Failed to create plugins folder:`, error);
             }
         }
-        if (!fs.statSync(this.folder).isDirectory()) return void Logger$8.error("PluginsManager", `Plugins dir isn't a folder.`);
-        Logger$8.log("PluginsManager", "Loading plugins...");
+        if (!fs.statSync(this.folder).isDirectory()) return void Logger$9.error("PluginsManager", `Plugins dir isn't a folder.`);
+        Logger$9.log("PluginsManager", "Loading plugins...");
         for (const file of fs.readdirSync(this.folder, "utf8")){
             const location = path.resolve(this.folder, file);
             if (!fs.statSync(location).isDirectory()) continue;
@@ -2021,7 +1965,7 @@ class PluginManager extends Emitter {
             try {
                 this.loadPlugin(location);
             } catch (error) {
-                Logger$8.error(`Failed to load ${file}:`, error);
+                Logger$9.error(`Failed to load ${file}:`, error);
             }
         }
     }
@@ -2078,10 +2022,10 @@ class PluginManager extends Emitter {
             });
             exports = new data(path.basename(location), location);
         } catch (error) {
-            return void Logger$8.error(`Failed to compile ${manifest.name || path.basename(location)}:`, error);
+            return void Logger$9.error(`Failed to compile ${manifest.name || path.basename(location)}:`, error);
         }
         if (log) {
-            Logger$8.log(`${manifest.name} was loaded!`);
+            Logger$9.log(`${manifest.name} was loaded!`);
         }
         this.plugins.set(path.basename(location), exports);
         if (this.isEnabled(path.basename(location))) {
@@ -2095,7 +2039,7 @@ class PluginManager extends Emitter {
         this.plugins.delete(plugin.entityID);
         this.clearCache(plugin.path);
         if (log) {
-            Logger$8.log(`${plugin.displayName} was unloaded!`);
+            Logger$9.log(`${plugin.displayName} was unloaded!`);
         }
         return success;
     }
@@ -2104,10 +2048,10 @@ class PluginManager extends Emitter {
         if (!addon) return;
         const success = this.unloadAddon(plugin, false);
         if (!success) {
-            return Logger$8.error(`Something went wrong while trying to unload ${plugin.displayName}:`);
+            return Logger$9.error(`Something went wrong while trying to unload ${plugin.displayName}:`);
         }
         this.loadPlugin(plugin.path, false);
-        Logger$8.log(`Finished reloading ${plugin.displayName}.`);
+        Logger$9.log(`Finished reloading ${plugin.displayName}.`);
     }
     static startPlugin(addon, log = true) {
         const plugin = this.resolve(addon);
@@ -2115,10 +2059,10 @@ class PluginManager extends Emitter {
         try {
             if (typeof plugin.startPlugin === "function") plugin.startPlugin();
             if (log) {
-                Logger$8.log(`${plugin.displayName} has been started!`);
+                Logger$9.log(`${plugin.displayName} has been started!`);
             }
         } catch (error) {
-            Logger$8.error(`Could not start ${plugin.displayName}:`, error);
+            Logger$9.error(`Could not start ${plugin.displayName}:`, error);
         }
         return true;
     }
@@ -2128,10 +2072,10 @@ class PluginManager extends Emitter {
         try {
             if (typeof plugin.pluginWillUnload === "function") plugin.pluginWillUnload();
             if (log) {
-                Logger$8.log(`${plugin.displayName} has been stopped!`);
+                Logger$9.log(`${plugin.displayName} has been stopped!`);
             }
         } catch (error) {
-            Logger$8.error(`Could not stop ${plugin.displayName}:`, error);
+            Logger$9.error(`Could not stop ${plugin.displayName}:`, error);
             return false;
         }
         return true;
@@ -2143,7 +2087,7 @@ class PluginManager extends Emitter {
         DataStore$1.trySaveData("plugins", this.states);
         this.startPlugin(plugin, false);
         if (log) {
-            Logger$8.log(`${plugin.displayName} has been enabled!`);
+            Logger$9.log(`${plugin.displayName} has been enabled!`);
             this.emit("toggle", plugin.entityID, true);
         }
     }
@@ -2154,7 +2098,7 @@ class PluginManager extends Emitter {
         DataStore$1.trySaveData("plugins", this.states);
         this.stopPlugin(plugin, false);
         if (log) {
-            Logger$8.log(`${plugin.displayName} has been disabled!`);
+            Logger$9.log(`${plugin.displayName} has been disabled!`);
             this.emit("toggle", plugin.entityID, false);
         }
     }
@@ -2386,7 +2330,7 @@ class Clyde {
     }
 }
 
-const Logger$7 = Logger$a.create("Commands");
+const Logger$8 = Logger$b.create("Commands");
 const [useCommandsStore, CommandsApi] = createStore({
     header: "",
     active: false,
@@ -2502,7 +2446,7 @@ function registerCommand(options) {
                                             });
                                         }
                                     } catch (error) {
-                                        Logger$7.error(`Could not executor for ${options.command}-${command}:`, error);
+                                        Logger$8.error(`Could not executor for ${options.command}-${command}:`, error);
                                         Clyde.sendMessage(void 0, {
                                             content: ":x: An error occurred while running this command. Check your console."
                                         });
@@ -2516,7 +2460,7 @@ function registerCommand(options) {
                     executor(args);
                 }
             } catch (error) {
-                Logger$7.error(error);
+                Logger$8.error(error);
             }
         },
         applicationId: section.id,
@@ -2532,11 +2476,11 @@ Webpack.whenReady.then(()=>{
         var ref;
         return (m === null || m === void 0 ? void 0 : (ref = m.type) === null || ref === void 0 ? void 0 : ref.toString().indexOf("useAndTrackNonFriendDMAccept")) > -1;
     });
-    if (!ChannelChatMemo) return void Logger$7.warn("Commands", "ChannelChat memo component not found!");
+    if (!ChannelChatMemo) return void Logger$8.warn("Commands", "ChannelChat memo component not found!");
     const unpatch = Patcher.after("Commands", ChannelChatMemo, "type", (_, __, returnValue1)=>{
         unpatch();
         const ChannelChat = returnValue1.type;
-        if (!ChannelChat) return void Logger$7.error("Commands", "Could no extract ChannelChat nested command!");
+        if (!ChannelChat) return void Logger$8.error("Commands", "Could no extract ChannelChat nested command!");
         Patcher.after("Commands", ChannelChat.prototype, "render", (_, __, returnValue)=>{
             var ref, ref2;
             const form = (ref = findInReactTree(returnValue, (n)=>{
@@ -2657,7 +2601,7 @@ class DOM {
 DOM.elements = {
 };
 
-const Logger$6 = Logger$a.create("FLuxDispatcher");
+const Logger$7 = Logger$b.create("FLuxDispatcher");
 function createDispatcher() {
     const events = {
     };
@@ -2669,7 +2613,7 @@ function createDispatcher() {
                 try {
                     callback(event);
                 } catch (error) {
-                    Logger$6.error(`Could not fire callback for ${event}:`, error);
+                    Logger$7.error(`Could not fire callback for ${event}:`, error);
                 }
             }
         },
@@ -2862,6 +2806,59 @@ Notices.container = DOM.createElement("div", {
 promise.then(()=>Notices.initialize()
 );
 
+const Logger$6 = Logger$b.create("Notices:Announcement");
+var Announcement = fromPromise(promise.then(()=>{
+    const Notices = Webpack.findModule((m)=>{
+        var ref;
+        return ((ref = m.default) === null || ref === void 0 ? void 0 : ref.displayName) === "Notice";
+    });
+    const NoticeCloseButton = Notices.NoticeCloseButton;
+    const NoticeButtonAncor = Notices.NoticeButton;
+    Notices.NoticeButton;
+    const Notice = Notices.default;
+    const Colors = {
+        BLURPLE: Notices.NoticeColors.BRAND,
+        RED: Notices.NoticeColors.DANGER,
+        ORANGE: Notices.NoticeColors.DEFAULT,
+        BLUE: Notices.NoticeColors.INFO,
+        GREY: Notices.NoticeColors.NEUTRAL,
+        DARK_GREY: Notices.NoticeColors.DARK,
+        GREEN: Notices.NoticeColors.NOTIFICATION,
+        BLURPLE_GRADIENT_1: Notices.NoticeColors.PREMIUM_TIER_1,
+        BLURPLE_GRADIENT_2: Notices.NoticeColors.PREMIUM_TIER_2,
+        SPOTIFY: Notices.NoticeColors.SPOTIFY,
+        PURPLE: Notices.NoticeColors.STREAMER_MODE
+    };
+    return function Announcement(props) {
+        var ref;
+        const handleClick = (callback)=>{
+            try {
+                closeAnnouncement(props.id);
+                if (callback && typeof callback === "function") {
+                    return callback();
+                }
+            } catch (err) {
+                return Logger$6.error(err);
+            }
+        };
+        return(/*#__PURE__*/ React.createElement(Notice, {
+            className: props.className,
+            color: Colors[(ref = props.color) === null || ref === void 0 ? void 0 : ref.toUpperCase()] || Colors.BLURPLE,
+            id: props.id
+        }, /*#__PURE__*/ React.createElement(NoticeCloseButton, {
+            onClick: ()=>handleClick(props.callback)
+        }), props.message, props.button && // I'm not sure if powercord's announcements close the announcement
+        // once the button is clicked since its currently broken.
+        // IF it doesn't, the component below doesn't close it once the button is clicked
+        // <NoticeButton onClick={() => handleClick(props.button.onClick)}>
+        //     {props.button.text}
+        // </NoticeButton>
+        /*#__PURE__*/ React.createElement(NoticeButtonAncor, {
+            onClick: ()=>handleClick(props.button.onClick)
+        }, props.button.text)));
+    };
+}));
+
 function _extends$P() {
     _extends$P = Object.assign || function(target) {
         for(var i = 1; i < arguments.length; i++){
@@ -2876,129 +2873,47 @@ function _extends$P() {
     };
     return _extends$P.apply(this, arguments);
 }
-const Logger$5 = Logger$a.create("Announcements");
-const [useAnnouncements, AnnouncementsApi] = createStore({
+function AnnouncementContainer(props) {
+    var ref, ref1;
+    const [, forceUpdate] = React.useReducer((e)=>e + 1
+    , 0);
+    const _handler = ()=>forceUpdate()
+    ;
+    React.useEffect(()=>{
+        AnnouncementsApi.addListener(_handler);
+        return ()=>{
+            AnnouncementsApi.removeListener(_handler);
+        };
+    }, []);
+    const elements = (ref = AnnouncementsApi.getState) === null || ref === void 0 ? void 0 : (ref1 = ref.call(AnnouncementsApi)) === null || ref1 === void 0 ? void 0 : ref1.elements;
+    return elements ? /*#__PURE__*/ React.createElement(React.Fragment, null, Object.values(elements).map((notice, index)=>/*#__PURE__*/ React.createElement(Announcement, _extends$P({
+        }, notice, {
+            className: "pc-announcement"
+        }))
+    )) : null;
+}
+
+const Logger$5 = Logger$b.create("Announcements");
+const [, AnnouncementsApi] = createStore({
     elements: {
     }
 });
-let classNames = null, ClickableComponent = (props)=>null
-;
-function Announcement(props) {
-    var _color;
-    const className = [
-        classNames.notice,
-        (_color = classNames.colors[props.color]) !== null && _color !== void 0 ? _color : classNames.colors.blurple, 
-    ];
-    const handleClick = function(func) {
-        closeAnnouncement(props.id);
-        if (typeof func === "function") func();
+promise.then(async ()=>{
+    var ref;
+    const { base  } = Webpack.findByProps("base", "container") || {
+        base: "not-found"
     };
-    return(/*#__PURE__*/ React.createElement("div", {
-        className: joinClassNames("powercord-notice", ...className),
-        id: props.id
-    }, props.message, /*#__PURE__*/ React.createElement(ClickableComponent, {
-        className: classNames.closeButton,
-        onClick: handleClick.bind(null, props.onClose)
-    }), props.button && /*#__PURE__*/ React.createElement("button", {
-        className: classNames.button,
-        onClick: handleClick.bind(null, props.button.onClick)
-    }, props.button.text)));
-}
-promise.then(()=>{
-    let renderRoute = (props)=>null
-    ;
-    const [{ Switch  } = {
-    }, AppView, Notices, AppClasses, NoticeClasses, Clickable] = Webpack.bulk(Filters.byProps("Router", "Switch"), Filters.byDisplayName("AppView", false), Filters.byTypeString("PrimaryCTANoticeButton"), Filters.byProps("app", "layers"), Filters.byProps("colorStreamerMode"), Filters.byDisplayName("Clickable"));
-    ClickableComponent = Clickable;
-    classNames = {
-        ...NoticeClasses,
-        colors: {
-            blurple: NoticeClasses.colorBrand,
-            red: NoticeClasses.colorDanger,
-            organge: NoticeClasses.colorDefault,
-            blue: NoticeClasses.colorInfo,
-            dark: NoticeClasses.colorDark,
-            blurple_gradient: NoticeClasses.colorPremiumTier1,
-            spotify: NoticeClasses.colorSpotify,
-            purple: NoticeClasses.colorStreamerMode,
-            green: NoticeClasses.colorSuccess
-        }
-    };
-    function PatchedAnnouncements() {
-        const elements = useAnnouncements((s)=>Object.entries(s.elements)
-        );
-        return(/*#__PURE__*/ React.createElement(React.Fragment, null, /*#__PURE__*/ React.createElement(Notices, null), elements.map(([id, options])=>/*#__PURE__*/ React.createElement(Announcement, _extends$P({
-                key: id,
-                id: id
-            }, options))
-        )));
-    }
-    function PatchedViews(props) {
-        const returnValue = AppView(props);
+    const instance = getOwnerInstance(await waitFor(`.${base.split(" ")[0]}`));
+    Patcher.after("pc-compat-notices", instance === null || instance === void 0 ? void 0 : (ref = instance.props) === null || ref === void 0 ? void 0 : ref.children, "type", (_, args, res)=>{
         try {
-            const notices = findInReactTree(returnValue, (n)=>{
-                return (n === null || n === void 0 ? void 0 : n.type) === Notices;
-            });
-            if (!notices) return returnValue;
-            notices.type = React.memo(PatchedAnnouncements);
-        } catch (error) {
-            Logger$5.log("Error in NoticesContainer patch:", error);
+            const { children  } = findInReactTree(res, (r)=>r.className === base
+            );
+            children.unshift(/*#__PURE__*/ React.createElement(AnnouncementContainer, null));
+        } catch (err) {
+            return Logger$5.error(err);
         }
-        return returnValue;
-    }
-    function PatchedChat({ __pc_original , ...props }) {
-        const returnValue = __pc_original(props);
-        try {
-            const layer = returnValue.props.children[0];
-            if (!layer) return returnValue;
-            const clonedChild = React.cloneElement(layer.props.children);
-            clonedChild.type = PatchedViews;
-            layer.props.children = clonedChild;
-        } catch (error) {
-            Logger$5.error("Error in PatchedChat:", error);
-        }
-        return returnValue;
-    }
-    function patchedRenderRoute(props) {
-        const returnValue = renderRoute(props);
-        if (!returnValue) return;
-        try {
-            const original = returnValue.type.type;
-            if (typeof original !== "function") return returnValue;
-            returnValue.type = React.memo(PatchedChat);
-            returnValue.props.__pc_original = original;
-        } catch (error) {
-            Logger$5.error("Announcements");
-        }
-        return returnValue;
-    }
-    Patcher.after("Announcements", Switch.prototype, "render", (_this, _, ret)=>{
-        var ref, ref1;
-        const childs = _this.props.children;
-        if (!Array.isArray(childs) || !((ref = childs[1]) === null || ref === void 0 ? void 0 : (ref1 = ref.some) === null || ref1 === void 0 ? void 0 : ref1.call(ref, (c)=>{
-            return (c === null || c === void 0 ? void 0 : c.key) === "/app";
-        }))) return;
-        const original = ret.props.children;
-        ret.props.children = (props)=>{
-            const returnValue = original(props);
-            if (returnValue.props.render === patchedRenderRoute) return returnValue;
-            try {
-                renderRoute = returnValue.props.render;
-                returnValue.props.render = patchedRenderRoute;
-            } catch (error) {
-                Logger$5.error("Failed to patch Router Switch:", error);
-            }
-            return returnValue;
-        };
     });
-    const [node] = document.getElementsByClassName(AppClasses.app);
-    if (!node) return Logger$5.warn("DOM Element for app was not found!");
-    const instance1 = getOwnerInstance(node, (instance)=>{
-        var ref;
-        return (instance === null || instance === void 0 ? void 0 : (ref = instance.constructor) === null || ref === void 0 ? void 0 : ref.displayName) === "ViewsWithMainInterface";
-    });
-    if (instance1) instance1.forceUpdate();
-//TODO: Patch the notice store to make sidebar rounded.
+    instance.forceUpdate();
 }).catch((error)=>{
     Logger$5.error("Failed to initialize:", error);
 });
@@ -3009,7 +2924,10 @@ function sendAnnouncement(id, options) {
         ...state,
         elements: {
             ...state.elements,
-            [id]: options
+            [id]: {
+                ...options,
+                id
+            }
         }
     });
 }
@@ -3034,7 +2952,7 @@ var notices = /*#__PURE__*/Object.freeze({
     __proto__: null,
     sendToast: sendToast,
     closeToast: closeToast,
-    Announcement: Announcement,
+    api: AnnouncementsApi,
     sendAnnouncement: sendAnnouncement,
     closeAnnouncement: closeAnnouncement
 });
@@ -3337,7 +3255,7 @@ const ColorPicker = fromPromise(Webpack.whenReady.then(()=>{
             }, props)))
         ;
     } catch (error) {
-        Logger$a.error("Failed to get ColorPicker component!", error);
+        Logger$b.error("Failed to get ColorPicker component!", error);
         return ()=>null
         ;
     }
@@ -4672,7 +4590,7 @@ const injector = {
     isInjected
 };
 
-const Logger$4 = Logger$a.create("StyleManager");
+const Logger$4 = Logger$b.create("StyleManager");
 class StyleManager extends Emitter {
     static get folder() {
         return path.resolve(DataStore$1.baseDir, "themes");
@@ -4904,7 +4822,7 @@ class EventEmitter {
             try {
                 listener(...args);
             } catch (error) {
-                Logger$a.error("Emitter", `Cannot fire listener for event ${event} at position ${index}:`, error);
+                Logger$b.error("Emitter", `Cannot fire listener for event ${event} at position ${index}:`, error);
             }
         }
         return this;
@@ -5087,7 +5005,7 @@ var url = {
     `)
 };
 
-const Logger$3 = Logger$a.create("HTTP");
+const Logger$3 = Logger$b.create("HTTP");
 class HTTPError extends Error {
     constructor(message, res){
         super(message);
@@ -5523,7 +5441,7 @@ const NodeModule = {
 
 var Require = createRequire(path.resolve(PCCompatNative.getBasePath(), "plugins"));
 
-const Logger$2 = Logger$a.create("DataStore");
+const Logger$2 = Logger$b.create("DataStore");
 const DataStore = new class DataStore extends Store {
     tryLoadData(name, def = {
     }) {
@@ -5637,7 +5555,7 @@ const [usePanelStore, PanelAPI] = createStore({
     selectedFile: null
 });
 
-const Logger$1 = Logger$a.create("QuickCSS:util");
+const Logger$1 = Logger$b.create("QuickCSS:util");
 const filesPath = path.resolve(PCCompatNative.getBasePath(), "config", "quickcss");
 const createStorage = function() {
     try {
@@ -5981,7 +5899,7 @@ function SideBar() {
                         selectedFile: location
                     });
                 } catch (error) {
-                    Logger$a.error("QuickCSS", "Failed to create file " + value, error);
+                    Logger$b.error("QuickCSS", "Failed to create file " + value, error);
                 }
             }
         });
@@ -6204,7 +6122,7 @@ function QuickCSSPanel() {
     })())));
 }
 
-const Logger = Logger$a.create("QuickCSS");
+const Logger = Logger$b.create("QuickCSS");
 class QuickCSS {
     static async initialize() {
         const { Lodash  } = DiscordModules;
