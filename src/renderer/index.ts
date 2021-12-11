@@ -9,6 +9,7 @@ import StyleManager from "@powercord/stylemanager";
 import SettingsRenderer from "@modules/settings";
 import {promise} from "@modules/discord";
 import QuickCSS from "@ui/quickcss";
+import * as Internals from "./modules";
 
 if (!("process" in window)) {
     PCCompatNative.IPC.dispatch(IPCEvents.EXPOSE_PROCESS_GLOBAL);
@@ -20,6 +21,7 @@ export default new class PCCompat {
     async onStart() {
         this.expose("React", DiscordModules.React);
         this.expose("powercord", Require("powercord"));
+        this.expose("PCInternals", Internals);
         await initializeWebpack();
         
         powercord.api.commands.initialize();
