@@ -35,6 +35,9 @@ export default {
         props: ["Messages", "getAvailableLocales"],
         ensure: (mod: any) => mod.Messages.CLOSE
     },
+    LocaleStore: {
+        props: ["locale", "theme"]
+    },
     Lodash: {
         props: ["zipObjectDeep"]
     },

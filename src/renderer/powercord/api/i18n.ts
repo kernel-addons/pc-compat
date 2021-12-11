@@ -1,13 +1,13 @@
 import DiscordModules, {promise} from "@modules/discord";
 
 promise.then(() => {
-    const { LocaleManager } = DiscordModules;
+    const {LocaleManager, LocaleStore} = DiscordModules;
 
     locale = LocaleManager.getLocale();
 
-    LocaleManager.addChangeListener(() => {
-        if (LocaleManager.locale !== locale) {
-            locale = LocaleManager.locale;
+    LocaleStore.addChangeListener(() => {
+        if (LocaleStore.locale !== locale) {
+            locale = LocaleStore.locale;
             LocaleManager.loadPromise.then(injectStrings);
         }
     });

@@ -69,6 +69,12 @@ var Modules = {
         ],
         ensure: (mod)=>mod.Messages.CLOSE
     },
+    LocaleStore: {
+        props: [
+            "locale",
+            "theme"
+        ]
+    },
     Lodash: {
         props: [
             "zipObjectDeep"
@@ -2507,11 +2513,11 @@ var commands$1 = /*#__PURE__*/Object.freeze({
 });
 
 promise.then(()=>{
-    const { LocaleManager  } = DiscordModules;
+    const { LocaleManager , LocaleStore  } = DiscordModules;
     locale = LocaleManager.getLocale();
-    LocaleManager.addChangeListener(()=>{
-        if (LocaleManager.locale !== locale) {
-            locale = LocaleManager.locale;
+    LocaleStore.addChangeListener(()=>{
+        if (LocaleStore.locale !== locale) {
+            locale = LocaleStore.locale;
             LocaleManager.loadPromise.then(injectStrings);
         }
     });
