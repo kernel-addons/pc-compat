@@ -903,27 +903,12 @@ function forceUpdateElement(selector) {
     var ref;
     (ref = getOwnerInstance(document.querySelector(selector))) === null || ref === void 0 ? void 0 : ref.forceUpdate();
 }
-function waitFor(selector) {
-    return new Promise((resolve)=>{
-        const element = document.querySelector(selector);
-        if (element) return resolve(element);
-        new MutationObserver((mutations, observer)=>{
-            for(let m = 0; m < mutations.length; m++){
-                for(let i = 0; i < mutations[m].addedNodes.length; i++){
-                    const mutation = mutations[m].addedNodes[i];
-                    if (mutation.nodeType === 3) continue; // ignore text
-                    const directMatch = mutation.matches(selector) && mutation;
-                    if (directMatch) {
-                        observer.disconnect();
-                        return resolve(directMatch);
-                    }
-                }
-            }
-        }).observe(document, {
-            childList: true,
-            subtree: true
-        });
-    });
+async function waitFor(selector) {
+    let element;
+    while(!(element = document.querySelector(selector))){
+        await sleep(1);
+    }
+    return element;
 }
 
 var util$1 = /*#__PURE__*/Object.freeze({
