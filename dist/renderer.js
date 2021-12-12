@@ -285,8 +285,8 @@ if (typeof setImmediate === "undefined") {
     ;
 }
 class Filters {
-    static byProps(...props) {
-        return (module)=>props.every((prop)=>prop in module
+    static byProps(...props1) {
+        return (module)=>props1.every((prop)=>prop in module
             )
         ;
     }
@@ -312,10 +312,10 @@ var Webpack = new class Webpack {
     get id() {
         return "kernel-req" + Math.random().toString().slice(2, 5);
     }
-    async waitFor(filter, { retries =100 , all =false , forever =false , delay =50  } = {
+    async waitFor(filter4, { retries =100 , all =false , forever =false , delay =50  } = {
     }) {
         for(let i = 0; i < retries || forever; i++){
-            const module = this.findModule(filter, {
+            const module = this.findModule(filter4, {
                 all,
                 cache: false
             });
@@ -324,16 +324,16 @@ var Webpack = new class Webpack {
             );
         }
     }
-    parseOptions(args, filter = (thing)=>typeof thing === "object" && thing != null && !Array.isArray(thing)
+    parseOptions(args, filter1 = (thing)=>typeof thing === "object" && thing != null && !Array.isArray(thing)
     ) {
         return [
             args,
-            filter(args.at(-1)) ? args.pop() : {
+            filter1(args.at(-1)) ? args.pop() : {
             }
         ];
     }
-    request(cache = true) {
-        if (cache && this.cache) return this.cache;
+    request(cache2 = true) {
+        if (cache2 && this.cache) return this.cache;
         let req = undefined;
         if (Array.isArray(window[this.chunkName])) {
             const chunk = [
@@ -348,18 +348,18 @@ var Webpack = new class Webpack {
             webpackChunkdiscord_app.splice(webpackChunkdiscord_app.indexOf(chunk), 1);
         }
         if (!req) console.warn("[Webpack] Got empty cache.");
-        if (cache) this.cache = req;
+        if (cache2) this.cache = req;
         return req;
     }
-    findModule(filter, { all =false , cache =true , force =false  } = {
+    findModule(filter2, { all: all1 = false , cache: cache1 = true , force =false  } = {
     }) {
-        if (typeof filter !== "function") return void 0;
-        const __webpack_require__ = this.request(cache);
+        if (typeof filter2 !== "function") return void 0;
+        const __webpack_require__ = this.request(cache1);
         const found = [];
         if (!__webpack_require__) return;
         const wrapFilter = function(module, index) {
             try {
-                return filter(module, index);
+                return filter2(module, index);
             } catch (e) {
                 return false;
             }
@@ -371,17 +371,17 @@ var Webpack = new class Webpack {
                 case "object":
                     {
                         if (wrapFilter(module, id)) {
-                            if (!all) return module;
+                            if (!all1) return module;
                             found.push(module);
                         }
                         if (module.__esModule && module.default != null && wrapFilter(module.default, id)) {
-                            if (!all) return module.default;
+                            if (!all1) return module.default;
                             found.push(module.default);
                         }
                         if (force && module.__esModule) for(const key in module){
                             if (!module[key]) continue;
                             if (wrapFilter(module[key], id)) {
-                                if (!all) return module[key];
+                                if (!all1) return module[key];
                                 found.push(module[key]);
                             }
                         }
@@ -390,17 +390,17 @@ var Webpack = new class Webpack {
                 case "function":
                     {
                         if (wrapFilter(module, id)) {
-                            if (!all) return module;
+                            if (!all1) return module;
                             found.push(module);
                         }
                         break;
                     }
             }
         }
-        return all ? found : found[0];
+        return all1 ? found : found[0];
     }
-    findModules(filter) {
-        return this.findModule(filter, {
+    findModules(filter3) {
+        return this.findModule(filter3, {
             all: true
         });
     }
@@ -428,8 +428,8 @@ var Webpack = new class Webpack {
         );
         return found;
     }
-    findByProps(...options) {
-        const [props, { bulk =false , wait =false , ...rest }] = this.parseOptions(options);
+    findByProps(...options1) {
+        const [props, { bulk =false , wait =false , ...rest }] = this.parseOptions(options1);
         if (!bulk && !wait) {
             return this.findModule(Filters.byProps(...props), rest);
         }
@@ -446,8 +446,8 @@ var Webpack = new class Webpack {
         }
         return null;
     }
-    findByDisplayName(...options) {
-        const [displayNames, { bulk =false , default: defaultExport = false , wait =false , ...rest }] = this.parseOptions(options);
+    findByDisplayName(...options2) {
+        const [displayNames, { bulk =false , default: defaultExport = false , wait =false , ...rest }] = this.parseOptions(options2);
         if (!bulk && !wait) {
             return this.findModule(Filters.byDisplayName(displayNames[0]), rest);
         }
@@ -490,10 +490,10 @@ var Webpack = new class Webpack {
     /**@deprecated Use Webpack.whenReady.then(() => {}) instead. */ get whenExists() {
         return this.waitForGlobal;
     }
-    /**@deprecated Use Webpack.whenReady.then(() => {}) instead. */ on(event, listener) {
+    /**@deprecated Use Webpack.whenReady.then(() => {}) instead. */ on(event, listener1) {
         switch(event){
             case "LOADED":
-                return this.whenReady.then(listener);
+                return this.whenReady.then(listener1);
         }
     }
     /**@deprecated @see Webpack.on */ get once() {
@@ -529,7 +529,7 @@ const DiscordModules = {
 };
 const NOOP_RET = (_)=>_
 ;
-const filters = new Promise((resolve)=>{
+const filters1 = new Promise((resolve)=>{
     const result = [];
     for(let moduleId in Modules){
         const module = Modules[moduleId];
@@ -594,12 +594,12 @@ const filters = new Promise((resolve)=>{
     resolve(result);
 });
 const promise = Promise.all([
-    filters,
+    filters1,
     Webpack.whenReady
-]).then(([filters1])=>{
-    const result = Webpack.bulk(...filters1.map(({ filter  })=>filter
+]).then(([filters])=>{
+    const result = Webpack.bulk(...filters.map(({ filter  })=>filter
     ));
-    Object.assign(DiscordModules, filters1.reduce((modules, { id , map  }, index)=>{
+    Object.assign(DiscordModules, filters.reduce((modules, { id , map  }, index)=>{
         const mapper = map !== null && map !== void 0 ? map : NOOP_RET;
         modules[id] = mapper(result[index]);
         return modules;
@@ -701,28 +701,28 @@ function _classPrivateMethodGet(receiver, privateSet, fn) {
 }
 var _parseType = new WeakSet(), _log = new WeakSet();
 class Logger$b {
-    log(...message) {
-        _classPrivateMethodGet(this, _log, log).call(this, "log", ...message);
+    log(...message5) {
+        _classPrivateMethodGet(this, _log, log).call(this, "log", ...message5);
     }
-    info(...message) {
-        _classPrivateMethodGet(this, _log, log).call(this, "info", ...message);
+    info(...message1) {
+        _classPrivateMethodGet(this, _log, log).call(this, "info", ...message1);
     }
-    warn(...message) {
-        _classPrivateMethodGet(this, _log, log).call(this, "warn", ...message);
+    warn(...message2) {
+        _classPrivateMethodGet(this, _log, log).call(this, "warn", ...message2);
     }
-    error(...message) {
-        _classPrivateMethodGet(this, _log, log).call(this, "error", ...message);
+    error(...message3) {
+        _classPrivateMethodGet(this, _log, log).call(this, "error", ...message3);
     }
-    debug(...message) {
-        _classPrivateMethodGet(this, _log, log).call(this, "debug", ...message);
+    debug(...message4) {
+        _classPrivateMethodGet(this, _log, log).call(this, "debug", ...message4);
     }
     static create(name) {
         return new Logger$b(name);
     }
-    constructor(name){
+    constructor(name1){
         _parseType.add(this);
         _log.add(this);
-        this.module = name;
+        this.module = name1;
     }
 }
 function parseType(type) {
@@ -791,9 +791,9 @@ class Patcher {
             return returnValue;
         };
     }
-    static pushPatch(caller, module, functionName) {
+    static pushPatch(caller1, module, functionName) {
         const patch = {
-            caller,
+            caller: caller1,
             module,
             functionName,
             originalFunction: module[functionName],
@@ -813,15 +813,15 @@ class Patcher {
         });
         return this._patches.push(patch), patch;
     }
-    static doPatch(caller, module, functionName, callback, type = "after", options = {
+    static doPatch(caller2, module1, functionName1, callback, type = "after", options = {
     }) {
         let { displayName  } = options;
         var ref;
-        const patch = (ref = this._patches.find((e)=>e.module === module && e.functionName === functionName
-        )) !== null && ref !== void 0 ? ref : this.pushPatch(caller, module, functionName);
-        if (typeof displayName !== "string") displayName || module.displayName || module.name || module.constructor.displayName || module.constructor.name;
+        const patch = (ref = this._patches.find((e)=>e.module === module1 && e.functionName === functionName1
+        )) !== null && ref !== void 0 ? ref : this.pushPatch(caller2, module1, functionName1);
+        if (typeof displayName !== "string") displayName || module1.displayName || module1.name || module1.constructor.displayName || module1.constructor.name;
         const child = {
-            caller,
+            caller: caller2,
             type,
             id: patch.count,
             callback,
@@ -829,7 +829,7 @@ class Patcher {
                 patch.children.splice(patch.children.findIndex((cpatch)=>cpatch.id === child.id && cpatch.type === type
                 ), 1);
                 if (patch.children.length <= 0) {
-                    const patchNum = this._patches.findIndex((p)=>p.module == module && p.functionName == functionName
+                    const patchNum = this._patches.findIndex((p)=>p.module == module1 && p.functionName == functionName1
                     );
                     this._patches[patchNum].undo();
                     this._patches.splice(patchNum, 1);
@@ -840,14 +840,14 @@ class Patcher {
         patch.count++;
         return child.unpatch;
     }
-    static before(caller, module, functionName, callback) {
-        return this.doPatch(caller, module, functionName, callback, "before");
+    static before(caller3, module2, functionName2, callback1) {
+        return this.doPatch(caller3, module2, functionName2, callback1, "before");
     }
-    static after(caller, module, functionName, callback) {
-        return this.doPatch(caller, module, functionName, callback, "after");
+    static after(caller4, module3, functionName3, callback2) {
+        return this.doPatch(caller4, module3, functionName3, callback2, "after");
     }
-    static instead(caller, module, functionName, callback) {
-        return this.doPatch(caller, module, functionName, callback, "instead");
+    static instead(caller5, module4, functionName4, callback3) {
+        return this.doPatch(caller5, module4, functionName4, callback3, "instead");
     }
 }
 Patcher._patches = [];
@@ -943,8 +943,8 @@ var util$1 = /*#__PURE__*/Object.freeze({
     waitFor: waitFor
 });
 
-function _extends$W() {
-    _extends$W = Object.assign || function(target) {
+function _extends$X() {
+    _extends$X = Object.assign || function(target) {
         for(var i = 1; i < arguments.length; i++){
             var source = arguments[i];
             for(var key in source){
@@ -955,7 +955,7 @@ function _extends$W() {
         }
         return target;
     };
-    return _extends$W.apply(this, arguments);
+    return _extends$X.apply(this, arguments);
 }
 const patchAvatars = function() {
     var ref5, ref1, ref2;
@@ -969,7 +969,7 @@ const patchAvatars = function() {
         return res;
     });
     Patcher.after("pc-utility-classes-animated-avatar", Avatar.AnimatedAvatar, "type", (_, args, res)=>{
-        return(/*#__PURE__*/ React.createElement(Avatar.default, _extends$W({
+        return(/*#__PURE__*/ React.createElement(Avatar.default, _extends$X({
         }, res.props)));
     });
     const AvatarWrapper = (ref2 = (ref5 = Webpack.findByProps([
@@ -996,19 +996,19 @@ class Store {
     has(event) {
         return event in this.events;
     }
-    on(event, listener) {
-        if (!this.has(event)) this.events[event] = new Set();
-        this.events[event].add(listener);
-        return ()=>void this.off(event, listener)
+    on(event1, listener) {
+        if (!this.has(event1)) this.events[event1] = new Set();
+        this.events[event1].add(listener);
+        return ()=>void this.off(event1, listener)
         ;
     }
-    off(event, listener) {
-        if (!this.has(event)) return;
-        return this.events[event].delete(listener);
+    off(event2, listener1) {
+        if (!this.has(event2)) return;
+        return this.events[event2].delete(listener1);
     }
-    emit(event, ...args) {
-        if (!this.has(event)) return;
-        for (const listener of this.events[event]){
+    emit(event3, ...args) {
+        if (!this.has(event3)) return;
+        for (const listener of this.events[event3]){
             try {
                 listener(...args);
             } catch (error) {
@@ -1016,14 +1016,14 @@ class Store {
             }
         }
     }
-    useEvent(event, listener) {
-        const [state, setState] = DiscordModules.React.useState(listener());
+    useEvent(event4, listener2) {
+        const [state, setState] = DiscordModules.React.useState(listener2());
         DiscordModules.React.useEffect(()=>{
-            return this.on(event, ()=>setState(listener())
+            return this.on(event4, ()=>setState(listener2())
             );
         }, [
-            event,
-            listener
+            event4,
+            listener2
         ]);
         return state;
     }
@@ -1037,18 +1037,18 @@ class Emitter {
     static has(event) {
         return event in this.events;
     }
-    static on(event, listener) {
-        if (!this.has(event)) this.events[event] = new Set();
-        this.events[event].add(listener);
-        return this.off.bind(this, event, listener);
+    static on(event1, listener) {
+        if (!this.has(event1)) this.events[event1] = new Set();
+        this.events[event1].add(listener);
+        return this.off.bind(this, event1, listener);
     }
-    static off(event, listener) {
-        if (!this.has(event)) return;
-        return this.events[event].delete(listener);
+    static off(event2, listener1) {
+        if (!this.has(event2)) return;
+        return this.events[event2].delete(listener1);
     }
-    static emit(event, ...args) {
-        if (!this.has(event)) return;
-        for (const listener of this.events[event]){
+    static emit(event3, ...args) {
+        if (!this.has(event3)) return;
+        for (const listener of this.events[event3]){
             try {
                 listener(...args);
             } catch (error) {
@@ -1064,36 +1064,36 @@ class fs {
     static readFileSync(path, options = "utf8") {
         return PCCompatNative.executeJS(`require("fs").readFileSync(${JSON.stringify(path)}, ${JSON.stringify(options)});`);
     }
-    static writeFileSync(path, data, options) {
-        return PCCompatNative.executeJS(`require("fs").writeFileSync(${JSON.stringify(path)}, ${JSON.stringify(data)}, ${JSON.stringify(options)})`);
+    static writeFileSync(path1, data, options1) {
+        return PCCompatNative.executeJS(`require("fs").writeFileSync(${JSON.stringify(path1)}, ${JSON.stringify(data)}, ${JSON.stringify(options1)})`);
     }
-    static writeFile(path, data, options, callback) {
-        if (typeof options === "function") {
-            callback = options;
-            options = null;
+    static writeFile(path2, data1, options2, callback) {
+        if (typeof options2 === "function") {
+            callback = options2;
+            options2 = null;
         }
         const ret = {
             error: null
         };
         try {
-            this.writeFileSync(path, data, options);
+            this.writeFileSync(path2, data1, options2);
         } catch (error) {
             ret.error = error;
         }
         callback(ret.error);
     }
-    static readdirSync(path, options) {
-        return PCCompatNative.executeJS(`require("fs").readdirSync(${JSON.stringify(path)}, ${JSON.stringify(options)});`);
+    static readdirSync(path3, options3) {
+        return PCCompatNative.executeJS(`require("fs").readdirSync(${JSON.stringify(path3)}, ${JSON.stringify(options3)});`);
     }
-    static existsSync(path) {
-        return PCCompatNative.executeJS(`require("fs").existsSync(${JSON.stringify(path)});`);
+    static existsSync(path4) {
+        return PCCompatNative.executeJS(`require("fs").existsSync(${JSON.stringify(path4)});`);
     }
-    static mkdirSync(path, options) {
-        return PCCompatNative.executeJS(`require("fs").mkdirSync(${JSON.stringify(path)}, ${JSON.stringify(options)});`);
+    static mkdirSync(path5, options4) {
+        return PCCompatNative.executeJS(`require("fs").mkdirSync(${JSON.stringify(path5)}, ${JSON.stringify(options4)});`);
     }
-    static statSync(path, options) {
+    static statSync(path6, options5) {
         return PCCompatNative.executeJS(`
-            const stats = require("fs").statSync(${JSON.stringify(path)}, ${JSON.stringify(options)});
+            const stats = require("fs").statSync(${JSON.stringify(path6)}, ${JSON.stringify(options5)});
             const ret = {
                 ...stats,
                 isFile: () => stats.isFile(),
@@ -1102,17 +1102,17 @@ class fs {
             ret
         `);
     }
-    static watch(path, options, callback) {
-        if (typeof options === "function") {
-            callback = options;
-            options = null;
+    static watch(path7, options6, callback1) {
+        if (typeof options6 === "function") {
+            callback1 = options6;
+            options6 = null;
         }
         const eventId = "bdcompat-watcher-" + Math.random().toString(36).slice(2, 10);
         PCCompatNative.IPC.on(eventId, (event, filename)=>{
-            callback(event, filename);
+            callback1(event, filename);
         });
         return PCCompatNative.executeJS(`
-            require("fs").watch(${JSON.stringify(path)}, ${JSON.stringify(options)}, (event, filename) => {
+            require("fs").watch(${JSON.stringify(path7)}, ${JSON.stringify(options6)}, (event, filename) => {
                 PCCompatNative.IPC.dispatch(${JSON.stringify(eventId)}, event, filename);
             });
         `);
@@ -1140,6 +1140,37 @@ const electron = {
     clipboard
 };
 
+function _extends$W() {
+    _extends$W = Object.assign || function(target) {
+        for(var i = 1; i < arguments.length; i++){
+            var source = arguments[i];
+            for(var key in source){
+                if (Object.prototype.hasOwnProperty.call(source, key)) {
+                    target[key] = source[key];
+                }
+            }
+        }
+        return target;
+    };
+    return _extends$W.apply(this, arguments);
+}
+const cache$4 = new Map();
+function DiscordIcon({ name , ...props }) {
+    var ref, ref1;
+    const IconComponent = (ref1 = (ref = cache$4.get(name)) !== null && ref !== void 0 ? ref : (cache$4.set(name, Webpack.findByDisplayName(name)), cache$4.get(name))) !== null && ref1 !== void 0 ? ref1 : ()=>null
+    ;
+    return(/*#__PURE__*/ React.createElement(IconComponent, _extends$W({
+    }, props)));
+}
+
+function memoize(target, key, value) {
+    Object.defineProperty(target, key, {
+        value: value,
+        configurable: true
+    });
+    return value;
+}
+
 function _extends$V() {
     _extends$V = Object.assign || function(target) {
         for(var i = 1; i < arguments.length; i++){
@@ -1154,37 +1185,6 @@ function _extends$V() {
     };
     return _extends$V.apply(this, arguments);
 }
-const cache$4 = new Map();
-function DiscordIcon({ name , ...props }) {
-    var ref, ref1;
-    const IconComponent = (ref1 = (ref = cache$4.get(name)) !== null && ref !== void 0 ? ref : (cache$4.set(name, Webpack.findByDisplayName(name)), cache$4.get(name))) !== null && ref1 !== void 0 ? ref1 : ()=>null
-    ;
-    return(/*#__PURE__*/ React.createElement(IconComponent, _extends$V({
-    }, props)));
-}
-
-function memoize(target, key, value) {
-    Object.defineProperty(target, key, {
-        value: value,
-        configurable: true
-    });
-    return value;
-}
-
-function _extends$U() {
-    _extends$U = Object.assign || function(target) {
-        for(var i = 1; i < arguments.length; i++){
-            var source = arguments[i];
-            for(var key in source){
-                if (Object.prototype.hasOwnProperty.call(source, key)) {
-                    target[key] = source[key];
-                }
-            }
-        }
-        return target;
-    };
-    return _extends$U.apply(this, arguments);
-}
 function AsyncComponent({ _provider , _fallback , ...props }) {
     const [Component, setComponent] = DiscordModules.React.useState(()=>_fallback !== null && _fallback !== void 0 ? _fallback : ()=>null
     );
@@ -1196,7 +1196,7 @@ function AsyncComponent({ _provider , _fallback , ...props }) {
         _provider,
         _fallback
     ]);
-    return(/*#__PURE__*/ React.createElement(Component, _extends$U({
+    return(/*#__PURE__*/ React.createElement(Component, _extends$V({
     }, props)));
 }function from(promise, fallback) {
     return (props)=>DiscordModules.React.createElement(AsyncComponent, {
@@ -1244,6 +1244,35 @@ const FormItem = fromPromise(promise.then(()=>{
     };
 }));
 
+function _extends$U() {
+    _extends$U = Object.assign || function(target) {
+        for(var i = 1; i < arguments.length; i++){
+            var source = arguments[i];
+            for(var key in source){
+                if (Object.prototype.hasOwnProperty.call(source, key)) {
+                    target[key] = source[key];
+                }
+            }
+        }
+        return target;
+    };
+    return _extends$U.apply(this, arguments);
+}
+function TextInput(props) {
+    const { TextInput: TextInput1  } = DiscordModules;
+    const { children: title , note , required  } = props;
+    delete props.children;
+    return(/*#__PURE__*/ React.createElement(FormItem, {
+        title: title,
+        note: note,
+        required: required,
+        noteHasMargin: true
+    }, /*#__PURE__*/ React.createElement(TextInput1, _extends$U({
+    }, props, {
+        required: required
+    }))));
+}
+
 function _extends$T() {
     _extends$T = Object.assign || function(target) {
         for(var i = 1; i < arguments.length; i++){
@@ -1258,20 +1287,54 @@ function _extends$T() {
     };
     return _extends$T.apply(this, arguments);
 }
-function TextInput(props) {
-    const { TextInput: TextInput1  } = DiscordModules;
-    const { children: title , note , required  } = props;
-    delete props.children;
-    return(/*#__PURE__*/ React.createElement(FormItem, {
-        title: title,
-        note: note,
-        required: required,
-        noteHasMargin: true
-    }, /*#__PURE__*/ React.createElement(TextInput1, _extends$T({
-    }, props, {
-        required: required
-    }))));
-}
+var ChangeLog = fromPromise(promise.then(()=>{
+    const { Markdown , Flex , Forms: { FormTitle  }  } = DiscordModules;
+    const [changelogClasses, modalClasses, { ModalRoot , ModalHeader , ModalContent , ModalCloseButton  } = {
+    }] = Webpack.bulk(Filters.byProps("progress", "improved", "container"), (m)=>m.content && m.modal && Object.keys(m).length === 2
+    , Filters.byProps("ModalRoot"));
+    const ItemTypes = {
+        IMPROVED: changelogClasses.improved,
+        ADDED: changelogClasses.added,
+        FIXED: changelogClasses.fixed,
+        PROGRESS: changelogClasses.progress
+    };
+    const buildChangelogItem = function(item1, index) {
+        var _type;
+        return(/*#__PURE__*/ React.createElement(React.Fragment, {
+            key: item1.title
+        }, /*#__PURE__*/ React.createElement("h1", {
+            className: joinClassNames(changelogClasses.title, (_type = ItemTypes[item1.type]) !== null && _type !== void 0 ? _type : ItemTypes.ADDED, [
+                index === 0,
+                "pc-margin-top-0"
+            ])
+        }, item1.title), /*#__PURE__*/ React.createElement("ul", null, item1.items.map((item)=>/*#__PURE__*/ React.createElement("li", {
+                key: item
+            }, /*#__PURE__*/ React.createElement(Markdown, null, item))
+        ))));
+    };
+    return function ChangeLog({ items , title , ...props }) {
+        return(/*#__PURE__*/ React.createElement(ModalRoot, _extends$T({
+        }, props, {
+            className: joinClassNames(changelogClasses.container, modalClasses.content)
+        }), /*#__PURE__*/ React.createElement(ModalHeader, {
+            separator: false
+        }, /*#__PURE__*/ React.createElement(Flex.Child, {
+            basis: "auto",
+            grow: 1,
+            shrink: 1,
+            wrap: false
+        }, /*#__PURE__*/ React.createElement(FormTitle, {
+            tag: FormTitle.Tags.H2
+        }, title)), /*#__PURE__*/ React.createElement(Flex.Child, {
+            basis: "auto",
+            rgrow: 0,
+            shrink: 1,
+            wrap: false
+        }, /*#__PURE__*/ React.createElement(ModalCloseButton, {
+            onClick: props.onClose
+        }))), /*#__PURE__*/ React.createElement(ModalContent, null, items.map(buildChangelogItem))));
+    };
+}));
 
 class Modals {
     static get TextInput() {
@@ -1294,13 +1357,13 @@ class Modals {
             }, props), typeof content === "string" ? React.createElement(Markdown, null, content) : content);
         });
     }
-    static prompt(title, content, options = {
+    static prompt(title1, content1, options1 = {
     }) {
         const { placeholder ="" , onInput =()=>{
-        }  } = options;
+        }  } = options1;
         let value = "";
-        return this.showConfirmationModal(title, React.createElement(this.TextInput, {
-            note: content,
+        return this.showConfirmationModal(title1, React.createElement(this.TextInput, {
+            note: content1,
             value: value,
             placeholder: placeholder,
             onChange: (val)=>{
@@ -1312,9 +1375,18 @@ class Modals {
             }
         });
     }
-    static alert(title, content) {
-        return this.showConfirmationModal(title, content, {
+    static alert(title2, content2) {
+        return this.showConfirmationModal(title2, content2, {
             cancelText: null
+        });
+    }
+    static showChangeLog(title3, items) {
+        const { ModalsApi  } = DiscordModules;
+        return ModalsApi.openModal((props)=>{
+            return React.createElement(ChangeLog, Object.assign({
+                title: title3,
+                items
+            }, props));
         });
     }
 }
@@ -1357,8 +1429,8 @@ const ErrorBoundary = fromPromise(promise.then(()=>{
                 error: error.message
             };
         }
-        componentDidCatch(error, errorInfo) {
-            console.error(error, errorInfo);
+        componentDidCatch(error1, errorInfo) {
+            console.error(error1, errorInfo);
         }
         render() {
             if (this.state.hasError) {
@@ -1887,8 +1959,8 @@ class SettingsRenderer {
             return true;
         };
     }
-    static unregisterPanel(id) {
-        const panel = this.panels.findIndex((e)=>e.id === id
+    static unregisterPanel(id1) {
+        const panel = this.panels.findIndex((e)=>e.id === id1
         );
         if (panel < 0) return;
         this.panels.splice(panel, 1);
@@ -2044,20 +2116,20 @@ class PluginManager extends Emitter {
             this.startPlugin(exports);
         }
     }
-    static unloadAddon(addon, log = true) {
-        const plugin = this.resolve(addon);
-        if (!addon) return;
+    static unloadAddon(addon1, log1 = true) {
+        const plugin = this.resolve(addon1);
+        if (!addon1) return;
         const success = this.stopPlugin(plugin);
         this.plugins.delete(plugin.entityID);
         this.clearCache(plugin.path);
-        if (log) {
+        if (log1) {
             Logger$9.log(`${plugin.displayName} was unloaded!`);
         }
         return success;
     }
-    static reloadPlugin(addon) {
-        const plugin = this.resolve(addon);
-        if (!addon) return;
+    static reloadPlugin(addon2) {
+        const plugin = this.resolve(addon2);
+        if (!addon2) return;
         const success = this.unloadAddon(plugin, false);
         if (!success) {
             return Logger$9.error(`Something went wrong while trying to unload ${plugin.displayName}:`);
@@ -2065,12 +2137,12 @@ class PluginManager extends Emitter {
         this.loadPlugin(plugin.path, false);
         Logger$9.log(`Finished reloading ${plugin.displayName}.`);
     }
-    static startPlugin(addon, log = true) {
-        const plugin = this.resolve(addon);
+    static startPlugin(addon3, log2 = true) {
+        const plugin = this.resolve(addon3);
         if (!plugin) return;
         try {
             if (typeof plugin.startPlugin === "function") plugin.startPlugin();
-            if (log) {
+            if (log2) {
                 Logger$9.log(`${plugin.displayName} has been started!`);
             }
         } catch (error) {
@@ -2078,12 +2150,12 @@ class PluginManager extends Emitter {
         }
         return true;
     }
-    static stopPlugin(addon, log = true) {
-        const plugin = this.resolve(addon);
+    static stopPlugin(addon4, log3 = true) {
+        const plugin = this.resolve(addon4);
         if (!plugin) return;
         try {
             if (typeof plugin.pluginWillUnload === "function") plugin.pluginWillUnload();
-            if (log) {
+            if (log3) {
                 Logger$9.log(`${plugin.displayName} has been stopped!`);
             }
         } catch (error) {
@@ -2092,37 +2164,37 @@ class PluginManager extends Emitter {
         }
         return true;
     }
-    static enablePlugin(addon, log = true) {
-        const plugin = this.resolve(addon);
+    static enablePlugin(addon5, log4 = true) {
+        const plugin = this.resolve(addon5);
         if (!plugin) return;
         this.states[plugin.entityID] = true;
         DataStore$1.trySaveData("plugins", this.states);
         this.startPlugin(plugin, false);
-        if (log) {
+        if (log4) {
             Logger$9.log(`${plugin.displayName} has been enabled!`);
             this.emit("toggle", plugin.entityID, true);
         }
     }
-    static disablePlugin(addon, log = true) {
-        const plugin = this.resolve(addon);
+    static disablePlugin(addon6, log5 = true) {
+        const plugin = this.resolve(addon6);
         if (!plugin) return;
         this.states[plugin.entityID] = false;
         DataStore$1.trySaveData("plugins", this.states);
         this.stopPlugin(plugin, false);
-        if (log) {
+        if (log5) {
             Logger$9.log(`${plugin.displayName} has been disabled!`);
             this.emit("toggle", plugin.entityID, false);
         }
     }
-    static delete(addon) {
-        const plugin = this.resolve(addon);
+    static delete(addon7) {
+        const plugin = this.resolve(addon7);
         if (!plugin) return;
         this.unloadAddon(plugin);
         PCCompatNative.executeJS(`require("electron").shell.trashItem(${JSON.stringify(plugin.path)})`);
         this.emit("delete", plugin);
     }
-    static toggle(addon) {
-        const plugin = this.resolve(addon);
+    static toggle(addon8) {
+        const plugin = this.resolve(addon8);
         if (!plugin) return;
         if (this.isEnabled(plugin.entityID)) this.disable(plugin);
         else this.enable(plugin);
@@ -2172,14 +2244,14 @@ class Plugin$1 {
     log(...messages) {
         console.log(`%c[Powercord:Plugin:${this.constructor.name}]`, `color: ${this.color};`, ...messages);
     }
-    debug(...messages) {
-        console.debug(`%c[Powercord:Plugin:${this.constructor.name}]`, `color: ${this.color};`, ...messages);
+    debug(...messages1) {
+        console.debug(`%c[Powercord:Plugin:${this.constructor.name}]`, `color: ${this.color};`, ...messages1);
     }
-    warn(...messages) {
-        console.warn(`%c[Powercord:Plugin:${this.constructor.name}]`, `color: ${this.color};`, ...messages);
+    warn(...messages2) {
+        console.warn(`%c[Powercord:Plugin:${this.constructor.name}]`, `color: ${this.color};`, ...messages2);
     }
-    error(...messages) {
-        console.error(`%c[Powercord:Plugin:${this.constructor.name}]`, `color: ${this.color};`, ...messages);
+    error(...messages3) {
+        console.error(`%c[Powercord:Plugin:${this.constructor.name}]`, `color: ${this.color};`, ...messages3);
     }
     // "Internals" :zere_zoom:
     _load() {
@@ -2520,10 +2592,10 @@ var commands$1 = /*#__PURE__*/Object.freeze({
 
 promise.then(()=>{
     const { LocaleManager , LocaleStore  } = DiscordModules;
-    locale = LocaleManager.getLocale();
+    locale1 = LocaleManager.getLocale();
     LocaleStore.addChangeListener(()=>{
-        if (LocaleStore.locale !== locale) {
-            locale = LocaleStore.locale;
+        if (LocaleStore.locale !== locale1) {
+            locale1 = LocaleStore.locale;
             LocaleManager.loadPromise.then(injectStrings);
         }
     });
@@ -2531,10 +2603,10 @@ promise.then(()=>{
 });
 let messages = {
 };
-let locale = null;
+let locale1 = null;
 function loadAllStrings(strings) {
-    for(let locale1 in strings){
-        loadStrings(locale1, strings[locale1]);
+    for(let locale in strings){
+        loadStrings(locale, strings[locale]);
     }
 }
 function loadStrings(locale, strings) {
@@ -2546,14 +2618,14 @@ function loadStrings(locale, strings) {
 function injectStrings() {
     if (!DiscordModules.LocaleManager) return;
     const context = DiscordModules.LocaleManager._provider._context;
-    Object.assign(context.messages, messages[locale]);
+    Object.assign(context.messages, messages[locale1]);
     Object.assign(context.defaultMessages, messages["en-US"]);
 }
 
 var i18n = /*#__PURE__*/Object.freeze({
     __proto__: null,
     messages: messages,
-    get locale () { return locale; },
+    get locale () { return locale1; },
     loadAllStrings: loadAllStrings,
     loadStrings: loadStrings,
     injectStrings: injectStrings
@@ -2569,9 +2641,9 @@ class DOM {
         node.append(...children);
         return node;
     }
-    static injectCSS(id, cssOrURL, options) {
+    static injectCSS(id, cssOrURL, options1) {
         var ref;
-        switch((ref = options === null || options === void 0 ? void 0 : options.type) !== null && ref !== void 0 ? ref : "PLAIN"){
+        switch((ref = options1 === null || options1 === void 0 ? void 0 : options1.type) !== null && ref !== void 0 ? ref : "PLAIN"){
             case "PLAIN":
                 var element = this.createElement("style", {
                     id,
@@ -2585,29 +2657,29 @@ class DOM {
                 });
                 break;
         }
-        ((options === null || options === void 0 ? void 0 : options.documentHead) ? document.head : this.head).appendChild(element);
+        ((options1 === null || options1 === void 0 ? void 0 : options1.documentHead) ? document.head : this.head).appendChild(element);
         this.elements[id] = element;
         return element;
     }
-    static injectJS(id, url, options) {
+    static injectJS(id1, url, options2) {
         return new Promise((resolve, reject)=>{
             const script = this.createElement("script", {
-                id,
+                id: id1,
                 src: url,
                 onload: resolve,
                 onerror: reject
             });
-            ((options === null || options === void 0 ? void 0 : options.documentHead) ? document.head : this.head).appendChild(script);
-            this.elements[id] = script;
+            ((options2 === null || options2 === void 0 ? void 0 : options2.documentHead) ? document.head : this.head).appendChild(script);
+            this.elements[id1] = script;
         });
     }
-    static getElement(id) {
-        return this.elements[id] || this.head.querySelector(`style[id="${id}"]`);
+    static getElement(id2) {
+        return this.elements[id2] || this.head.querySelector(`style[id="${id2}"]`);
     }
-    static clearCSS(id) {
-        const element = this.getElement(id);
+    static clearCSS(id3) {
+        const element = this.getElement(id3);
         if (element) element.remove();
-        delete this.elements[id];
+        delete this.elements[id3];
     }
 }
 DOM.elements = {
@@ -3819,10 +3891,10 @@ class Notices {
             id: id
         });
     }
-    static remove(id) {
+    static remove(id1) {
         const state = NoticesApi.getState();
-        if (!state.notices[id]) throw new Error(`Notice with id ${id} already exists!`);
-        delete state.notices[id];
+        if (!state.notices[id1]) throw new Error(`Notice with id ${id1} already exists!`);
+        delete state.notices[id1];
         NoticesApi.setState({
             notices: {
                 ...state.notices
@@ -3896,13 +3968,13 @@ function _extends$e() {
     };
     return _extends$e.apply(this, arguments);
 }
-const useAnnouncements = createStore({
+const useAnnouncements1 = createStore({
     elements: {
     }
 });
-const AnnouncementsStore = useAnnouncements;
-function AnnouncementContainer({ store: useAnnouncements1  }) {
-    const elements = useAnnouncements1((state)=>state.elements
+const AnnouncementsStore = useAnnouncements1;
+function AnnouncementContainer({ store: useAnnouncements  }) {
+    const elements = useAnnouncements((state)=>state.elements
     );
     return(/*#__PURE__*/ React.createElement(React.Fragment, null, Object.values(elements).map((notice)=>/*#__PURE__*/ React.createElement(Announcement, _extends$e({
         }, notice, {
@@ -4261,7 +4333,7 @@ function _extends$b() {
     };
     return _extends$b.apply(this, arguments);
 }
-const ColorPicker = fromPromise(Webpack.whenReady.then(()=>{
+const ColorPicker1 = fromPromise(Webpack.whenReady.then(()=>{
     try {
         const GuildFolderSettingsModal = Webpack.findByDisplayName("GuildFolderSettingsModal");
         if (!GuildFolderSettingsModal) throw "GuildFolderSettingsModal was not found!";
@@ -4271,12 +4343,12 @@ const ColorPicker = fromPromise(Webpack.whenReady.then(()=>{
             props: {
             }
         });
-        const ColorPicker1 = findInReactTree(rendered, (e)=>{
+        const ColorPicker = findInReactTree(rendered, (e)=>{
             var ref;
             return (e === null || e === void 0 ? void 0 : (ref = e.props) === null || ref === void 0 ? void 0 : ref.defaultColor) != null;
         }).type;
-        if (typeof ColorPicker1 !== "function") throw "ColorPicker could not be found!";
-        return (props)=>/*#__PURE__*/ React.createElement(ErrorBoundary, null, /*#__PURE__*/ React.createElement(ColorPicker1, _extends$b({
+        if (typeof ColorPicker !== "function") throw "ColorPicker could not be found!";
+        return (props)=>/*#__PURE__*/ React.createElement(ErrorBoundary, null, /*#__PURE__*/ React.createElement(ColorPicker, _extends$b({
             }, props)))
         ;
     } catch (error) {
@@ -4293,7 +4365,7 @@ function ColorPickerInput(props) {
         title: title,
         required: required,
         note: note
-    }, /*#__PURE__*/ React.createElement(ColorPicker, {
+    }, /*#__PURE__*/ React.createElement(ColorPicker1, {
         colors: defaultColors,
         defaultColor: typeof defaultValue === "number" ? defaultValue : DEFAULT_ROLE_COLOR,
         onChange: onChange,
@@ -4402,7 +4474,7 @@ let Components = {
     AsyncComponent,
     modal: Modal,
     Icons: Icons$1,
-    ColorPicker,
+    ColorPicker: ColorPicker1,
     Divider
 };
 promise.then(async ()=>{
@@ -4714,19 +4786,19 @@ class StyleManager extends Emitter {
             this.startTheme(data);
         }
     }
-    static unloadAddon(addon, log = true) {
-        const theme = this.resolve(addon);
-        if (!addon) return;
+    static unloadAddon(addon1, log1 = true) {
+        const theme = this.resolve(addon1);
+        if (!addon1) return;
         const success = this.stopTheme(theme);
         this.clearCache(theme.path);
-        if (log) {
+        if (log1) {
             Logger$4.log(`${theme.displayName} was unloaded!`);
         }
         return success;
     }
-    static reloadTheme(addon) {
-        const theme = this.resolve(addon);
-        if (!addon) return;
+    static reloadTheme(addon2) {
+        const theme = this.resolve(addon2);
+        if (!addon2) return;
         const success = this.unloadAddon(theme, false);
         if (!success) {
             return Logger$4.error(`Something went wrong while trying to unload ${theme.displayName}:`);
@@ -4734,12 +4806,12 @@ class StyleManager extends Emitter {
         this.startTheme(theme, false);
         Logger$4.log(`Finished reloading ${theme.displayName}.`);
     }
-    static startTheme(addon, log = true) {
-        const theme = this.resolve(addon);
+    static startTheme(addon3, log2 = true) {
+        const theme = this.resolve(addon3);
         if (!theme) return;
         try {
             theme._load();
-            if (log) {
+            if (log2) {
                 Logger$4.log(`${theme.displayName} has been loaded!`);
             }
         } catch (error) {
@@ -4747,12 +4819,12 @@ class StyleManager extends Emitter {
         }
         return true;
     }
-    static stopTheme(addon, log = true) {
-        const theme = this.resolve(addon);
+    static stopTheme(addon4, log3 = true) {
+        const theme = this.resolve(addon4);
         if (!theme) return;
         try {
             theme._unload();
-            if (log) {
+            if (log3) {
                 Logger$4.log(`${theme.displayName} has been stopped!`);
             }
         } catch (error) {
@@ -4761,38 +4833,38 @@ class StyleManager extends Emitter {
         }
         return true;
     }
-    static enableTheme(addon, log = true) {
-        const theme = this.resolve(addon);
+    static enableTheme(addon5, log4 = true) {
+        const theme = this.resolve(addon5);
         if (!theme) return;
         this.states[theme.entityID] = true;
         DataStore$1.trySaveData("themes", this.states);
         this.startTheme(theme, false);
-        if (log) {
+        if (log4) {
             Logger$4.log(`${theme.displayName} has been enabled!`);
             this.emit("toggle", theme.entityID, true);
         }
     }
-    static disableTheme(addon, log = true) {
-        const theme = this.resolve(addon);
+    static disableTheme(addon6, log5 = true) {
+        const theme = this.resolve(addon6);
         if (!theme) return;
         this.states[theme.entityID] = false;
         DataStore$1.trySaveData("themes", this.states);
         this.stopTheme(theme, false);
-        if (log) {
+        if (log5) {
             Logger$4.log(`${theme.displayName} has been disabled!`);
             this.emit("toggle", theme.entityID, false);
         }
     }
-    static delete(addon) {
-        const theme = this.resolve(addon);
+    static delete(addon7) {
+        const theme = this.resolve(addon7);
         if (!theme) return;
         this.unloadAddon(theme);
         this.themes.delete(theme.entityID);
         PCCompatNative.executeJS(`require("electron").shell.trashItem(${JSON.stringify(theme.path)})`);
         this.emit("delete", theme);
     }
-    static toggle(addon) {
-        const theme = this.resolve(addon);
+    static toggle(addon8) {
+        const theme = this.resolve(addon8);
         if (!theme) return;
         if (this.isEnabled(theme.entityID)) this.disable(theme);
         else this.enable(theme);
@@ -4836,35 +4908,35 @@ class EventEmitter {
         this.maxListeners = count;
         return this;
     }
-    emit(event, ...args) {
+    emit(event, ...args1) {
         if (!this.events[event]) return this;
         for (const [index, listener] of this.events[event].entries()){
             try {
-                listener(...args);
+                listener(...args1);
             } catch (error) {
                 Logger$b.error("Emitter", `Cannot fire listener for event ${event} at position ${index}:`, error);
             }
         }
         return this;
     }
-    off(event, callback) {
-        if (!this.events[event]) return;
-        this.events[event].delete(callback);
+    off(event1, callback) {
+        if (!this.events[event1]) return;
+        this.events[event1].delete(callback);
         return this;
     }
-    on(event, callback) {
-        if (!this.events[event]) this.events[event] = new Set();
-        this.emit("newListener", event, callback);
-        this.events[event].add(callback);
+    on(event2, callback1) {
+        if (!this.events[event2]) this.events[event2] = new Set();
+        this.emit("newListener", event2, callback1);
+        this.events[event2].add(callback1);
         return this;
     }
-    once(event, callback) {
-        this.on(event, callback);
+    once(event3, callback2) {
+        this.on(event3, callback2);
         return this;
     }
-    removeAllListeners(event) {
-        if (this.events[event]) {
-            this.events[event].clear();
+    removeAllListeners(event4) {
+        if (this.events[event4]) {
+            this.events[event4].clear();
         }
         return this;
     }
@@ -5027,9 +5099,9 @@ var url = {
 
 const Logger$3 = Logger$b.create("HTTP");
 class HTTPError extends Error {
-    constructor(message, res){
+    constructor(message, res1){
         super(message);
-        Object.assign(this, res);
+        Object.assign(this, res1);
         this.name = this.constructor.name;
     }
 }
@@ -5039,20 +5111,20 @@ class GenericRequest {
             [key]: value
         };
     }
-    query(key, value) {
-        Object.assign(this.opts.query, this._objectify(key, value));
+    query(key1, value1) {
+        Object.assign(this.opts.query, this._objectify(key1, value1));
         return this;
     }
-    set(key, value) {
-        Object.assign(this.opts.headers, this._objectify(key, value));
+    set(key2, value2) {
+        Object.assign(this.opts.headers, this._objectify(key2, value2));
         return this;
     }
-    send(data) {
-        if (data instanceof Object) {
+    send(data1) {
+        if (data1 instanceof Object) {
             const serialize = this.opts.headers["Content-Type"] === "application/x-www-form-urlencoded" ? querystring.encode : JSON.stringify;
-            this.opts.data = serialize(data);
+            this.opts.data = serialize(data1);
         } else {
-            this.opts.data = data;
+            this.opts.data = data1;
         }
         return this;
     }
@@ -5111,8 +5183,8 @@ class GenericRequest {
         }
         return this._res = this.execute().then(resolver, rejector);
     }
-    catch(rejector) {
-        return this.then(null, rejector);
+    catch(rejector1) {
+        return this.then(null, rejector1);
     }
     constructor(method, uri){
         this.opts = {
@@ -5314,22 +5386,22 @@ class Module {
         })`);
         wrapped(this.require, this, this.exports, this.filename, this.path, window);
     }
-    constructor(id, parent, require){
+    constructor(id, parent1, require1){
         this.id = id;
         this.path = path.dirname(id);
         this.exports = {
         };
-        this.parent = parent;
+        this.parent = parent1;
         this.filename = id;
         this.loaded = false;
         this.children = [];
-        this.require = require;
-        if (parent) parent.children.push(this);
+        this.require = require1;
+        if (parent1) parent1.children.push(this);
     }
 }
-function resolve(path1) {
+function resolve(path) {
     for(const key in cache$2){
-        if (key.startsWith(path1)) return key;
+        if (key.startsWith(path)) return key;
     }
 }
 function getExtension(mod) {
@@ -5478,22 +5550,22 @@ const DataStore = new class DataStore extends Store {
             return def;
         }
     }
-    trySaveData(name, data, emit, event = "data-update") {
-        this.cache.set(name, data);
+    trySaveData(name1, data, emit, event = "data-update") {
+        this.cache.set(name1, data);
         try {
-            fs.writeFileSync(path.resolve(this.configFolder, `${name}.json`), JSON.stringify(data, null, "\t"), "utf8");
+            fs.writeFileSync(path.resolve(this.configFolder, `${name1}.json`), JSON.stringify(data, null, "\t"), "utf8");
         } catch (error) {
-            Logger$2.error(`Failed to save data of ${name}:`, error);
+            Logger$2.error(`Failed to save data of ${name1}:`, error);
         }
-        if (emit) this.emit(event, name, data);
+        if (emit) this.emit(event, name1, data);
     }
-    getMisc(misc = "", def) {
+    getMisc(misc = "", def1) {
         var ref;
-        return (ref = getProps(this.tryLoadData("misc"), misc)) !== null && ref !== void 0 ? ref : def;
+        return (ref = getProps(this.tryLoadData("misc"), misc)) !== null && ref !== void 0 ? ref : def1;
     }
-    setMisc(misc = this.getMisc("", {
+    setMisc(misc1 = this.getMisc("", {
     }), prop, value) {
-        this.trySaveData("misc", _.set(misc, prop.split("."), value));
+        this.trySaveData("misc", _.set(misc1, prop.split("."), value));
         this.emit("misc");
     }
     constructor(){

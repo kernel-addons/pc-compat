@@ -6,6 +6,7 @@
         "jsx": "react-jsx",
         "downlevelIteration": true,
         "moduleResolution": "node",
+        "resolveJsonModule": true,
         "paths": {
             "@powercord/*": ["src/renderer/powercord/*"],
             "@powercord": ["src/renderer/powercord/index"],

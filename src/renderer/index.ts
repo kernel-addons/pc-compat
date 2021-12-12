@@ -10,6 +10,9 @@ import SettingsRenderer from "@modules/settings";
 import {promise} from "@modules/discord";
 import QuickCSS from "@ui/quickcss";
 import * as Internals from "./modules";
+import manifest from "../../index.json";
+import {Modals} from "./ui";
+import DiscordIcon from "@ui/discordicon";
 
 if (!("process" in window)) {
     PCCompatNative.IPC.dispatch(IPCEvents.EXPOSE_PROCESS_GLOBAL);
@@ -39,6 +42,9 @@ export default new class PCCompat {
         QuickCSS.initialize();
         PluginManager.initialize();
         StyleManager.initialize();
+
+        this.checkForChangelog();
+        this.patchSettingsHeader();
     }
 
     expose(name: string, namespace: any) {
@@ -49,6 +55,39 @@ export default new class PCCompat {
         });
     }
 
-    stop() {
+    checkForChangelog() {
+        const {latestUsedVersion} = Internals.DataStore.tryLoadData("info", {latestUsedVersion: "0.0.0"});
+
+        if (latestUsedVersion !== manifest.version) {
+            Internals.DataStore.trySaveData("info", {latestUsedVersion: manifest.version});
+
+            Modals.showChangeLog("PCCompat Changelog", manifest.changelog);
+        }
     }
+
+    patchSettingsHeader() {
+        const {Webpack, DiscordModules: {Button, Tooltips}} = Internals;
+        const SettingsComponents = Webpack.findByProps("Header", "Panel");
+
+        Internals.Patcher.after("SettingsHeade", SettingsComponents.default, "Header", (_, [props], ret) => {
+            if (props.children !== "Powercord") return ret;
+
+            ret.props.children = [
+                ret.props.children,
+                React.createElement(Tooltips.Tooltip, {
+                    text: "Changelog",
+                    position: "top"
+                }, props => React.createElement(Button, {
+                    ...props,
+                    look: Button.Looks.BLANK,
+                    size: Button.Sizes.NONE,
+                    className: "pc-changelog-button",
+                    onClick: () => {Modals.showChangeLog("PCCompat Changelog", manifest.changelog);},
+                    children: React.createElement(DiscordIcon, {name: "Info"})
+                }))
+            ];
+        });
+    }
+
+    stop() {}
 }

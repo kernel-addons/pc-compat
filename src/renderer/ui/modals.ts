@@ -2,6 +2,7 @@ import memoize from "@modules/memoize.js";
 import {createUpdateWrapper} from "@modules/utilities";
 import TextInput from "@powercord/components/settings/textinput";
 import DiscordModules from "../modules/discord";
+import ChangeLog, {ChangeLogItems} from "./changelog";
 
 export default class Modals {
     static get TextInput() {return memoize(this, "TextInput", createUpdateWrapper(TextInput));}
@@ -44,5 +45,13 @@ export default class Modals {
 
     static alert(title: string, content: any) {
         return this.showConfirmationModal(title, content, {cancelText: null});
+    }
+
+    static showChangeLog(title: string, items: ChangeLogItems) {
+        const {ModalsApi} = DiscordModules;
+
+        return ModalsApi.openModal(props => {
+            return React.createElement(ChangeLog, Object.assign({title, items}, props))
+        });
     }
 }

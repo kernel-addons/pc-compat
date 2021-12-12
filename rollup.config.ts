@@ -5,6 +5,7 @@ import resolve from "@rollup/plugin-node-resolve";
 import path from "path";
 import alias from "@rollup/plugin-alias";
 import sourcemaps from "rollup-plugin-sourcemaps";
+import json from "@rollup/plugin-json";
 
 const aliases = {
     "@powercord":   path.resolve(__dirname, "./src/renderer/powercord"),
@@ -34,6 +35,7 @@ export default args => {
         },
 
         plugins: [
+            json(),
             source && sourcemaps({include: "./src/**"}),
             // AliasLoader(),
             alias({
