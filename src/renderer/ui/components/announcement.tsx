@@ -11,7 +11,6 @@ export default fromPromise(promise.then(() => {
 
     const NoticeCloseButton = Notices.NoticeCloseButton;
     const NoticeButtonAncor = Notices.NoticeButton;
-    const NoticeButton = Notices.NoticeButton;
     const Notice = Notices.default;
 
     const Colors = {
@@ -45,20 +44,11 @@ export default fromPromise(promise.then(() => {
             <Notice className={props.className} color={Colors[props.color?.toUpperCase()] || Colors.BLURPLE} id={props.id}>
                 <NoticeCloseButton onClick={() => handleClick(props.callback)} />
                 {props.message}
-                {props.button && (
-                    // I'm not sure if powercord's announcements close the announcement
-                    // once the button is clicked since its currently broken.
-
-                    // IF it doesn't, the component below doesn't close it once the button is clicked
-
-                    // <NoticeButton onClick={() => handleClick(props.button.onClick)}>
-                    //     {props.button.text}
-                    // </NoticeButton>
-
+                {props.button &&
                     <NoticeButtonAncor onClick={() => handleClick(props.button.onClick)}>
                         {props.button.text}
                     </NoticeButtonAncor>
-                )}
+                }
             </Notice>
         );
     };

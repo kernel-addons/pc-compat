@@ -16,6 +16,6 @@ export default function AnnouncementContainer(props): JSX.Element | null {
     const elements = api.getState?.()?.elements;
 
     return elements ? <>
-        {Object.values(elements).map((notice, index) => <Announcement {...notice} className="pc-announcement" />)}
+        {Object.values(elements).map((notice) => <Announcement {...notice} className="pc-announcement" />)}
     </> : null;
 };

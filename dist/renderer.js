@@ -619,6 +619,15 @@ function getProps(obj, path) {
     return path.split(".").reduce((value, key)=>value && value[key]
     , obj);
 }
+function setProps(object, path, value) {
+    if (!path) return object;
+    const split = path.split(".");
+    const prop = split.pop();
+    let current = split.length ? getProps(object, split.join(".")) : object;
+    if (!current) return object;
+    current[prop] = value;
+    return object;
+}
 const createUpdateWrapper = (Component, valueProp = "value", changeProp = "onChange", valueProps = "0", valueIndex = 0)=>(props)=>{
         const [value1, setValue] = DiscordModules.React.useState(props[valueProp]);
         return DiscordModules.React.createElement(Component, {
@@ -671,6 +680,18 @@ function matchAll(regex, input, parent = false) {
     }
     return output;
 }
+
+var utilities = /*#__PURE__*/Object.freeze({
+    __proto__: null,
+    sleep: sleep$1,
+    random: random,
+    getProps: getProps,
+    setProps: setProps,
+    createUpdateWrapper: createUpdateWrapper,
+    omit: omit,
+    joinClassNames: joinClassNames,
+    matchAll: matchAll
+});
 
 function _classPrivateMethodGet(receiver, privateSet, fn) {
     if (!privateSet.has(receiver)) {
@@ -903,12 +924,32 @@ function forceUpdateElement(selector) {
     var ref;
     (ref = getOwnerInstance(document.querySelector(selector))) === null || ref === void 0 ? void 0 : ref.forceUpdate();
 }
-async function waitFor(selector) {
-    let element;
-    while(!(element = document.querySelector(selector))){
-        await sleep(1);
-    }
-    return element;
+function waitFor(selector) {
+    return new Promise((resolve)=>{
+        const element = document.querySelector(selector);
+        if (element) return resolve(element);
+        new MutationObserver((mutations, observer)=>{
+            for(let m = 0; m < mutations.length; m++){
+                for(let i = 0; i < mutations[m].addedNodes.length; i++){
+                    const mutation = mutations[m].addedNodes[i];
+                    if (mutation.nodeType === 3) continue; // ignore text
+                    const directMatch = mutation.matches(selector) && mutation;
+                    if (directMatch) {
+                        observer.disconnect();
+                        return resolve(directMatch);
+                    } else {
+                        const node = mutation.querySelector(selector);
+                        if (!node) return;
+                        resolve(node);
+                        observer.disconnect();
+                    }
+                }
+            }
+        }).observe(document, {
+            childList: true,
+            subtree: true
+        });
+    });
 }
 
 var util$1 = /*#__PURE__*/Object.freeze({
@@ -966,7 +1007,7 @@ const injectMessageName = function() {
     if (!Message) return Logger$b.warn("ComponentPatcher", "Message Component was not found!");
     Message.displayName = "Message";
 };
-promise.then(()=>{
+var componentpatcher = promise.then(()=>{
     patchAvatars();
     injectMessageName();
 });
@@ -2805,7 +2846,6 @@ var Announcement = fromPromise(promise.then(()=>{
     });
     const NoticeCloseButton = Notices.NoticeCloseButton;
     const NoticeButtonAncor = Notices.NoticeButton;
-    Notices.NoticeButton;
     const Notice = Notices.default;
     const Colors = {
         BLURPLE: Notices.NoticeColors.BRAND,
@@ -2838,13 +2878,7 @@ var Announcement = fromPromise(promise.then(()=>{
             id: props.id
         }, /*#__PURE__*/ React.createElement(NoticeCloseButton, {
             onClick: ()=>handleClick(props.callback)
-        }), props.message, props.button && // I'm not sure if powercord's announcements close the announcement
-        // once the button is clicked since its currently broken.
-        // IF it doesn't, the component below doesn't close it once the button is clicked
-        // <NoticeButton onClick={() => handleClick(props.button.onClick)}>
-        //     {props.button.text}
-        // </NoticeButton>
-        /*#__PURE__*/ React.createElement(NoticeButtonAncor, {
+        }), props.message, props.button && /*#__PURE__*/ React.createElement(NoticeButtonAncor, {
             onClick: ()=>handleClick(props.button.onClick)
         }, props.button.text)));
     };
@@ -2877,7 +2911,7 @@ function AnnouncementContainer(props) {
         };
     }, []);
     const elements = (ref = AnnouncementsApi.getState) === null || ref === void 0 ? void 0 : (ref1 = ref.call(AnnouncementsApi)) === null || ref1 === void 0 ? void 0 : ref1.elements;
-    return elements ? /*#__PURE__*/ React.createElement(React.Fragment, null, Object.values(elements).map((notice, index)=>/*#__PURE__*/ React.createElement(Announcement, _extends$P({
+    return elements ? /*#__PURE__*/ React.createElement(React.Fragment, null, Object.values(elements).map((notice)=>/*#__PURE__*/ React.createElement(Announcement, _extends$P({
         }, notice, {
             className: "pc-announcement"
         }))
@@ -5483,6 +5517,19 @@ const DataStore = new class DataStore extends Store {
 };
 var DataStore$1 = DataStore;
 
+var Internals = /*#__PURE__*/Object.freeze({
+    __proto__: null,
+    Utilities: utilities,
+    Webpack: Webpack,
+    ComponentPatcher: componentpatcher,
+    DiscordModules: DiscordModules,
+    DataStore: DataStore$1,
+    Patcher: Patcher,
+    memoize: memoize,
+    Logger: Logger$b,
+    DOM: DOM
+});
+
 function getLanguage(filename) {
     if (!filename) return "";
     switch(path.extname(filename)){
@@ -6204,6 +6251,7 @@ var index = new class PCCompat {
     async onStart() {
         this.expose("React", DiscordModules.React);
         this.expose("powercord", Require("powercord"));
+        this.expose("PCInternals", Internals);
         await init();
         powercord.api.commands.initialize();
         Object.defineProperty(window, "powercord_require", {

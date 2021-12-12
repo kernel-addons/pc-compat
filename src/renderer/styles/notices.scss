@@ -85,11 +85,11 @@
     }
 }
 
-.pc-announcement {
+div[class*="base-"] div[class*="notice-"] {
     border-radius: 0;
 
     &:first-child {
-        border-radius: 8px 0 0 !important;
+        border-radius: 8px 0 0;
     }
 }
 
