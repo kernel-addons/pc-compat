@@ -86,7 +86,10 @@ export function Notice(props) {
                             color={Button.Colors[button.color?.toUpperCase() ?? "BRAND_NEW"]}
                             look={Button.Looks[button.look?.toUpperCase() || "FILLED"]}
                             size={Button.Sizes[button.size?.toUpperCase() || "MIN"]}
-                            onClick={button.onClick}
+                            onClick={() => {
+                                button.onClick?.()
+                                setClosing(true);
+                            }}
                             key={"button-" + i}
                             className="pc-notice-button"
                         >
