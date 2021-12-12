@@ -1,7 +1,11 @@
 .pc-notices {
     position: fixed;
+    display: flex;
+    flex-direction: column;
     bottom: 20px;
+    align-items: flex-end;
     right: 20px;
+    z-index: 1;
 
     .pc-notice-container {
         position: relative;
@@ -13,12 +17,12 @@
         overflow: hidden;
         margin-top: 20px;
         max-width: 400px;
-        animation: .6s open ease-in;
+        animation: open .5s ease;
         display: flex;
         flex-direction: column;
 
         &.pc-notice-closing {
-            animation: .6s close ease-out;
+            animation: close .7s ease-out;
         }
 
         .pc-notice-header {
@@ -28,8 +32,13 @@
             align-items: center;
         }
 
+        .pc-notice-icon::before {
+            margin-right: 10px;
+        }
+
         .pc-notice-content {
             padding: 15px;
+            padding-bottom: 10px;
             padding-top: 0;
         }
 
@@ -71,11 +80,12 @@
             padding: 8px;
             display: flex;
             align-items: center;
-            justify-content: flex-end;
+            justify-content: center;
             margin-top: auto;
 
             .pc-notice-button {
                 padding: 5px;
+                width: 100%;
             }
 
             .pc-notice-button + .pc-notice-button {
@@ -95,28 +105,21 @@
 
 @keyframes open {
     0% {
+        transform: translateX(500px);
         opacity: 0;
-        transform: translateX(100%);
     }
-    50% {
-        transform: translateX(-10%);
+    75% {
+        transform: translateX(-15px);
+        opacity: 1;
     }
     100% {
         transform: translateX(0);
-        opacity: 1;
     }
 }
 
 @keyframes close {
-    0% {
-        opacity: 1;
-        transform: translateX(0);
-    }
-    50% {
-        transform: translateX(-10%);
-    }
-    100% {
-        transform: translateX(100%);
+    to {
+        transform: translateX(500px);
         opacity: 0;
     }
 }

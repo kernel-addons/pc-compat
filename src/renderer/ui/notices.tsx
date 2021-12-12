@@ -5,14 +5,24 @@ import ErrorBoundary from "@powercord/components/errorboundary";
 import {joinClassNames} from "@modules/utilities";
 import DiscordIcon from "./discordicon";
 import createDispatcher from "@flux/dispatcher";
+import {FontAwesome} from "@powercord/components/icons";
 
 const [useNoticesStore, NoticesApi] = createStore({notices: {}});
 const Dispatcher = createDispatcher();
 
+const types = {
+    info: 'info-circle-regular',
+    warning: 'exclamation-circle-regular',
+    danger: 'times-circle-regular',
+    success: 'check-circle-regular'
+};
+
 export function Notice(props) {
     const {ReactSpring: {useSpring, animated}, Button, Markdown} = DiscordModules;
     const [closing, setClosing] = React.useState(false);
-    const timeout = React.useMemo(() => props.timeout || 3e3, []);
+
+    if (props.type && types[props.type]) props.icon = types[props.type];
+
     const spring = useSpring({
         from: {
             progress: 0
@@ -22,8 +32,8 @@ export function Notice(props) {
         },
         config: (key: string) => {
             switch (key) {
-                case "progress": return {duration: timeout};
-                default: return {duration: 250};
+                case "progress": return {duration: props.timeout};
+                default: return {duration: 0};
             }
         }
     });
@@ -33,6 +43,7 @@ export function Notice(props) {
     };
 
     Dispatcher.useComponentDispatch("SET_CLOSING", (event) => {
+        if (event.all) setClosing(true);
         if (event.id !== props.id) return;
 
         startClosing();
@@ -51,12 +62,16 @@ export function Notice(props) {
             className={joinClassNames("pc-notice-container", [closing, "pc-notice-closing"])}
         >
             <div className="pc-notice-header">
-                <div className="pc-notice-header-name">{props.header ?? "Unknown"}</div>
+                <div className="pc-notice-header-name">
+                    {props.icon && <FontAwesome className="pc-notice-icon" icon={props.icon} />}
+                    {props.header}
+                </div>
                 <Button
                     look={Button.Looks.BLANK}
                     size={Button.Sizes.NONE}
                     className="pc-notice-close"
-                    onClick={startClosing}
+                    onClick={() => setClosing(true)}
+                    onContextMenu={() => Dispatcher.emit({type: "SET_CLOSING", all: true})}
                 >
                     <DiscordIcon name="Close" />
                 </Button>
@@ -70,8 +85,8 @@ export function Notice(props) {
                         <Button
                             color={Button.Colors[button.color?.toUpperCase() ?? "BRAND_NEW"]}
                             look={Button.Looks[button.look?.toUpperCase() || "FILLED"]}
+                            size={Button.Sizes[button.size?.toUpperCase() || "MIN"]}
                             onClick={button.onClick}
-                            size={Button.Sizes.MIN}
                             key={"button-" + i}
                             className="pc-notice-button"
                         >
@@ -80,7 +95,7 @@ export function Notice(props) {
                     ))}
                 </div>
             )}
-            <div className="pc-notice-progress">
+            {props.timeout > 0 && <div className="pc-notice-progress">
                 <animated.div
                     className="pc-notice-progress-bar"
                     style={{
@@ -95,7 +110,7 @@ export function Notice(props) {
                 >
 
                 </animated.div>
-            </div>
+            </div>}
         </animated.div>
     );
 };
