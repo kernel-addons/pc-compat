@@ -27,8 +27,8 @@ export default fromPromise(promise.then(() => {
         PURPLE: Notices.NoticeColors.STREAMER_MODE
     };
 
-    return function Announcement(props) {
-        const handleClick = callback => {
+    return function Announcement(props: any) {
+        const handleClick = function (callback: Function | void) {
             try {
                 closeAnnouncement(props.id);
 
@@ -41,14 +41,14 @@ export default fromPromise(promise.then(() => {
         };
 
         return (
-            <Notice className={props.className} color={Colors[props.color?.toUpperCase()] || Colors.BLURPLE} id={props.id}>
+            <Notice color={Colors[props.color?.toUpperCase()] ?? Colors.BLURPLE} id={props.id}>
                 <NoticeCloseButton onClick={() => handleClick(props.callback)} />
                 {props.message}
-                {props.button &&
+                {props.button && (
                     <NoticeButtonAncor onClick={() => handleClick(props.button.onClick)}>
                         {props.button.text}
                     </NoticeButtonAncor>
-                }
+                )}
             </Notice>
         );
     };

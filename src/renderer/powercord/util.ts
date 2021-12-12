@@ -63,28 +63,12 @@ export function forceUpdateElement(selector: string) {
     getOwnerInstance(document.querySelector(selector))?.forceUpdate();
 };
 
-export function waitFor(selector: string) {
-    return new Promise(resolve => {
-        const element = document.querySelector(selector);
-        if (element) return resolve(element);
-        new MutationObserver((mutations, observer) => {
-            for (let m = 0; m < mutations.length; m++) {
-                for (let i = 0; i < mutations[m].addedNodes.length; i++) {
-                    const mutation = mutations[m].addedNodes[i] as Element;
-                    if (mutation.nodeType === 3) continue; // ignore text
-                    const directMatch = mutation.matches(selector) && mutation;
-                    if (directMatch) {
-                        observer.disconnect();
-                        return resolve(directMatch);
-                    } else {
-                        const node = mutation.querySelector(selector);
-                        if (!node) return;
-                        resolve(node);
-                        observer.disconnect();
-                    } 
+export async function waitFor(selector: string) { 
+    let element = document.querySelector(selector);
 
-                }
-            }
-        }).observe(document, {childList: true, subtree: true});
-    });
-};
+    do {
+        await sleep(1);
+    } while(!(element = document.querySelector(selector)));
+
+    return element;
+}

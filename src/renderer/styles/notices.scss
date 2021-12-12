@@ -85,7 +85,7 @@
     }
 }
 
-div[class*="base-"] div[class*="notice-"] {
+#app-mount .powercord-announcement {
     border-radius: 0;
 
     &:first-child {

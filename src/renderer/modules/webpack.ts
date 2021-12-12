@@ -43,7 +43,7 @@ export default new class Webpack {
             const listener = function () {
                 Dispatcher.unsubscribe(ActionTypes.START_SESSION, listener);
                 onReady();
-            }
+            };
 
             Dispatcher.subscribe(ActionTypes.START_SESSION, listener);
         }));

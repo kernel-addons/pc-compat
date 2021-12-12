@@ -1,21 +1,18 @@
+import createStore from "@flux/zustand";
 import Announcement from "./announcement";
-import {api} from "../announcements";
 
-export default function AnnouncementContainer(props): JSX.Element | null {
-    const [, forceUpdate] = React.useReducer(e => e + 1, 0);
-    const _handler = () => forceUpdate();
+const useAnnouncements = createStore({elements: {}});
 
-    React.useEffect(() => {
-        api.addListener(_handler);
+export const AnnouncementsStore = useAnnouncements;
 
-        return () => {
-            api.removeListener(_handler);
-        };
-    }, []);
+export default function AnnouncementContainer({store: useAnnouncements}) {
+    const elements = useAnnouncements(state => state.elements);
 
-    const elements = api.getState?.()?.elements;
-
-    return elements ? <>
-        {Object.values(elements).map((notice) => <Announcement {...notice} className="pc-announcement" />)}
-    </> : null;
+    return (
+        <React.Fragment>
+            {Object.values<any>(elements).map((notice) => (
+                <Announcement {...notice} key={notice.id} />
+            ))}
+        </React.Fragment> 
+    );
 };

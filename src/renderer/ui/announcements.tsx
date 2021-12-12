@@ -1,30 +1,39 @@
 import {findInReactTree, getOwnerInstance, waitFor} from "@powercord/util";
-import AnnouncementContainer from "./components/announcementcontainer";
+import AnnouncementContainer, {AnnouncementsStore} from "./components/announcementcontainer";
 import LoggerModule from "@modules/logger";
 import {promise} from "@modules/discord";
-import createStore from "@flux/zustand";
 import Patcher from "@modules/patcher";
 import Webpack from "@modules/webpack";
 
 const Logger = LoggerModule.create("Announcements");
-const [, AnnouncementsApi] = createStore({ elements: {} });
 
-export {AnnouncementsApi as api};
+const [useAnnouncementsStore, AnnouncementsApi] = AnnouncementsStore;
 
-promise.then(async () => {
-    const {base} = Webpack.findByProps("base", "container") || { base: "not-found" };
+const patchClassNames = function () {
+    const noticeClasses = Webpack.findByProps("notice", "colorDefault", "buttonMinor");
+
+    noticeClasses.notice += " powercord-announcement";
+};
+
+const patchNoticeContainer = async function () {
+    const {base} = Webpack.findByProps("base", "container") ?? {base: "pc-not-found"};
     const instance = getOwnerInstance(await waitFor(`.${base.split(" ")[0]}`));
 
     Patcher.after("pc-compat-notices", instance?.props?.children, "type", (_, args, res) => {
         try {
-            const { children } = findInReactTree(res, r => r.className === base);
-            children.unshift(<AnnouncementContainer />);
-        } catch (err) {
-            return Logger.error(err);
+            const {children} = findInReactTree(res, r => r.className === base);
+            children.unshift(<AnnouncementContainer store={useAnnouncementsStore} />);
+        } catch (error) {
+            return Logger.error(error);
         }
     });
 
     instance.forceUpdate();
+}
+
+promise.then(() => {
+    patchClassNames();
+    patchNoticeContainer();
 }).catch(error => {
     Logger.error("Failed to initialize:", error);
 });
