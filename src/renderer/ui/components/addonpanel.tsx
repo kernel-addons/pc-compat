@@ -145,7 +145,7 @@ export default function AddonPanel({manager, type}) {
             <div className="pc-settings-addons-controls">
                 <SearchBar
                     // @ts-ignore
-                    onChange={(value) => setQuery(value)}
+                    onQueryChange={(value) => setQuery(value)}
                     onClear={() => setQuery("")}
                     placeholder={`Search ${type}s...`}
                     size={SearchBar.Sizes.SMALL}

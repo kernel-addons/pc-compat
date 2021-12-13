@@ -1909,7 +1909,7 @@ function AddonPanel({ manager , type  }) {
         className: "pc-settings-addons-controls"
     }, /*#__PURE__*/ React.createElement(SearchBar, {
         // @ts-ignore
-        onChange: (value)=>setQuery(value)
+        onQueryChange: (value)=>setQuery(value)
         ,
         onClear: ()=>setQuery("")
         ,
