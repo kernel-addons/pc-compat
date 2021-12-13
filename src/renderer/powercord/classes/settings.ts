@@ -14,6 +14,8 @@ promise.then(() => {
 
             this.settings = DataStore.tryLoadData(id);
             this.id = id;
+
+            Object.assign(this, this.makeProps());
         }
 
         getKeys = () => {return Reflect.ownKeys(this.settings);}
