@@ -5,6 +5,14 @@ export let store = null;
 
 export let settings = new Map();
 
+export let tabs = settings;
+
+Object.defineProperty(settings, "hasOwnProperty", {
+    value: settings.has.bind(settings),
+    configurable: true,
+    writable: false
+});
+
 promise.then(() => {
     store = Object.assign(getSettings("powercord"), {
         // powerCord momento
