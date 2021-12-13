@@ -15,7 +15,8 @@ const aliases = {
     "@node":        path.resolve(__dirname, "./src/renderer/node"),
     "@common":      path.resolve(__dirname, "./src/common"),
     "@classes":     path.resolve(__dirname, "./src/renderer/classes"),
-    "@flux":        path.resolve(__dirname, "./src/renderer/flux")
+    "@flux":        path.resolve(__dirname, "./src/renderer/flux"),
+    "@decorators":  path.resolve(__dirname, "./src/renderer/decorators")
 };
 
 export default args => {
@@ -64,7 +65,7 @@ export default args => {
                         syntax: "typescript",
                         decorators: true
                     },
-                    target: "es2019"
+                    target: !source ? "es2019" : "es2022"
                 }
             })
         ].filter(Boolean),
