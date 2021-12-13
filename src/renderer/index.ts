@@ -13,6 +13,7 @@ import * as Internals from "./modules";
 import manifest from "../../index.json";
 import {Modals} from "./ui";
 import DiscordIcon from "@ui/discordicon";
+import Updater from "@ui/updater";
 
 if (!("process" in window)) {
     PCCompatNative.IPC.dispatch(IPCEvents.EXPOSE_PROCESS_GLOBAL);
@@ -40,6 +41,7 @@ export default new class PCCompat {
 
         SettingsRenderer.patchSettingsView();
         QuickCSS.initialize();
+        Updater.initialize();
         PluginManager.initialize();
         StyleManager.initialize();
 

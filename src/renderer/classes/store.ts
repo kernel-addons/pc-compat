@@ -1,7 +1,11 @@
-import Logger from "@modules/logger";
+import LoggerModule from "@modules/logger";
 import DiscordModules from "@modules/discord";
 
+export type ValidateListener = (...args: any[]) => boolean;
+
 export default class Store<events = string> {
+    logger = new LoggerModule("Store");
+
     events: {[event: string]: Set<Function>} = {};
 
     has(event: events): boolean {return event in this.events;}
@@ -25,15 +29,15 @@ export default class Store<events = string> {
 
         for (const listener of this.events[event as unknown as string]) {
             try {listener(...args);}
-            catch (error) {Logger.error(`Store:${this.constructor.name}`, error);}
+            catch (error) {this.logger.error(`Store:${this.constructor.name}`, error);}
         }
     }
 
-    useEvent(event: events, listener: Function) {
+    useEvent(event: events, listener: Function, validate: ValidateListener = () => true) {
         const [state, setState] = DiscordModules.React.useState(listener());
 
         DiscordModules.React.useEffect(() => {
-            return this.on(event, () => setState(listener()));
+            return this.on(event, (...args) => validate(...args) && (() => setState(listener())));
         }, [event, listener]);
 
         return state;

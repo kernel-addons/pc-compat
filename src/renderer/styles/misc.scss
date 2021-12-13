@@ -39,3 +39,7 @@
 .powercord-notice:not(:first-child) {
     border-top-left-radius: 0;
 }
+
+.pc-spinner, .pc-spinner > span {
+    display: inline;
+}

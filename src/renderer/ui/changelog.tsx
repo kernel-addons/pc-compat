@@ -12,15 +12,17 @@ export type ChangeLogItem = {
 export type ChangeLogItems = ChangeLogItem[];
 
 export default fromPromise(promise.then(() => {
-    const {Markdown, Flex, Forms: {FormTitle}} = DiscordModules;
+    const {
+        Markdown, Flex,
+        Forms: {FormTitle},
+        ModalComponents: {ModalRoot, ModalHeader, ModalContent, ModalCloseButton}
+    } = DiscordModules;
     const [
         changelogClasses,
         modalClasses,
-        {ModalRoot, ModalHeader, ModalContent, ModalCloseButton} = {} as any
     ] = Webpack.bulk(
         Filters.byProps("progress", "improved", "container"),
-        m => m.content && m.modal && Object.keys(m).length === 2,
-        Filters.byProps("ModalRoot")
+        m => m.content && m.modal && Object.keys(m).length === 2
     );
 
     const ItemTypes = {

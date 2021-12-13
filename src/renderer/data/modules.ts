@@ -50,6 +50,9 @@ export default {
     AvatarDefaults: {
         props: ["BOT_AVATARS"]
     },
+    Moment: {
+        props: ["momentProperties"]
+    },
     // Stores
     SelectedChannelStore: {
         props: ["_dispatchToken", "getChannelId", "getLastSelectedChannelId"]
@@ -57,6 +60,9 @@ export default {
     // Components
     ModalComponents: {
         props: ["ModalRoot", "ModalHeader"]
+    },
+    Link: {
+        name: "Anchor"
     },
     Switch: {
         name: "Switch"

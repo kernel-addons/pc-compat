@@ -21,7 +21,7 @@ export default class QuickCSS {
         SettingsRenderer.registerPanel(QuickCSS.name, {
             label: "QuickCSS",
             render: () => DiscordModules.React.createElement(QuickCSSPanel, {}),
-            order: 3
+            order: 4
         });
         this.loadMonaco();
 

@@ -1,0 +1,43 @@
+
+.pcu-card {
+    padding: 15px;
+    background: var(--background-secondary);
+    border: 1px solid var(--background-tertiary);
+    border-radius: 4px;
+
+    .pcu-shield-container {
+        align-items: center;
+
+        .pcu-shield-warn {
+            color: var(--status-warning-background);
+        }
+
+        .pcu-shield-ok {
+            color: var(--info-positive-foreground);
+        }
+    }
+
+
+    .pcu-git-info {
+        min-width: 130px;
+
+        .pcu-git-info-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 4px;
+            background: var(--background-tertiary);
+            border-radius: 4px;
+            font-family: Consolas,Andale Mono WT,Andale Mono,Lucida Console,Lucida Sans Typewriter,DejaVu Sans Mono,Bitstream Vera Sans Mono,Liberation Mono,Nimbus Mono L,Monaco,Courier New,Courier,monospace;
+            font-size: 80%;
+
+            & + .pcu-git-info-item {
+                margin-top: 5px;
+            }
+        
+            .pc-spinner {
+                padding-bottom: 2px;
+            }
+        }
+    }
+}

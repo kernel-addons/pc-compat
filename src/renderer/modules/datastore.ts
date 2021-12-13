@@ -4,6 +4,7 @@ import path from "@node/path";
 import {default as Require} from "@node/require";
 import {getProps, setProps} from "./utilities";
 import LoggerModule from "./logger";
+import {DiscordModules} from ".";
 
 const Logger = LoggerModule.create("DataStore");
 
@@ -27,14 +28,19 @@ const DataStore = new class DataStore extends Store<"misc" | "data-update"> {
     cache = new Map();
 
     tryLoadData(name: string, def: any = {}) {
-        if (this.cache.has(name)) return this.cache.get(name);
+        const {Lodash} = DiscordModules;
+        if (this.cache.has(name)) return Lodash.merge({}, def, this.cache.get(name));
 
         try {
             const location = path.resolve(this.configFolder, `${name}.json`);
             if (!fs.existsSync(location)) return def;
-            const data = Require(location);
+            
+            let data = Require(location);
             if (Object.keys(data).length === 0) return def;
+
+            data = Lodash.merge({}, def, data);
             this.cache.set(name, data);
+
             return data;
         } catch (error) {
             Logger.error(`Data of ${name} corrupt:`, error);

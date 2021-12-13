@@ -95,6 +95,11 @@ var Modules = {
             "BOT_AVATARS"
         ]
     },
+    Moment: {
+        props: [
+            "momentProperties"
+        ]
+    },
     // Stores
     SelectedChannelStore: {
         props: [
@@ -109,6 +114,9 @@ var Modules = {
             "ModalRoot",
             "ModalHeader"
         ]
+    },
+    Link: {
+        name: "Anchor"
     },
     Switch: {
         name: "Switch"
@@ -285,8 +293,8 @@ if (typeof setImmediate === "undefined") {
     ;
 }
 class Filters {
-    static byProps(...props) {
-        return (module)=>props.every((prop)=>prop in module
+    static byProps(...props1) {
+        return (module)=>props1.every((prop)=>prop in module
             )
         ;
     }
@@ -312,10 +320,10 @@ var Webpack = new class Webpack {
     get id() {
         return "kernel-req" + Math.random().toString().slice(2, 5);
     }
-    async waitFor(filter, { retries =100 , all =false , forever =false , delay =50  } = {
+    async waitFor(filter4, { retries =100 , all =false , forever =false , delay =50  } = {
     }) {
         for(let i = 0; i < retries || forever; i++){
-            const module = this.findModule(filter, {
+            const module = this.findModule(filter4, {
                 all,
                 cache: false
             });
@@ -324,16 +332,16 @@ var Webpack = new class Webpack {
             );
         }
     }
-    parseOptions(args, filter = (thing)=>typeof thing === "object" && thing != null && !Array.isArray(thing)
+    parseOptions(args, filter1 = (thing)=>typeof thing === "object" && thing != null && !Array.isArray(thing)
     ) {
         return [
             args,
-            filter(args.at(-1)) ? args.pop() : {
+            filter1(args.at(-1)) ? args.pop() : {
             }
         ];
     }
-    request(cache = true) {
-        if (cache && this.cache) return this.cache;
+    request(cache2 = true) {
+        if (cache2 && this.cache) return this.cache;
         let req = undefined;
         if (Array.isArray(window[this.chunkName])) {
             const chunk = [
@@ -348,18 +356,18 @@ var Webpack = new class Webpack {
             webpackChunkdiscord_app.splice(webpackChunkdiscord_app.indexOf(chunk), 1);
         }
         if (!req) console.warn("[Webpack] Got empty cache.");
-        if (cache) this.cache = req;
+        if (cache2) this.cache = req;
         return req;
     }
-    findModule(filter, { all =false , cache =true , force =false  } = {
+    findModule(filter2, { all: all1 = false , cache: cache1 = true , force =false  } = {
     }) {
-        if (typeof filter !== "function") return void 0;
-        const __webpack_require__ = this.request(cache);
+        if (typeof filter2 !== "function") return void 0;
+        const __webpack_require__ = this.request(cache1);
         const found = [];
         if (!__webpack_require__) return;
         const wrapFilter = function(module, index) {
             try {
-                return filter(module, index);
+                return filter2(module, index);
             } catch (e) {
                 return false;
             }
@@ -371,17 +379,17 @@ var Webpack = new class Webpack {
                 case "object":
                     {
                         if (wrapFilter(module, id)) {
-                            if (!all) return module;
+                            if (!all1) return module;
                             found.push(module);
                         }
                         if (module.__esModule && module.default != null && wrapFilter(module.default, id)) {
-                            if (!all) return module.default;
+                            if (!all1) return module.default;
                             found.push(module.default);
                         }
                         if (force && module.__esModule) for(const key in module){
                             if (!module[key]) continue;
                             if (wrapFilter(module[key], id)) {
-                                if (!all) return module[key];
+                                if (!all1) return module[key];
                                 found.push(module[key]);
                             }
                         }
@@ -390,17 +398,17 @@ var Webpack = new class Webpack {
                 case "function":
                     {
                         if (wrapFilter(module, id)) {
-                            if (!all) return module;
+                            if (!all1) return module;
                             found.push(module);
                         }
                         break;
                     }
             }
         }
-        return all ? found : found[0];
+        return all1 ? found : found[0];
     }
-    findModules(filter) {
-        return this.findModule(filter, {
+    findModules(filter3) {
+        return this.findModule(filter3, {
             all: true
         });
     }
@@ -428,8 +436,8 @@ var Webpack = new class Webpack {
         );
         return found;
     }
-    findByProps(...options) {
-        const [props, { bulk =false , wait =false , ...rest }] = this.parseOptions(options);
+    findByProps(...options1) {
+        const [props, { bulk =false , wait =false , ...rest }] = this.parseOptions(options1);
         if (!bulk && !wait) {
             return this.findModule(Filters.byProps(...props), rest);
         }
@@ -446,8 +454,8 @@ var Webpack = new class Webpack {
         }
         return null;
     }
-    findByDisplayName(...options) {
-        const [displayNames, { bulk =false , default: defaultExport = false , wait =false , ...rest }] = this.parseOptions(options);
+    findByDisplayName(...options2) {
+        const [displayNames, { bulk =false , default: defaultExport = false , wait =false , ...rest }] = this.parseOptions(options2);
         if (!bulk && !wait) {
             return this.findModule(Filters.byDisplayName(displayNames[0]), rest);
         }
@@ -490,10 +498,10 @@ var Webpack = new class Webpack {
     /**@deprecated Use Webpack.whenReady.then(() => {}) instead. */ get whenExists() {
         return this.waitForGlobal;
     }
-    /**@deprecated Use Webpack.whenReady.then(() => {}) instead. */ on(event, listener) {
+    /**@deprecated Use Webpack.whenReady.then(() => {}) instead. */ on(event, listener1) {
         switch(event){
             case "LOADED":
-                return this.whenReady.then(listener);
+                return this.whenReady.then(listener1);
         }
     }
     /**@deprecated @see Webpack.on */ get once() {
@@ -529,7 +537,7 @@ const DiscordModules = {
 };
 const NOOP_RET = (_)=>_
 ;
-const filters = new Promise((resolve)=>{
+const filters1 = new Promise((resolve)=>{
     const result = [];
     for(let moduleId in Modules){
         const module = Modules[moduleId];
@@ -594,12 +602,12 @@ const filters = new Promise((resolve)=>{
     resolve(result);
 });
 const promise = Promise.all([
-    filters,
+    filters1,
     Webpack.whenReady
-]).then(([filters1])=>{
-    const result = Webpack.bulk(...filters1.map(({ filter  })=>filter
+]).then(([filters])=>{
+    const result = Webpack.bulk(...filters.map(({ filter  })=>filter
     ));
-    Object.assign(DiscordModules, filters1.reduce((modules, { id , map  }, index)=>{
+    Object.assign(DiscordModules, filters.reduce((modules, { id , map  }, index)=>{
         const mapper = map !== null && map !== void 0 ? map : NOOP_RET;
         modules[id] = mapper(result[index]);
         return modules;
@@ -701,28 +709,28 @@ function _classPrivateMethodGet(receiver, privateSet, fn) {
 }
 var _parseType = new WeakSet(), _log = new WeakSet();
 class Logger$b {
-    log(...message) {
-        _classPrivateMethodGet(this, _log, log).call(this, "log", ...message);
+    log(...message5) {
+        _classPrivateMethodGet(this, _log, log).call(this, "log", ...message5);
     }
-    info(...message) {
-        _classPrivateMethodGet(this, _log, log).call(this, "info", ...message);
+    info(...message1) {
+        _classPrivateMethodGet(this, _log, log).call(this, "info", ...message1);
     }
-    warn(...message) {
-        _classPrivateMethodGet(this, _log, log).call(this, "warn", ...message);
+    warn(...message2) {
+        _classPrivateMethodGet(this, _log, log).call(this, "warn", ...message2);
     }
-    error(...message) {
-        _classPrivateMethodGet(this, _log, log).call(this, "error", ...message);
+    error(...message3) {
+        _classPrivateMethodGet(this, _log, log).call(this, "error", ...message3);
     }
-    debug(...message) {
-        _classPrivateMethodGet(this, _log, log).call(this, "debug", ...message);
+    debug(...message4) {
+        _classPrivateMethodGet(this, _log, log).call(this, "debug", ...message4);
     }
     static create(name) {
         return new Logger$b(name);
     }
-    constructor(name){
+    constructor(name1){
         _parseType.add(this);
         _log.add(this);
-        this.module = name;
+        this.module = name1;
     }
 }
 function parseType(type) {
@@ -791,9 +799,9 @@ class Patcher {
             return returnValue;
         };
     }
-    static pushPatch(caller, module, functionName) {
+    static pushPatch(caller1, module, functionName) {
         const patch = {
-            caller,
+            caller: caller1,
             module,
             functionName,
             originalFunction: module[functionName],
@@ -813,15 +821,15 @@ class Patcher {
         });
         return this._patches.push(patch), patch;
     }
-    static doPatch(caller, module, functionName, callback, type = "after", options = {
+    static doPatch(caller2, module1, functionName1, callback, type = "after", options = {
     }) {
         let { displayName  } = options;
         var ref;
-        const patch = (ref = this._patches.find((e)=>e.module === module && e.functionName === functionName
-        )) !== null && ref !== void 0 ? ref : this.pushPatch(caller, module, functionName);
-        if (typeof displayName !== "string") displayName || module.displayName || module.name || module.constructor.displayName || module.constructor.name;
+        const patch = (ref = this._patches.find((e)=>e.module === module1 && e.functionName === functionName1
+        )) !== null && ref !== void 0 ? ref : this.pushPatch(caller2, module1, functionName1);
+        if (typeof displayName !== "string") displayName || module1.displayName || module1.name || module1.constructor.displayName || module1.constructor.name;
         const child = {
-            caller,
+            caller: caller2,
             type,
             id: patch.count,
             callback,
@@ -829,7 +837,7 @@ class Patcher {
                 patch.children.splice(patch.children.findIndex((cpatch)=>cpatch.id === child.id && cpatch.type === type
                 ), 1);
                 if (patch.children.length <= 0) {
-                    const patchNum = this._patches.findIndex((p)=>p.module == module && p.functionName == functionName
+                    const patchNum = this._patches.findIndex((p)=>p.module == module1 && p.functionName == functionName1
                     );
                     this._patches[patchNum].undo();
                     this._patches.splice(patchNum, 1);
@@ -840,14 +848,14 @@ class Patcher {
         patch.count++;
         return child.unpatch;
     }
-    static before(caller, module, functionName, callback) {
-        return this.doPatch(caller, module, functionName, callback, "before");
+    static before(caller3, module2, functionName2, callback1) {
+        return this.doPatch(caller3, module2, functionName2, callback1, "before");
     }
-    static after(caller, module, functionName, callback) {
-        return this.doPatch(caller, module, functionName, callback, "after");
+    static after(caller4, module3, functionName3, callback2) {
+        return this.doPatch(caller4, module3, functionName3, callback2, "after");
     }
-    static instead(caller, module, functionName, callback) {
-        return this.doPatch(caller, module, functionName, callback, "instead");
+    static instead(caller5, module4, functionName4, callback3) {
+        return this.doPatch(caller5, module4, functionName4, callback3, "instead");
     }
 }
 Patcher._patches = [];
@@ -943,8 +951,8 @@ var util$1 = /*#__PURE__*/Object.freeze({
     waitFor: waitFor
 });
 
-function _extends$X() {
-    _extends$X = Object.assign || function(target) {
+function _extends$Z() {
+    _extends$Z = Object.assign || function(target) {
         for(var i = 1; i < arguments.length; i++){
             var source = arguments[i];
             for(var key in source){
@@ -955,7 +963,7 @@ function _extends$X() {
         }
         return target;
     };
-    return _extends$X.apply(this, arguments);
+    return _extends$Z.apply(this, arguments);
 }
 const patchAvatars = function() {
     var ref5, ref1, ref2;
@@ -969,7 +977,7 @@ const patchAvatars = function() {
         return res;
     });
     Patcher.after("pc-utility-classes-animated-avatar", Avatar.AnimatedAvatar, "type", (_, args, res)=>{
-        return(/*#__PURE__*/ React.createElement(Avatar.default, _extends$X({
+        return(/*#__PURE__*/ React.createElement(Avatar.default, _extends$Z({
         }, res.props)));
     });
     const AvatarWrapper = (ref2 = (ref5 = Webpack.findByProps([
@@ -996,38 +1004,41 @@ class Store {
     has(event) {
         return event in this.events;
     }
-    on(event, listener) {
-        if (!this.has(event)) this.events[event] = new Set();
-        this.events[event].add(listener);
-        return ()=>void this.off(event, listener)
+    on(event1, listener) {
+        if (!this.has(event1)) this.events[event1] = new Set();
+        this.events[event1].add(listener);
+        return ()=>void this.off(event1, listener)
         ;
     }
-    off(event, listener) {
-        if (!this.has(event)) return;
-        return this.events[event].delete(listener);
+    off(event2, listener1) {
+        if (!this.has(event2)) return;
+        return this.events[event2].delete(listener1);
     }
-    emit(event, ...args) {
-        if (!this.has(event)) return;
-        for (const listener of this.events[event]){
+    emit(event3, ...args1) {
+        if (!this.has(event3)) return;
+        for (const listener of this.events[event3]){
             try {
-                listener(...args);
+                listener(...args1);
             } catch (error) {
-                Logger$b.error(`Store:${this.constructor.name}`, error);
+                this.logger.error(`Store:${this.constructor.name}`, error);
             }
         }
     }
-    useEvent(event, listener) {
-        const [state, setState] = DiscordModules.React.useState(listener());
+    useEvent(event4, listener2, validate = ()=>true
+    ) {
+        const [state, setState] = DiscordModules.React.useState(listener2());
         DiscordModules.React.useEffect(()=>{
-            return this.on(event, ()=>setState(listener())
+            return this.on(event4, (...args)=>validate(...args) && (()=>setState(listener2())
+                )
             );
         }, [
-            event,
-            listener
+            event4,
+            listener2
         ]);
         return state;
     }
     constructor(){
+        this.logger = new Logger$b("Store");
         this.events = {
         };
     }
@@ -1037,18 +1048,18 @@ class Emitter {
     static has(event) {
         return event in this.events;
     }
-    static on(event, listener) {
-        if (!this.has(event)) this.events[event] = new Set();
-        this.events[event].add(listener);
-        return this.off.bind(this, event, listener);
+    static on(event1, listener) {
+        if (!this.has(event1)) this.events[event1] = new Set();
+        this.events[event1].add(listener);
+        return this.off.bind(this, event1, listener);
     }
-    static off(event, listener) {
-        if (!this.has(event)) return;
-        return this.events[event].delete(listener);
+    static off(event2, listener1) {
+        if (!this.has(event2)) return;
+        return this.events[event2].delete(listener1);
     }
-    static emit(event, ...args) {
-        if (!this.has(event)) return;
-        for (const listener of this.events[event]){
+    static emit(event3, ...args) {
+        if (!this.has(event3)) return;
+        for (const listener of this.events[event3]){
             try {
                 listener(...args);
             } catch (error) {
@@ -1064,36 +1075,36 @@ class fs {
     static readFileSync(path, options = "utf8") {
         return PCCompatNative.executeJS(`require("fs").readFileSync(${JSON.stringify(path)}, ${JSON.stringify(options)});`);
     }
-    static writeFileSync(path, data, options) {
-        return PCCompatNative.executeJS(`require("fs").writeFileSync(${JSON.stringify(path)}, ${JSON.stringify(data)}, ${JSON.stringify(options)})`);
+    static writeFileSync(path1, data, options1) {
+        return PCCompatNative.executeJS(`require("fs").writeFileSync(${JSON.stringify(path1)}, ${JSON.stringify(data)}, ${JSON.stringify(options1)})`);
     }
-    static writeFile(path, data, options, callback) {
-        if (typeof options === "function") {
-            callback = options;
-            options = null;
+    static writeFile(path2, data1, options2, callback) {
+        if (typeof options2 === "function") {
+            callback = options2;
+            options2 = null;
         }
         const ret = {
             error: null
         };
         try {
-            this.writeFileSync(path, data, options);
+            this.writeFileSync(path2, data1, options2);
         } catch (error) {
             ret.error = error;
         }
         callback(ret.error);
     }
-    static readdirSync(path, options) {
-        return PCCompatNative.executeJS(`require("fs").readdirSync(${JSON.stringify(path)}, ${JSON.stringify(options)});`);
+    static readdirSync(path3, options3) {
+        return PCCompatNative.executeJS(`require("fs").readdirSync(${JSON.stringify(path3)}, ${JSON.stringify(options3)});`);
     }
-    static existsSync(path) {
-        return PCCompatNative.executeJS(`require("fs").existsSync(${JSON.stringify(path)});`);
+    static existsSync(path4) {
+        return PCCompatNative.executeJS(`require("fs").existsSync(${JSON.stringify(path4)});`);
     }
-    static mkdirSync(path, options) {
-        return PCCompatNative.executeJS(`require("fs").mkdirSync(${JSON.stringify(path)}, ${JSON.stringify(options)});`);
+    static mkdirSync(path5, options4) {
+        return PCCompatNative.executeJS(`require("fs").mkdirSync(${JSON.stringify(path5)}, ${JSON.stringify(options4)});`);
     }
-    static statSync(path, options) {
+    static statSync(path6, options5) {
         return PCCompatNative.executeJS(`
-            const stats = require("fs").statSync(${JSON.stringify(path)}, ${JSON.stringify(options)});
+            const stats = require("fs").statSync(${JSON.stringify(path6)}, ${JSON.stringify(options5)});
             const ret = {
                 ...stats,
                 isFile: () => stats.isFile(),
@@ -1102,17 +1113,17 @@ class fs {
             ret
         `);
     }
-    static watch(path, options, callback) {
-        if (typeof options === "function") {
-            callback = options;
-            options = null;
+    static watch(path7, options6, callback1) {
+        if (typeof options6 === "function") {
+            callback1 = options6;
+            options6 = null;
         }
         const eventId = "bdcompat-watcher-" + Math.random().toString(36).slice(2, 10);
         PCCompatNative.IPC.on(eventId, (event, filename)=>{
-            callback(event, filename);
+            callback1(event, filename);
         });
         return PCCompatNative.executeJS(`
-            require("fs").watch(${JSON.stringify(path)}, ${JSON.stringify(options)}, (event, filename) => {
+            require("fs").watch(${JSON.stringify(path7)}, ${JSON.stringify(options6)}, (event, filename) => {
                 PCCompatNative.IPC.dispatch(${JSON.stringify(eventId)}, event, filename);
             });
         `);
@@ -1140,8 +1151,8 @@ const electron = {
     clipboard
 };
 
-function _extends$W() {
-    _extends$W = Object.assign || function(target) {
+function _extends$Y() {
+    _extends$Y = Object.assign || function(target) {
         for(var i = 1; i < arguments.length; i++){
             var source = arguments[i];
             for(var key in source){
@@ -1152,14 +1163,14 @@ function _extends$W() {
         }
         return target;
     };
-    return _extends$W.apply(this, arguments);
+    return _extends$Y.apply(this, arguments);
 }
 const cache$4 = new Map();
 function DiscordIcon({ name , ...props }) {
     var ref, ref1;
     const IconComponent = (ref1 = (ref = cache$4.get(name)) !== null && ref !== void 0 ? ref : (cache$4.set(name, Webpack.findByDisplayName(name)), cache$4.get(name))) !== null && ref1 !== void 0 ? ref1 : ()=>null
     ;
-    return(/*#__PURE__*/ React.createElement(IconComponent, _extends$W({
+    return(/*#__PURE__*/ React.createElement(IconComponent, _extends$Y({
     }, props)));
 }
 
@@ -1171,8 +1182,8 @@ function memoize(target, key, value) {
     return value;
 }
 
-function _extends$V() {
-    _extends$V = Object.assign || function(target) {
+function _extends$X() {
+    _extends$X = Object.assign || function(target) {
         for(var i = 1; i < arguments.length; i++){
             var source = arguments[i];
             for(var key in source){
@@ -1183,7 +1194,7 @@ function _extends$V() {
         }
         return target;
     };
-    return _extends$V.apply(this, arguments);
+    return _extends$X.apply(this, arguments);
 }
 function AsyncComponent({ _provider , _fallback , ...props }) {
     const [Component, setComponent] = DiscordModules.React.useState(()=>_fallback !== null && _fallback !== void 0 ? _fallback : ()=>null
@@ -1196,7 +1207,7 @@ function AsyncComponent({ _provider , _fallback , ...props }) {
         _provider,
         _fallback
     ]);
-    return(/*#__PURE__*/ React.createElement(Component, _extends$V({
+    return(/*#__PURE__*/ React.createElement(Component, _extends$X({
     }, props)));
 }function from(promise, fallback) {
     return (props)=>DiscordModules.React.createElement(AsyncComponent, {
@@ -1244,8 +1255,8 @@ const FormItem = fromPromise(promise.then(()=>{
     };
 }));
 
-function _extends$U() {
-    _extends$U = Object.assign || function(target) {
+function _extends$W() {
+    _extends$W = Object.assign || function(target) {
         for(var i = 1; i < arguments.length; i++){
             var source = arguments[i];
             for(var key in source){
@@ -1256,7 +1267,7 @@ function _extends$U() {
         }
         return target;
     };
-    return _extends$U.apply(this, arguments);
+    return _extends$W.apply(this, arguments);
 }
 function TextInput(props) {
     const { TextInput: TextInput1  } = DiscordModules;
@@ -1267,14 +1278,14 @@ function TextInput(props) {
         note: note,
         required: required,
         noteHasMargin: true
-    }, /*#__PURE__*/ React.createElement(TextInput1, _extends$U({
+    }, /*#__PURE__*/ React.createElement(TextInput1, _extends$W({
     }, props, {
         required: required
     }))));
 }
 
-function _extends$T() {
-    _extends$T = Object.assign || function(target) {
+function _extends$V() {
+    _extends$V = Object.assign || function(target) {
         for(var i = 1; i < arguments.length; i++){
             var source = arguments[i];
             for(var key in source){
@@ -1285,13 +1296,12 @@ function _extends$T() {
         }
         return target;
     };
-    return _extends$T.apply(this, arguments);
+    return _extends$V.apply(this, arguments);
 }
 var ChangeLog = fromPromise(promise.then(()=>{
-    const { Markdown , Flex , Forms: { FormTitle  }  } = DiscordModules;
-    const [changelogClasses, modalClasses, { ModalRoot , ModalHeader , ModalContent , ModalCloseButton  } = {
-    }] = Webpack.bulk(Filters.byProps("progress", "improved", "container"), (m)=>m.content && m.modal && Object.keys(m).length === 2
-    , Filters.byProps("ModalRoot"));
+    const { Markdown , Flex , Forms: { FormTitle  } , ModalComponents: { ModalRoot , ModalHeader , ModalContent , ModalCloseButton  }  } = DiscordModules;
+    const [changelogClasses, modalClasses, ] = Webpack.bulk(Filters.byProps("progress", "improved", "container"), (m)=>m.content && m.modal && Object.keys(m).length === 2
+    );
     const ItemTypes = {
         IMPROVED: changelogClasses.improved,
         ADDED: changelogClasses.added,
@@ -1313,7 +1323,7 @@ var ChangeLog = fromPromise(promise.then(()=>{
         ))));
     };
     return function ChangeLog({ items , title , ...props }) {
-        return(/*#__PURE__*/ React.createElement(ModalRoot, _extends$T({
+        return(/*#__PURE__*/ React.createElement(ModalRoot, _extends$V({
         }, props, {
             className: joinClassNames(changelogClasses.container, modalClasses.content)
         }), /*#__PURE__*/ React.createElement(ModalHeader, {
@@ -1357,13 +1367,13 @@ class Modals {
             }, props), typeof content === "string" ? React.createElement(Markdown, null, content) : content);
         });
     }
-    static prompt(title, content, options = {
+    static prompt(title1, content1, options1 = {
     }) {
         const { placeholder ="" , onInput =()=>{
-        }  } = options;
+        }  } = options1;
         let value = "";
-        return this.showConfirmationModal(title, React.createElement(this.TextInput, {
-            note: content,
+        return this.showConfirmationModal(title1, React.createElement(this.TextInput, {
+            note: content1,
             value: value,
             placeholder: placeholder,
             onChange: (val)=>{
@@ -1375,16 +1385,16 @@ class Modals {
             }
         });
     }
-    static alert(title, content) {
-        return this.showConfirmationModal(title, content, {
+    static alert(title2, content2) {
+        return this.showConfirmationModal(title2, content2, {
             cancelText: null
         });
     }
-    static showChangeLog(title, items) {
+    static showChangeLog(title3, items) {
         const { ModalsApi  } = DiscordModules;
         return ModalsApi.openModal((props)=>{
             return React.createElement(ChangeLog, Object.assign({
-                title,
+                title: title3,
                 items
             }, props));
         });
@@ -1429,8 +1439,8 @@ const ErrorBoundary = fromPromise(promise.then(()=>{
                 error: error.message
             };
         }
-        componentDidCatch(error, errorInfo) {
-            console.error(error, errorInfo);
+        componentDidCatch(error1, errorInfo) {
+            console.error(error1, errorInfo);
         }
         render() {
             if (this.state.hasError) {
@@ -1596,8 +1606,8 @@ var settings$1 = /*#__PURE__*/Object.freeze({
     connectStores: connectStores
 });
 
-function _extends$S() {
-    _extends$S = Object.assign || function(target) {
+function _extends$U() {
+    _extends$U = Object.assign || function(target) {
         for(var i = 1; i < arguments.length; i++){
             var source = arguments[i];
             for(var key in source){
@@ -1608,14 +1618,14 @@ function _extends$S() {
         }
         return target;
     };
-    return _extends$S.apply(this, arguments);
+    return _extends$U.apply(this, arguments);
 }
 function ToolButton({ label , icon , onClick , danger =false , disabled =false  }) {
     const { Button , Tooltips: { Tooltip  }  } = DiscordModules;
     return(/*#__PURE__*/ React.createElement(Tooltip, {
         text: label,
         position: "top"
-    }, (props)=>/*#__PURE__*/ React.createElement(Button, _extends$S({
+    }, (props)=>/*#__PURE__*/ React.createElement(Button, _extends$U({
         }, props, {
             className: "pc-settings-toolbutton",
             look: Button.Looks.BLANK,
@@ -1725,8 +1735,8 @@ function AddonCard({ addon , manager , openSettings , hasSettings , type  }) {
     }, /*#__PURE__*/ React.createElement(Markdown, null, addon.manifest.description))));
 }
 
-function _extends$R() {
-    _extends$R = Object.assign || function(target) {
+function _extends$T() {
+    _extends$T = Object.assign || function(target) {
         for(var i = 1; i < arguments.length; i++){
             var source = arguments[i];
             for(var key in source){
@@ -1737,7 +1747,7 @@ function _extends$R() {
         }
         return target;
     };
-    return _extends$R.apply(this, arguments);
+    return _extends$T.apply(this, arguments);
 }
 const sortLabels = [
     "name",
@@ -1896,7 +1906,7 @@ function AddonPanel({ manager , type  }) {
     }), /*#__PURE__*/ React.createElement(Tooltips.Tooltip, {
         text: "Options",
         position: "bottom"
-    }, (props)=>/*#__PURE__*/ React.createElement(Button, _extends$R({
+    }, (props)=>/*#__PURE__*/ React.createElement(Button, _extends$T({
         }, props, {
             size: Button.Sizes.NONE,
             look: Button.Looks.BLANK,
@@ -1959,8 +1969,8 @@ class SettingsRenderer {
             return true;
         };
     }
-    static unregisterPanel(id) {
-        const panel = this.panels.findIndex((e)=>e.id === id
+    static unregisterPanel(id1) {
+        const panel = this.panels.findIndex((e)=>e.id === id1
         );
         if (panel < 0) return;
         this.panels.splice(panel, 1);
@@ -2116,20 +2126,20 @@ class PluginManager extends Emitter {
             this.startPlugin(exports);
         }
     }
-    static unloadAddon(addon, log = true) {
-        const plugin = this.resolve(addon);
-        if (!addon) return;
+    static unloadAddon(addon1, log1 = true) {
+        const plugin = this.resolve(addon1);
+        if (!addon1) return;
         const success = this.stopPlugin(plugin);
         this.plugins.delete(plugin.entityID);
         this.clearCache(plugin.path);
-        if (log) {
+        if (log1) {
             Logger$9.log(`${plugin.displayName} was unloaded!`);
         }
         return success;
     }
-    static reloadPlugin(addon) {
-        const plugin = this.resolve(addon);
-        if (!addon) return;
+    static reloadPlugin(addon2) {
+        const plugin = this.resolve(addon2);
+        if (!addon2) return;
         const success = this.unloadAddon(plugin, false);
         if (!success) {
             return Logger$9.error(`Something went wrong while trying to unload ${plugin.displayName}:`);
@@ -2137,12 +2147,12 @@ class PluginManager extends Emitter {
         this.loadPlugin(plugin.path, false);
         Logger$9.log(`Finished reloading ${plugin.displayName}.`);
     }
-    static startPlugin(addon, log = true) {
-        const plugin = this.resolve(addon);
+    static startPlugin(addon3, log2 = true) {
+        const plugin = this.resolve(addon3);
         if (!plugin) return;
         try {
             if (typeof plugin.startPlugin === "function") plugin.startPlugin();
-            if (log) {
+            if (log2) {
                 Logger$9.log(`${plugin.displayName} has been started!`);
             }
         } catch (error) {
@@ -2150,12 +2160,12 @@ class PluginManager extends Emitter {
         }
         return true;
     }
-    static stopPlugin(addon, log = true) {
-        const plugin = this.resolve(addon);
+    static stopPlugin(addon4, log3 = true) {
+        const plugin = this.resolve(addon4);
         if (!plugin) return;
         try {
             if (typeof plugin.pluginWillUnload === "function") plugin.pluginWillUnload();
-            if (log) {
+            if (log3) {
                 Logger$9.log(`${plugin.displayName} has been stopped!`);
             }
         } catch (error) {
@@ -2164,37 +2174,37 @@ class PluginManager extends Emitter {
         }
         return true;
     }
-    static enablePlugin(addon, log = true) {
-        const plugin = this.resolve(addon);
+    static enablePlugin(addon5, log4 = true) {
+        const plugin = this.resolve(addon5);
         if (!plugin) return;
         this.states[plugin.entityID] = true;
         DataStore$1.trySaveData("plugins", this.states);
         this.startPlugin(plugin, false);
-        if (log) {
+        if (log4) {
             Logger$9.log(`${plugin.displayName} has been enabled!`);
             this.emit("toggle", plugin.entityID, true);
         }
     }
-    static disablePlugin(addon, log = true) {
-        const plugin = this.resolve(addon);
+    static disablePlugin(addon6, log5 = true) {
+        const plugin = this.resolve(addon6);
         if (!plugin) return;
         this.states[plugin.entityID] = false;
         DataStore$1.trySaveData("plugins", this.states);
         this.stopPlugin(plugin, false);
-        if (log) {
+        if (log5) {
             Logger$9.log(`${plugin.displayName} has been disabled!`);
             this.emit("toggle", plugin.entityID, false);
         }
     }
-    static delete(addon) {
-        const plugin = this.resolve(addon);
+    static delete(addon7) {
+        const plugin = this.resolve(addon7);
         if (!plugin) return;
         this.unloadAddon(plugin);
         PCCompatNative.executeJS(`require("electron").shell.trashItem(${JSON.stringify(plugin.path)})`);
         this.emit("delete", plugin);
     }
-    static toggle(addon) {
-        const plugin = this.resolve(addon);
+    static toggle(addon8) {
+        const plugin = this.resolve(addon8);
         if (!plugin) return;
         if (this.isEnabled(plugin.entityID)) this.disable(plugin);
         else this.enable(plugin);
@@ -2244,14 +2254,14 @@ class Plugin$1 {
     log(...messages) {
         console.log(`%c[Powercord:Plugin:${this.constructor.name}]`, `color: ${this.color};`, ...messages);
     }
-    debug(...messages) {
-        console.debug(`%c[Powercord:Plugin:${this.constructor.name}]`, `color: ${this.color};`, ...messages);
+    debug(...messages1) {
+        console.debug(`%c[Powercord:Plugin:${this.constructor.name}]`, `color: ${this.color};`, ...messages1);
     }
-    warn(...messages) {
-        console.warn(`%c[Powercord:Plugin:${this.constructor.name}]`, `color: ${this.color};`, ...messages);
+    warn(...messages2) {
+        console.warn(`%c[Powercord:Plugin:${this.constructor.name}]`, `color: ${this.color};`, ...messages2);
     }
-    error(...messages) {
-        console.error(`%c[Powercord:Plugin:${this.constructor.name}]`, `color: ${this.color};`, ...messages);
+    error(...messages3) {
+        console.error(`%c[Powercord:Plugin:${this.constructor.name}]`, `color: ${this.color};`, ...messages3);
     }
     // "Internals" :zere_zoom:
     _load() {
@@ -2592,10 +2602,10 @@ var commands$1 = /*#__PURE__*/Object.freeze({
 
 promise.then(()=>{
     const { LocaleManager , LocaleStore  } = DiscordModules;
-    locale = LocaleManager.getLocale();
+    locale1 = LocaleManager.getLocale();
     LocaleStore.addChangeListener(()=>{
-        if (LocaleStore.locale !== locale) {
-            locale = LocaleStore.locale;
+        if (LocaleStore.locale !== locale1) {
+            locale1 = LocaleStore.locale;
             LocaleManager.loadPromise.then(injectStrings);
         }
     });
@@ -2603,10 +2613,10 @@ promise.then(()=>{
 });
 let messages = {
 };
-let locale = null;
+let locale1 = null;
 function loadAllStrings(strings) {
-    for(let locale1 in strings){
-        loadStrings(locale1, strings[locale1]);
+    for(let locale in strings){
+        loadStrings(locale, strings[locale]);
     }
 }
 function loadStrings(locale, strings) {
@@ -2618,14 +2628,14 @@ function loadStrings(locale, strings) {
 function injectStrings() {
     if (!DiscordModules.LocaleManager) return;
     const context = DiscordModules.LocaleManager._provider._context;
-    Object.assign(context.messages, messages[locale]);
+    Object.assign(context.messages, messages[locale1]);
     Object.assign(context.defaultMessages, messages["en-US"]);
 }
 
 var i18n = /*#__PURE__*/Object.freeze({
     __proto__: null,
     messages: messages,
-    get locale () { return locale; },
+    get locale () { return locale1; },
     loadAllStrings: loadAllStrings,
     loadStrings: loadStrings,
     injectStrings: injectStrings
@@ -2641,9 +2651,9 @@ class DOM {
         node.append(...children);
         return node;
     }
-    static injectCSS(id, cssOrURL, options) {
+    static injectCSS(id, cssOrURL, options1) {
         var ref;
-        switch((ref = options === null || options === void 0 ? void 0 : options.type) !== null && ref !== void 0 ? ref : "PLAIN"){
+        switch((ref = options1 === null || options1 === void 0 ? void 0 : options1.type) !== null && ref !== void 0 ? ref : "PLAIN"){
             case "PLAIN":
                 var element = this.createElement("style", {
                     id,
@@ -2657,29 +2667,29 @@ class DOM {
                 });
                 break;
         }
-        ((options === null || options === void 0 ? void 0 : options.documentHead) ? document.head : this.head).appendChild(element);
+        ((options1 === null || options1 === void 0 ? void 0 : options1.documentHead) ? document.head : this.head).appendChild(element);
         this.elements[id] = element;
         return element;
     }
-    static injectJS(id, url, options) {
+    static injectJS(id1, url, options2) {
         return new Promise((resolve, reject)=>{
             const script = this.createElement("script", {
-                id,
+                id: id1,
                 src: url,
                 onload: resolve,
                 onerror: reject
             });
-            ((options === null || options === void 0 ? void 0 : options.documentHead) ? document.head : this.head).appendChild(script);
-            this.elements[id] = script;
+            ((options2 === null || options2 === void 0 ? void 0 : options2.documentHead) ? document.head : this.head).appendChild(script);
+            this.elements[id1] = script;
         });
     }
-    static getElement(id) {
-        return this.elements[id] || this.head.querySelector(`style[id="${id}"]`);
+    static getElement(id2) {
+        return this.elements[id2] || this.head.querySelector(`style[id="${id2}"]`);
     }
-    static clearCSS(id) {
-        const element = this.getElement(id);
+    static clearCSS(id3) {
+        const element = this.getElement(id3);
         if (element) element.remove();
-        delete this.elements[id];
+        delete this.elements[id3];
     }
 }
 DOM.elements = {
@@ -2728,6 +2738,58 @@ function createDispatcher() {
     return API;
 }
 
+function _extends$S() {
+    _extends$S = Object.assign || function(target) {
+        for(var i = 1; i < arguments.length; i++){
+            var source = arguments[i];
+            for(var key in source){
+                if (Object.prototype.hasOwnProperty.call(source, key)) {
+                    target[key] = source[key];
+                }
+            }
+        }
+        return target;
+    };
+    return _extends$S.apply(this, arguments);
+}
+var Bin = ((props)=>{
+    return(/*#__PURE__*/ React.createElement("svg", _extends$S({
+        xmlns: "http://www.w3.org/2000/svg",
+        viewBox: "0 0 25 21"
+    }, props), /*#__PURE__*/ React.createElement("path", {
+        fill: "currentColor",
+        d: "M1.60772 16C1.60772 17.1 2.49904 18 3.58843 18H11.5112C12.6006 18 13.4919 17.1 13.4919 16V6C13.4919 4.9 12.6006 4 11.5112 4H3.58843C2.49904 4 1.60772 4.9 1.60772 6V16ZM4.74714 8.17C4.83876 8.0773 4.94759 8.00375 5.06739 7.95357C5.1872 7.90339 5.31563 7.87756 5.44534 7.87756C5.57504 7.87756 5.70347 7.90339 5.82328 7.95357C5.94309 8.00375 6.05191 8.0773 6.14354 8.17L7.54984 9.59L8.95614 8.17C9.04782 8.07742 9.15667 8.00398 9.27647 7.95387C9.39627 7.90377 9.52467 7.87798 9.65433 7.87798C9.784 7.87798 9.9124 7.90377 10.0322 7.95387C10.152 8.00398 10.2608 8.07742 10.3525 8.17C10.4442 8.26258 10.517 8.37249 10.5666 8.49346C10.6162 8.61442 10.6417 8.74407 10.6417 8.875C10.6417 9.00593 10.6162 9.13558 10.5666 9.25654C10.517 9.37751 10.4442 9.48742 10.3525 9.58L8.94623 11L10.3525 12.42C10.4442 12.5126 10.517 12.6225 10.5666 12.7435C10.6162 12.8644 10.6417 12.9941 10.6417 13.125C10.6417 13.2559 10.6162 13.3856 10.5666 13.5065C10.517 13.6275 10.4442 13.7374 10.3525 13.83C10.2608 13.9226 10.152 13.996 10.0322 14.0461C9.9124 14.0962 9.784 14.122 9.65433 14.122C9.52467 14.122 9.39627 14.0962 9.27647 14.0461C9.15667 13.996 9.04782 13.9226 8.95614 13.83L7.54984 12.41L6.14354 13.83C6.05185 13.9226 5.943 13.996 5.8232 14.0461C5.7034 14.0962 5.575 14.122 5.44534 14.122C5.31567 14.122 5.18727 14.0962 5.06747 14.0461C4.94768 13.996 4.83883 13.9226 4.74714 13.83C4.65545 13.7374 4.58272 13.6275 4.5331 13.5065C4.48348 13.3856 4.45794 13.2559 4.45794 13.125C4.45794 12.9941 4.48348 12.8644 4.5331 12.7435C4.58272 12.6225 4.65545 12.5126 4.74714 12.42L6.15344 11L4.74714 9.58C4.65533 9.48749 4.58249 9.3776 4.53279 9.25662C4.4831 9.13565 4.45752 9.00597 4.45752 8.875C4.45752 8.74403 4.4831 8.61435 4.53279 8.49338C4.58249 8.3724 4.65533 8.26251 4.74714 8.17ZM11.0161 1L10.3129 0.29C10.1347 0.11 9.87716 0 9.61967 0H5.48C5.22251 0 4.96502 0.11 4.78675 0.29L4.0836 1H1.60772C1.06303 1 0.617371 1.45 0.617371 2C0.617371 2.55 1.06303 3 1.60772 3H13.4919C14.0366 3 14.4823 2.55 14.4823 2C14.4823 1.45 14.0366 1 13.4919 1H11.0161Z"
+    })));
+});
+
+function _extends$R() {
+    _extends$R = Object.assign || function(target) {
+        for(var i = 1; i < arguments.length; i++){
+            var source = arguments[i];
+            for(var key in source){
+                if (Object.prototype.hasOwnProperty.call(source, key)) {
+                    target[key] = source[key];
+                }
+            }
+        }
+        return target;
+    };
+    return _extends$R.apply(this, arguments);
+}
+var Bulb = ((props)=>{
+    return(/*#__PURE__*/ React.createElement("svg", _extends$R({
+        xmlns: "http://www.w3.org/2000/svg",
+        viewBox: "0 0 24 24"
+    }, props), /*#__PURE__*/ React.createElement("path", {
+        fill: "currentColor",
+        stroke: "currentColor",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        strokeWidth: "2",
+        d: "M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 1 1 7.072 0l-.548.547A3.374 3.374 0 0 0 14 18.469V19a2 2 0 1 1-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+    })));
+});
+
 function _extends$Q() {
     _extends$Q = Object.assign || function(target) {
         for(var i = 1; i < arguments.length; i++){
@@ -2742,13 +2804,13 @@ function _extends$Q() {
     };
     return _extends$Q.apply(this, arguments);
 }
-var Bin = ((props)=>{
+var Chemistry = ((props)=>{
     return(/*#__PURE__*/ React.createElement("svg", _extends$Q({
         xmlns: "http://www.w3.org/2000/svg",
-        viewBox: "0 0 25 21"
+        viewBox: "0 0 640 1024"
     }, props), /*#__PURE__*/ React.createElement("path", {
         fill: "currentColor",
-        d: "M1.60772 16C1.60772 17.1 2.49904 18 3.58843 18H11.5112C12.6006 18 13.4919 17.1 13.4919 16V6C13.4919 4.9 12.6006 4 11.5112 4H3.58843C2.49904 4 1.60772 4.9 1.60772 6V16ZM4.74714 8.17C4.83876 8.0773 4.94759 8.00375 5.06739 7.95357C5.1872 7.90339 5.31563 7.87756 5.44534 7.87756C5.57504 7.87756 5.70347 7.90339 5.82328 7.95357C5.94309 8.00375 6.05191 8.0773 6.14354 8.17L7.54984 9.59L8.95614 8.17C9.04782 8.07742 9.15667 8.00398 9.27647 7.95387C9.39627 7.90377 9.52467 7.87798 9.65433 7.87798C9.784 7.87798 9.9124 7.90377 10.0322 7.95387C10.152 8.00398 10.2608 8.07742 10.3525 8.17C10.4442 8.26258 10.517 8.37249 10.5666 8.49346C10.6162 8.61442 10.6417 8.74407 10.6417 8.875C10.6417 9.00593 10.6162 9.13558 10.5666 9.25654C10.517 9.37751 10.4442 9.48742 10.3525 9.58L8.94623 11L10.3525 12.42C10.4442 12.5126 10.517 12.6225 10.5666 12.7435C10.6162 12.8644 10.6417 12.9941 10.6417 13.125C10.6417 13.2559 10.6162 13.3856 10.5666 13.5065C10.517 13.6275 10.4442 13.7374 10.3525 13.83C10.2608 13.9226 10.152 13.996 10.0322 14.0461C9.9124 14.0962 9.784 14.122 9.65433 14.122C9.52467 14.122 9.39627 14.0962 9.27647 14.0461C9.15667 13.996 9.04782 13.9226 8.95614 13.83L7.54984 12.41L6.14354 13.83C6.05185 13.9226 5.943 13.996 5.8232 14.0461C5.7034 14.0962 5.575 14.122 5.44534 14.122C5.31567 14.122 5.18727 14.0962 5.06747 14.0461C4.94768 13.996 4.83883 13.9226 4.74714 13.83C4.65545 13.7374 4.58272 13.6275 4.5331 13.5065C4.48348 13.3856 4.45794 13.2559 4.45794 13.125C4.45794 12.9941 4.48348 12.8644 4.5331 12.7435C4.58272 12.6225 4.65545 12.5126 4.74714 12.42L6.15344 11L4.74714 9.58C4.65533 9.48749 4.58249 9.3776 4.53279 9.25662C4.4831 9.13565 4.45752 9.00597 4.45752 8.875C4.45752 8.74403 4.4831 8.61435 4.53279 8.49338C4.58249 8.3724 4.65533 8.26251 4.74714 8.17ZM11.0161 1L10.3129 0.29C10.1347 0.11 9.87716 0 9.61967 0H5.48C5.22251 0 4.96502 0.11 4.78675 0.29L4.0836 1H1.60772C1.06303 1 0.617371 1.45 0.617371 2C0.617371 2.55 1.06303 3 1.60772 3H13.4919C14.0366 3 14.4823 2.55 14.4823 2C14.4823 1.45 14.0366 1 13.4919 1H11.0161Z"
+        d: "M618 971L448 769V416h21q14 0 23-9.5t9-23t-9-22.5t-23-9h-53q-13 0-22.5 9t-9.5 23v397q0 13 8 22l131 157H117l131-157q8-9 8-22V384q0-14-9.5-23t-22.5-9h-53q-14 0-23 9t-9 22.5t9 23t23 9.5h21v353L22 971q-14 15-6 34q4 9 12 14t17 5h550q20 0 28.5-19t-5.5-34zM288 320q26 0 45-19t19-45.5t-19-45t-45-18.5q-13 0-25 5t-20.5 13.5T229 231t-5 25q0 6 1 11.5t3 10.5t5 10t6.5 9t7.5 7.5t9 6.5t10 5t10.5 3t11.5 1zm208.5-95q46.5 0 79.5-33t33-79.5T576 33T496.5 0T417 33t-33 79.5t33 79.5t79.5 33zM496 64q10 0 19 3.5t15.5 10t10 15.5t3.5 19q0 20-14 34t-34 14q-13 0-24-6.5T454.5 136t-6.5-24q0-20 14-34t34-14z"
     })));
 });
 
@@ -2766,17 +2828,13 @@ function _extends$P() {
     };
     return _extends$P.apply(this, arguments);
 }
-var Bulb = ((props)=>{
+var Clear = ((props)=>{
     return(/*#__PURE__*/ React.createElement("svg", _extends$P({
         xmlns: "http://www.w3.org/2000/svg",
-        viewBox: "0 0 24 24"
+        viewBox: "0 0 14 14"
     }, props), /*#__PURE__*/ React.createElement("path", {
         fill: "currentColor",
-        stroke: "currentColor",
-        strokeLinecap: "round",
-        strokeLinejoin: "round",
-        strokeWidth: "2",
-        d: "M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 1 1 7.072 0l-.548.547A3.374 3.374 0 0 0 14 18.469V19a2 2 0 1 1-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+        d: "M7.02799 0.333252C3.346 0.333252 0.361328 3.31792 0.361328 6.99992C0.361328 10.6819 3.346 13.6666 7.02799 13.6666C10.71 13.6666 13.6947 10.6819 13.6947 6.99992C13.6947 3.31792 10.7093 0.333252 7.02799 0.333252ZM10.166 9.19525L9.22333 10.1379L7.02799 7.94325L4.83266 10.1379L3.89 9.19525L6.08466 6.99992L3.88933 4.80459L4.832 3.86259L7.02733 6.05792L9.22266 3.86259L10.1653 4.80459L7.97066 6.99992L10.166 9.19525Z"
     })));
 });
 
@@ -2794,14 +2852,15 @@ function _extends$O() {
     };
     return _extends$O.apply(this, arguments);
 }
-var Chemistry = ((props)=>{
+var Close = ((props)=>{
     return(/*#__PURE__*/ React.createElement("svg", _extends$O({
         xmlns: "http://www.w3.org/2000/svg",
-        viewBox: "0 0 640 1024"
-    }, props), /*#__PURE__*/ React.createElement("path", {
-        fill: "currentColor",
-        d: "M618 971L448 769V416h21q14 0 23-9.5t9-23t-9-22.5t-23-9h-53q-13 0-22.5 9t-9.5 23v397q0 13 8 22l131 157H117l131-157q8-9 8-22V384q0-14-9.5-23t-22.5-9h-53q-14 0-23 9t-9 22.5t9 23t23 9.5h21v353L22 971q-14 15-6 34q4 9 12 14t17 5h550q20 0 28.5-19t-5.5-34zM288 320q26 0 45-19t19-45.5t-19-45t-45-18.5q-13 0-25 5t-20.5 13.5T229 231t-5 25q0 6 1 11.5t3 10.5t5 10t6.5 9t7.5 7.5t9 6.5t10 5t10.5 3t11.5 1zm208.5-95q46.5 0 79.5-33t33-79.5T576 33T496.5 0T417 33t-33 79.5t33 79.5t79.5 33zM496 64q10 0 19 3.5t15.5 10t10 15.5t3.5 19q0 20-14 34t-34 14q-13 0-24-6.5T454.5 136t-6.5-24q0-20 14-34t34-14z"
-    })));
+        viewBox: "0 0 12 12"
+    }, props), /*#__PURE__*/ React.createElement("g", {
+        fill: "currentColor"
+    }, /*#__PURE__*/ React.createElement("path", {
+        d: "M9.5 3.205L8.795 2.5 6 5.295 3.205 2.5l-.705.705L5.295 6 2.5 8.795l.705.705L6 6.705 8.795 9.5l.705-.705L6.705 6"
+    }))));
 });
 
 function _extends$N() {
@@ -2818,13 +2877,17 @@ function _extends$N() {
     };
     return _extends$N.apply(this, arguments);
 }
-var Clear = ((props)=>{
+var CloudDownload = ((props)=>{
     return(/*#__PURE__*/ React.createElement("svg", _extends$N({
         xmlns: "http://www.w3.org/2000/svg",
-        viewBox: "0 0 14 14"
+        viewBox: "0 0 25 21"
     }, props), /*#__PURE__*/ React.createElement("path", {
-        fill: "currentColor",
-        d: "M7.02799 0.333252C3.346 0.333252 0.361328 3.31792 0.361328 6.99992C0.361328 10.6819 3.346 13.6666 7.02799 13.6666C10.71 13.6666 13.6947 10.6819 13.6947 6.99992C13.6947 3.31792 10.7093 0.333252 7.02799 0.333252ZM10.166 9.19525L9.22333 10.1379L7.02799 7.94325L4.83266 10.1379L3.89 9.19525L6.08466 6.99992L3.88933 4.80459L4.832 3.86259L7.02733 6.05792L9.22266 3.86259L10.1653 4.80459L7.97066 6.99992L10.166 9.19525Z"
+        fill: "none",
+        stroke: "currentColor",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        strokeWidth: "2",
+        d: "M8.59741 15.0117L12.5588 19.0117L16.5202 15.0117 M12.5588 10.0117V19.0117 M21.3531 16.1017C22.2141 15.4903 22.8598 14.6178 23.1965 13.6108C23.5331 12.6038 23.5432 11.5147 23.2253 10.5015C22.9074 9.48829 22.278 8.60374 21.4285 7.97621C20.5789 7.34869 19.5535 7.01082 18.5009 7.01165H17.2531C16.9552 5.83953 16.3979 4.7509 15.6231 3.82773C14.8482 2.90456 13.8761 2.17091 12.7798 1.68201C11.6836 1.1931 10.4918 0.961679 9.2941 1.00517C8.09645 1.04866 6.92417 1.36592 5.86552 1.93308C4.80688 2.50023 3.88944 3.3025 3.18229 4.27948C2.47514 5.25646 1.99671 6.3827 1.783 7.5734C1.56929 8.76411 1.62588 9.98825 1.9485 11.1537C2.27113 12.3191 2.85139 13.3954 3.64559 14.3017"
     })));
 });
 
@@ -2842,15 +2905,17 @@ function _extends$M() {
     };
     return _extends$M.apply(this, arguments);
 }
-var Close = ((props)=>{
+var CloudUpload = ((props)=>{
     return(/*#__PURE__*/ React.createElement("svg", _extends$M({
         xmlns: "http://www.w3.org/2000/svg",
-        viewBox: "0 0 12 12"
-    }, props), /*#__PURE__*/ React.createElement("g", {
-        fill: "currentColor"
-    }, /*#__PURE__*/ React.createElement("path", {
-        d: "M9.5 3.205L8.795 2.5 6 5.295 3.205 2.5l-.705.705L5.295 6 2.5 8.795l.705.705L6 6.705 8.795 9.5l.705-.705L6.705 6"
-    }))));
+        viewBox: "0 0 24 24"
+    }, props), /*#__PURE__*/ React.createElement("path", {
+        fill: "none",
+        d: "M0 0h24v24H0z"
+    }), /*#__PURE__*/ React.createElement("path", {
+        fill: "currentColor",
+        d: "M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"
+    })));
 });
 
 function _extends$L() {
@@ -2867,17 +2932,13 @@ function _extends$L() {
     };
     return _extends$L.apply(this, arguments);
 }
-var CloudDownload = ((props)=>{
+var CodeBraces = ((props)=>{
     return(/*#__PURE__*/ React.createElement("svg", _extends$L({
         xmlns: "http://www.w3.org/2000/svg",
-        viewBox: "0 0 25 21"
+        viewBox: "0 0 24 24"
     }, props), /*#__PURE__*/ React.createElement("path", {
-        fill: "none",
-        stroke: "currentColor",
-        strokeLinecap: "round",
-        strokeLinejoin: "round",
-        strokeWidth: "2",
-        d: "M8.59741 15.0117L12.5588 19.0117L16.5202 15.0117 M12.5588 10.0117V19.0117 M21.3531 16.1017C22.2141 15.4903 22.8598 14.6178 23.1965 13.6108C23.5331 12.6038 23.5432 11.5147 23.2253 10.5015C22.9074 9.48829 22.278 8.60374 21.4285 7.97621C20.5789 7.34869 19.5535 7.01082 18.5009 7.01165H17.2531C16.9552 5.83953 16.3979 4.7509 15.6231 3.82773C14.8482 2.90456 13.8761 2.17091 12.7798 1.68201C11.6836 1.1931 10.4918 0.961679 9.2941 1.00517C8.09645 1.04866 6.92417 1.36592 5.86552 1.93308C4.80688 2.50023 3.88944 3.3025 3.18229 4.27948C2.47514 5.25646 1.99671 6.3827 1.783 7.5734C1.56929 8.76411 1.62588 9.98825 1.9485 11.1537C2.27113 12.3191 2.85139 13.3954 3.64559 14.3017"
+        fill: "currentColor",
+        d: "M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2m-8 5H9v2c0 1.1-.9 2-2 2c1.1 0 2 .9 2 2v2h2v2H9c-1.1 0-2-.9-2-2v-1c0-1.1-.9-2-2-2v-2c1.1 0 2-.9 2-2V8c0-1.1.9-2 2-2h2v2m8 5c-1.1 0-2 .9-2 2v1c0 1.1-.9 2-2 2h-2v-2h2v-2c0-1.1.9-2 2-2c-1.1 0-2-.9-2-2V8h-2V6h2c1.1 0 2 .9 2 2v1c0 1.1.9 2 2 2v2z"
     })));
 });
 
@@ -2895,17 +2956,15 @@ function _extends$K() {
     };
     return _extends$K.apply(this, arguments);
 }
-var CloudUpload = ((props)=>{
+var Copy = ((props)=>{
     return(/*#__PURE__*/ React.createElement("svg", _extends$K({
         xmlns: "http://www.w3.org/2000/svg",
         viewBox: "0 0 24 24"
-    }, props), /*#__PURE__*/ React.createElement("path", {
-        fill: "none",
-        d: "M0 0h24v24H0z"
-    }), /*#__PURE__*/ React.createElement("path", {
-        fill: "currentColor",
-        d: "M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"
-    })));
+    }, props), /*#__PURE__*/ React.createElement("g", {
+        fill: "currentColor"
+    }, /*#__PURE__*/ React.createElement("path", {
+        d: "M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1z M15 5H8c-1.1 0-1.99.9-1.99 2L6 21c0 1.1.89 2 1.99 2H19c1.1 0 2-.9 2-2V11l-6-6zM8 21V7h6v5h5v9H8z"
+    }))));
 });
 
 function _extends$J() {
@@ -2922,14 +2981,17 @@ function _extends$J() {
     };
     return _extends$J.apply(this, arguments);
 }
-var CodeBraces = ((props)=>{
+var Discord = ((props)=>{
     return(/*#__PURE__*/ React.createElement("svg", _extends$J({
         xmlns: "http://www.w3.org/2000/svg",
-        viewBox: "0 0 24 24"
-    }, props), /*#__PURE__*/ React.createElement("path", {
-        fill: "currentColor",
-        d: "M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2m-8 5H9v2c0 1.1-.9 2-2 2c1.1 0 2 .9 2 2v2h2v2H9c-1.1 0-2-.9-2-2v-1c0-1.1-.9-2-2-2v-2c1.1 0 2-.9 2-2V8c0-1.1.9-2 2-2h2v2m8 5c-1.1 0-2 .9-2 2v1c0 1.1-.9 2-2 2h-2v-2h2v-2c0-1.1.9-2 2-2c-1.1 0-2-.9-2-2V8h-2V6h2c1.1 0 2 .9 2 2v1c0 1.1.9 2 2 2v2z"
-    })));
+        viewBox: "0 0 245 240"
+    }, props), /*#__PURE__*/ React.createElement("g", {
+        fill: "currentColor"
+    }, /*#__PURE__*/ React.createElement("path", {
+        d: "M104.4 103.9c-5.7 0-10.2 5-10.2 11.1s4.6 11.1 10.2 11.1c5.7 0 10.2-5 10.2-11.1.1-6.1-4.5-11.1-10.2-11.1zM140.9 103.9c-5.7 0-10.2 5-10.2 11.1s4.6 11.1 10.2 11.1c5.7 0 10.2-5 10.2-11.1s-4.5-11.1-10.2-11.1z"
+    }), /*#__PURE__*/ React.createElement("path", {
+        d: "M189.5 20h-134C44.2 20 35 29.2 35 40.6v135.2c0 11.4 9.2 20.6 20.5 20.6h113.4l-5.3-18.5 12.8 11.9 12.1 11.2 21.5 19V40.6c0-11.4-9.2-20.6-20.5-20.6zm-38.6 130.6s-3.6-4.3-6.6-8.1c13.1-3.7 18.1-11.9 18.1-11.9-4.1 2.7-8 4.6-11.5 5.9-5 2.1-9.8 3.5-14.5 4.3-9.6 1.8-18.4 1.3-25.9-.1-5.7-1.1-10.6-2.7-14.7-4.3-2.3-.9-4.8-2-7.3-3.4-.3-.2-.6-.3-.9-.5-.2-.1-.3-.2-.4-.3-1.8-1-2.8-1.7-2.8-1.7s4.8 8 17.5 11.8c-3 3.8-6.7 8.3-6.7 8.3-22.1-.7-30.5-15.2-30.5-15.2 0-32.2 14.4-58.3 14.4-58.3 14.4-10.8 28.1-10.5 28.1-10.5l1 1.2c-18 5.2-26.3 13.1-26.3 13.1s2.2-1.2 5.9-2.9c10.7-4.7 19.2-6 22.7-6.3.6-.1 1.1-.2 1.7-.2 6.1-.8 13-1 20.2-.2 9.5 1.1 19.7 3.9 30.1 9.6 0 0-7.9-7.5-24.9-12.7l1.4-1.6s13.7-.3 28.1 10.5c0 0 14.4 26.1 14.4 58.3 0 0-8.5 14.5-30.6 15.2z"
+    }))));
 });
 
 function _extends$I() {
@@ -2946,15 +3008,14 @@ function _extends$I() {
     };
     return _extends$I.apply(this, arguments);
 }
-var Copy = ((props)=>{
+var ExternalLink = ((props)=>{
     return(/*#__PURE__*/ React.createElement("svg", _extends$I({
         xmlns: "http://www.w3.org/2000/svg",
         viewBox: "0 0 24 24"
-    }, props), /*#__PURE__*/ React.createElement("g", {
-        fill: "currentColor"
-    }, /*#__PURE__*/ React.createElement("path", {
-        d: "M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1z M15 5H8c-1.1 0-1.99.9-1.99 2L6 21c0 1.1.89 2 1.99 2H19c1.1 0 2-.9 2-2V11l-6-6zM8 21V7h6v5h5v9H8z"
-    }))));
+    }, props), /*#__PURE__*/ React.createElement("path", {
+        fill: "currentColor",
+        d: "M10 5V3H5.375C4.06519 3 3 4.06519 3 5.375V18.625C3 19.936 4.06519 21 5.375 21H18.625C19.936 21 21 19.936 21 18.625V14H19V19H5V5H10Z M21 2.99902H14V4.99902H17.586L9.29297 13.292L10.707 14.706L19 6.41302V9.99902H21V2.99902Z"
+    })));
 });
 
 function _extends$H() {
@@ -2971,17 +3032,16 @@ function _extends$H() {
     };
     return _extends$H.apply(this, arguments);
 }
-var Discord = ((props)=>{
+var Gear = ((props)=>{
     return(/*#__PURE__*/ React.createElement("svg", _extends$H({
         xmlns: "http://www.w3.org/2000/svg",
-        viewBox: "0 0 245 240"
-    }, props), /*#__PURE__*/ React.createElement("g", {
-        fill: "currentColor"
-    }, /*#__PURE__*/ React.createElement("path", {
-        d: "M104.4 103.9c-5.7 0-10.2 5-10.2 11.1s4.6 11.1 10.2 11.1c5.7 0 10.2-5 10.2-11.1.1-6.1-4.5-11.1-10.2-11.1zM140.9 103.9c-5.7 0-10.2 5-10.2 11.1s4.6 11.1 10.2 11.1c5.7 0 10.2-5 10.2-11.1s-4.5-11.1-10.2-11.1z"
-    }), /*#__PURE__*/ React.createElement("path", {
-        d: "M189.5 20h-134C44.2 20 35 29.2 35 40.6v135.2c0 11.4 9.2 20.6 20.5 20.6h113.4l-5.3-18.5 12.8 11.9 12.1 11.2 21.5 19V40.6c0-11.4-9.2-20.6-20.5-20.6zm-38.6 130.6s-3.6-4.3-6.6-8.1c13.1-3.7 18.1-11.9 18.1-11.9-4.1 2.7-8 4.6-11.5 5.9-5 2.1-9.8 3.5-14.5 4.3-9.6 1.8-18.4 1.3-25.9-.1-5.7-1.1-10.6-2.7-14.7-4.3-2.3-.9-4.8-2-7.3-3.4-.3-.2-.6-.3-.9-.5-.2-.1-.3-.2-.4-.3-1.8-1-2.8-1.7-2.8-1.7s4.8 8 17.5 11.8c-3 3.8-6.7 8.3-6.7 8.3-22.1-.7-30.5-15.2-30.5-15.2 0-32.2 14.4-58.3 14.4-58.3 14.4-10.8 28.1-10.5 28.1-10.5l1 1.2c-18 5.2-26.3 13.1-26.3 13.1s2.2-1.2 5.9-2.9c10.7-4.7 19.2-6 22.7-6.3.6-.1 1.1-.2 1.7-.2 6.1-.8 13-1 20.2-.2 9.5 1.1 19.7 3.9 30.1 9.6 0 0-7.9-7.5-24.9-12.7l1.4-1.6s13.7-.3 28.1 10.5c0 0 14.4 26.1 14.4 58.3 0 0-8.5 14.5-30.6 15.2z"
-    }))));
+        viewBox: "0 0 24 24"
+    }, props), /*#__PURE__*/ React.createElement("path", {
+        fill: "currentColor",
+        "fill-rule": "evenodd",
+        "clip-rule": "evenodd",
+        d: "M19.738 10H22V14H19.739C19.498 14.931 19.1 15.798 18.565 16.564L20 18L18 20L16.565 18.564C15.797 19.099 14.932 19.498 14 19.738V22H10V19.738C9.069 19.498 8.203 19.099 7.436 18.564L6 20L4 18L5.436 16.564C4.901 15.799 4.502 14.932 4.262 14H2V10H4.262C4.502 9.068 4.9 8.202 5.436 7.436L4 6L6 4L7.436 5.436C8.202 4.9 9.068 4.502 10 4.262V2H14V4.261C14.932 4.502 15.797 4.9 16.565 5.435L18 3.999L20 5.999L18.564 7.436C19.099 8.202 19.498 9.069 19.738 10ZM12 16C14.2091 16 16 14.2091 16 12C16 9.79086 14.2091 8 12 8C9.79086 8 8 9.79086 8 12C8 14.2091 9.79086 16 12 16Z"
+    })));
 });
 
 function _extends$G() {
@@ -2998,13 +3058,17 @@ function _extends$G() {
     };
     return _extends$G.apply(this, arguments);
 }
-var ExternalLink = ((props)=>{
+var GitHub = ((props)=>{
     return(/*#__PURE__*/ React.createElement("svg", _extends$G({
         xmlns: "http://www.w3.org/2000/svg",
         viewBox: "0 0 24 24"
     }, props), /*#__PURE__*/ React.createElement("path", {
-        fill: "currentColor",
-        d: "M10 5V3H5.375C4.06519 3 3 4.06519 3 5.375V18.625C3 19.936 4.06519 21 5.375 21H18.625C19.936 21 21 19.936 21 18.625V14H19V19H5V5H10Z M21 2.99902H14V4.99902H17.586L9.29297 13.292L10.707 14.706L19 6.41302V9.99902H21V2.99902Z"
+        fill: "none",
+        stroke: "currentColor",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        strokeWidth: "2px",
+        d: "M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"
     })));
 });
 
@@ -3022,15 +3086,13 @@ function _extends$F() {
     };
     return _extends$F.apply(this, arguments);
 }
-var Gear = ((props)=>{
+var ImportExport = ((props)=>{
     return(/*#__PURE__*/ React.createElement("svg", _extends$F({
         xmlns: "http://www.w3.org/2000/svg",
         viewBox: "0 0 24 24"
     }, props), /*#__PURE__*/ React.createElement("path", {
         fill: "currentColor",
-        "fill-rule": "evenodd",
-        "clip-rule": "evenodd",
-        d: "M19.738 10H22V14H19.739C19.498 14.931 19.1 15.798 18.565 16.564L20 18L18 20L16.565 18.564C15.797 19.099 14.932 19.498 14 19.738V22H10V19.738C9.069 19.498 8.203 19.099 7.436 18.564L6 20L4 18L5.436 16.564C4.901 15.799 4.502 14.932 4.262 14H2V10H4.262C4.502 9.068 4.9 8.202 5.436 7.436L4 6L6 4L7.436 5.436C8.202 4.9 9.068 4.502 10 4.262V2H14V4.261C14.932 4.502 15.797 4.9 16.565 5.435L18 3.999L20 5.999L18.564 7.436C19.099 8.202 19.498 9.069 19.738 10ZM12 16C14.2091 16 16 14.2091 16 12C16 9.79086 14.2091 8 12 8C9.79086 8 8 9.79086 8 12C8 14.2091 9.79086 16 12 16Z"
+        d: "M16 17.01V11c0-.55-.45-1-1-1s-1 .45-1 1v6.01h-1.79c-.45 0-.67.54-.35.85l2.79 2.78c.2.19.51.19.71 0l2.79-2.78c.32-.31.09-.85-.35-.85H16zM8.65 3.35L5.86 6.14c-.32.31-.1.85.35.85H8V13c0 .55.45 1 1 1s1-.45 1-1V6.99h1.79c.45 0 .67-.54.35-.85L9.35 3.35c-.19-.19-.51-.19-.7 0z"
     })));
 });
 
@@ -3048,18 +3110,21 @@ function _extends$E() {
     };
     return _extends$E.apply(this, arguments);
 }
-var GitHub = ((props)=>{
+var Info = ((props)=>{
     return(/*#__PURE__*/ React.createElement("svg", _extends$E({
         xmlns: "http://www.w3.org/2000/svg",
         viewBox: "0 0 24 24"
-    }, props), /*#__PURE__*/ React.createElement("path", {
+    }, props), /*#__PURE__*/ React.createElement("g", {
         fill: "none",
-        stroke: "currentColor",
-        strokeLinecap: "round",
-        strokeLinejoin: "round",
-        strokeWidth: "2px",
-        d: "M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"
-    })));
+        "fill-rule": "evenodd"
+    }, /*#__PURE__*/ React.createElement("rect", {
+        width: "24",
+        height: "24"
+    }), /*#__PURE__*/ React.createElement("path", {
+        fill: "currentColor",
+        d: "M9,7 L11,7 L11,5 L9,5 L9,7 Z M10,18 C5.59,18 2,14.41 2,10 C2,5.59 5.59,2 10,2 C14.41,2 18,5.59 18,10 C18,14.41 14.41,18 10,18 L10,18 Z M10,4.4408921e-16 C4.4771525,-1.77635684e-15 4.4408921e-16,4.4771525 0,10 C-1.33226763e-15,12.6521649 1.0535684,15.195704 2.92893219,17.0710678 C4.80429597,18.9464316 7.3478351,20 10,20 C12.6521649,20 15.195704,18.9464316 17.0710678,17.0710678 C18.9464316,15.195704 20,12.6521649 20,10 C20,7.3478351 18.9464316,4.80429597 17.0710678,2.92893219 C15.195704,1.0535684 12.6521649,2.22044605e-16 10,0 L10,4.4408921e-16 Z M9,15 L11,15 L11,9 L9,9 L9,15 L9,15 Z",
+        transform: "translate(2 2)"
+    }))));
 });
 
 function _extends$D() {
@@ -3076,13 +3141,13 @@ function _extends$D() {
     };
     return _extends$D.apply(this, arguments);
 }
-var ImportExport = ((props)=>{
+var Key = ((props)=>{
     return(/*#__PURE__*/ React.createElement("svg", _extends$D({
         xmlns: "http://www.w3.org/2000/svg",
         viewBox: "0 0 24 24"
     }, props), /*#__PURE__*/ React.createElement("path", {
         fill: "currentColor",
-        d: "M16 17.01V11c0-.55-.45-1-1-1s-1 .45-1 1v6.01h-1.79c-.45 0-.67.54-.35.85l2.79 2.78c.2.19.51.19.71 0l2.79-2.78c.32-.31.09-.85-.35-.85H16zM8.65 3.35L5.86 6.14c-.32.31-.1.85.35.85H8V13c0 .55.45 1 1 1s1-.45 1-1V6.99h1.79c.45 0 .67-.54.35-.85L9.35 3.35c-.19-.19-.51-.19-.7 0z"
+        d: "M12.65 10C11.83 7.67 9.61 6 7 6c-3.31 0-6 2.69-6 6s2.69 6 6 6c2.61 0 4.83-1.67 5.65-4H17v4h4v-4h2v-4H12.65zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"
     })));
 });
 
@@ -3100,21 +3165,14 @@ function _extends$C() {
     };
     return _extends$C.apply(this, arguments);
 }
-var Info = ((props)=>{
+var Keyboard = ((props)=>{
     return(/*#__PURE__*/ React.createElement("svg", _extends$C({
         xmlns: "http://www.w3.org/2000/svg",
         viewBox: "0 0 24 24"
-    }, props), /*#__PURE__*/ React.createElement("g", {
-        fill: "none",
-        "fill-rule": "evenodd"
-    }, /*#__PURE__*/ React.createElement("rect", {
-        width: "24",
-        height: "24"
-    }), /*#__PURE__*/ React.createElement("path", {
+    }, props), /*#__PURE__*/ React.createElement("path", {
         fill: "currentColor",
-        d: "M9,7 L11,7 L11,5 L9,5 L9,7 Z M10,18 C5.59,18 2,14.41 2,10 C2,5.59 5.59,2 10,2 C14.41,2 18,5.59 18,10 C18,14.41 14.41,18 10,18 L10,18 Z M10,4.4408921e-16 C4.4771525,-1.77635684e-15 4.4408921e-16,4.4771525 0,10 C-1.33226763e-15,12.6521649 1.0535684,15.195704 2.92893219,17.0710678 C4.80429597,18.9464316 7.3478351,20 10,20 C12.6521649,20 15.195704,18.9464316 17.0710678,17.0710678 C18.9464316,15.195704 20,12.6521649 20,10 C20,7.3478351 18.9464316,4.80429597 17.0710678,2.92893219 C15.195704,1.0535684 12.6521649,2.22044605e-16 10,0 L10,4.4408921e-16 Z M9,15 L11,15 L11,9 L9,9 L9,15 L9,15 Z",
-        transform: "translate(2 2)"
-    }))));
+        d: "M20 5H4c-1.1 0-1.99.9-1.99 2L2 17c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm-9 3h2v2h-2V8zm0 3h2v2h-2v-2zM8 8h2v2H8V8zm0 3h2v2H8v-2zm-1 2H5v-2h2v2zm0-3H5V8h2v2zm8 7H9c-.55 0-1-.45-1-1s.45-1 1-1h6c.55 0 1 .45 1 1s-.45 1-1 1zm1-4h-2v-2h2v2zm0-3h-2V8h2v2zm3 3h-2v-2h2v2zm0-3h-2V8h2v2z"
+    })));
 });
 
 function _extends$B() {
@@ -3131,13 +3189,13 @@ function _extends$B() {
     };
     return _extends$B.apply(this, arguments);
 }
-var Key = ((props)=>{
+var Overflow = ((props)=>{
     return(/*#__PURE__*/ React.createElement("svg", _extends$B({
         xmlns: "http://www.w3.org/2000/svg",
         viewBox: "0 0 24 24"
     }, props), /*#__PURE__*/ React.createElement("path", {
         fill: "currentColor",
-        d: "M12.65 10C11.83 7.67 9.61 6 7 6c-3.31 0-6 2.69-6 6s2.69 6 6 6c2.61 0 4.83-1.67 5.65-4H17v4h4v-4h2v-4H12.65zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"
+        d: "M12 16c1.1045695 0 2 .8954305 2 2s-.8954305 2-2 2-2-.8954305-2-2 .8954305-2 2-2zm0-6c1.1045695 0 2 .8954305 2 2s-.8954305 2-2 2-2-.8954305-2-2 .8954305-2 2-2zm0-6c1.1045695 0 2 .8954305 2 2s-.8954305 2-2 2-2-.8954305-2-2 .8954305-2 2-2z"
     })));
 });
 
@@ -3155,13 +3213,13 @@ function _extends$A() {
     };
     return _extends$A.apply(this, arguments);
 }
-var Keyboard = ((props)=>{
+var Person = ((props)=>{
     return(/*#__PURE__*/ React.createElement("svg", _extends$A({
         xmlns: "http://www.w3.org/2000/svg",
         viewBox: "0 0 24 24"
     }, props), /*#__PURE__*/ React.createElement("path", {
         fill: "currentColor",
-        d: "M20 5H4c-1.1 0-1.99.9-1.99 2L2 17c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm-9 3h2v2h-2V8zm0 3h2v2h-2v-2zM8 8h2v2H8V8zm0 3h2v2H8v-2zm-1 2H5v-2h2v2zm0-3H5V8h2v2zm8 7H9c-.55 0-1-.45-1-1s.45-1 1-1h6c.55 0 1 .45 1 1s-.45 1-1 1zm1-4h-2v-2h2v2zm0-3h-2V8h2v2zm3 3h-2v-2h2v2zm0-3h-2V8h2v2z"
+        d: "M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4s-4 1.79-4 4s1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
     })));
 });
 
@@ -3179,14 +3237,17 @@ function _extends$z() {
     };
     return _extends$z.apply(this, arguments);
 }
-var Overflow = ((props)=>{
+var PersonShield = ((props)=>{
     return(/*#__PURE__*/ React.createElement("svg", _extends$z({
         xmlns: "http://www.w3.org/2000/svg",
-        viewBox: "0 0 24 24"
-    }, props), /*#__PURE__*/ React.createElement("path", {
+        viewBox: "0 0 20 23"
+    }, props), /*#__PURE__*/ React.createElement("g", {
+        fill: "none",
+        "fill-rule": "evenodd"
+    }, /*#__PURE__*/ React.createElement("path", {
         fill: "currentColor",
-        d: "M12 16c1.1045695 0 2 .8954305 2 2s-.8954305 2-2 2-2-.8954305-2-2 .8954305-2 2-2zm0-6c1.1045695 0 2 .8954305 2 2s-.8954305 2-2 2-2-.8954305-2-2 .8954305-2 2-2zm0-6c1.1045695 0 2 .8954305 2 2s-.8954305 2-2 2-2-.8954305-2-2 .8954305-2 2-2z"
-    })));
+        d: "M19.487 5.126L10.487 0.126C10.184 -0.042 9.81798 -0.042 9.51498 0.126L0.514977 5.126C0.197977 5.302 0.000976562 5.636 0.000976562 5.999C0.000976562 6.693 0.114977 22.999 10.001 22.999C19.887 22.999 20.001 6.693 20.001 5.999C20.001 5.636 19.804 5.302 19.487 5.126ZM10.001 5.999C11.382 5.999 12.501 7.118 12.501 8.499C12.501 9.88 11.382 10.999 10.001 10.999C8.61998 10.999 7.50098 9.88 7.50098 8.499C7.50098 7.118 8.61998 5.999 10.001 5.999ZM6.25098 16C6.25098 13.699 7.69998 12.25 10.001 12.25C12.302 12.25 13.751 13.699 13.751 16H6.25098Z"
+    }))));
 });
 
 function _extends$y() {
@@ -3203,13 +3264,13 @@ function _extends$y() {
     };
     return _extends$y.apply(this, arguments);
 }
-var Person = ((props)=>{
+var Pin = ((props)=>{
     return(/*#__PURE__*/ React.createElement("svg", _extends$y({
         xmlns: "http://www.w3.org/2000/svg",
         viewBox: "0 0 24 24"
     }, props), /*#__PURE__*/ React.createElement("path", {
         fill: "currentColor",
-        d: "M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4s-4 1.79-4 4s1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
+        d: "M19 3H5V5H7V12H5V14H11V22H13V14H19V12H17V5H19V3Z"
     })));
 });
 
@@ -3227,17 +3288,14 @@ function _extends$x() {
     };
     return _extends$x.apply(this, arguments);
 }
-var PersonShield = ((props)=>{
+var Plugin = ((props)=>{
     return(/*#__PURE__*/ React.createElement("svg", _extends$x({
         xmlns: "http://www.w3.org/2000/svg",
-        viewBox: "0 0 20 23"
-    }, props), /*#__PURE__*/ React.createElement("g", {
-        fill: "none",
-        "fill-rule": "evenodd"
-    }, /*#__PURE__*/ React.createElement("path", {
+        viewBox: "0 0 24 24"
+    }, props), /*#__PURE__*/ React.createElement("path", {
         fill: "currentColor",
-        d: "M19.487 5.126L10.487 0.126C10.184 -0.042 9.81798 -0.042 9.51498 0.126L0.514977 5.126C0.197977 5.302 0.000976562 5.636 0.000976562 5.999C0.000976562 6.693 0.114977 22.999 10.001 22.999C19.887 22.999 20.001 6.693 20.001 5.999C20.001 5.636 19.804 5.302 19.487 5.126ZM10.001 5.999C11.382 5.999 12.501 7.118 12.501 8.499C12.501 9.88 11.382 10.999 10.001 10.999C8.61998 10.999 7.50098 9.88 7.50098 8.499C7.50098 7.118 8.61998 5.999 10.001 5.999ZM6.25098 16C6.25098 13.699 7.69998 12.25 10.001 12.25C12.302 12.25 13.751 13.699 13.751 16H6.25098Z"
-    }))));
+        d: "M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5C13 2.12 11.88 1 10.5 1S8 2.12 8 3.5V5H4c-1.1 0-1.99.9-1.99 2v3.8H3.5c1.49 0 2.7 1.21 2.7 2.7s-1.21 2.7-2.7 2.7H2V20c0 1.1.9 2 2 2h3.8v-1.5c0-1.49 1.21-2.7 2.7-2.7s2.7 1.21 2.7 2.7V22H17c1.1 0 2-.9 2-2v-4h1.5c1.38 0 2.5-1.12 2.5-2.5S21.88 11 20.5 11z"
+    })));
 });
 
 function _extends$w() {
@@ -3254,13 +3312,13 @@ function _extends$w() {
     };
     return _extends$w.apply(this, arguments);
 }
-var Pin = ((props)=>{
+var Receipt = ((props)=>{
     return(/*#__PURE__*/ React.createElement("svg", _extends$w({
         xmlns: "http://www.w3.org/2000/svg",
-        viewBox: "0 0 24 24"
+        viewBox: "0 0 18 20"
     }, props), /*#__PURE__*/ React.createElement("path", {
         fill: "currentColor",
-        d: "M19 3H5V5H7V12H5V14H11V22H13V14H19V12H17V5H19V3Z"
+        d: "M15 15H3V13H15Zm0-4H3V9H15Zm0-4H3V5H15ZM0 20l1.5-1.5L3 20l1.5-1.5L6 20l1.5-1.5L9 20l1.5-1.5L12 20l1.5-1.5L15 20l1.5-1.5L18 20V0L16.5 1.5 15 0 13.5 1.5 12 0 10.5 1.5 9 0 7.5 1.5 6 0 4.5 1.5 3 0 1.5 1.5 0 0Z"
     })));
 });
 
@@ -3278,13 +3336,13 @@ function _extends$v() {
     };
     return _extends$v.apply(this, arguments);
 }
-var Plugin = ((props)=>{
+var ReportFlag = ((props)=>{
     return(/*#__PURE__*/ React.createElement("svg", _extends$v({
         xmlns: "http://www.w3.org/2000/svg",
         viewBox: "0 0 24 24"
     }, props), /*#__PURE__*/ React.createElement("path", {
         fill: "currentColor",
-        d: "M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5C13 2.12 11.88 1 10.5 1S8 2.12 8 3.5V5H4c-1.1 0-1.99.9-1.99 2v3.8H3.5c1.49 0 2.7 1.21 2.7 2.7s-1.21 2.7-2.7 2.7H2V20c0 1.1.9 2 2 2h3.8v-1.5c0-1.49 1.21-2.7 2.7-2.7s2.7 1.21 2.7 2.7V22H17c1.1 0 2-.9 2-2v-4h1.5c1.38 0 2.5-1.12 2.5-2.5S21.88 11 20.5 11z"
+        d: "M3 2.001h2v20H3zM20 6.002h-5v-3c0-.552-.447-1-1-1H7c-.553 0-1 .448-1 1v10c0 .552.447 1 1 1h5l-1.8 2.4c-.227.303-.265.708-.095 1.047.17.339.516.553.894.553h9c.553 0 1-.448 1-1v-10c.001-.552-.446-1-.999-1z"
     })));
 });
 
@@ -3302,13 +3360,13 @@ function _extends$u() {
     };
     return _extends$u.apply(this, arguments);
 }
-var Receipt = ((props)=>{
+var Scale = ((props)=>{
     return(/*#__PURE__*/ React.createElement("svg", _extends$u({
         xmlns: "http://www.w3.org/2000/svg",
-        viewBox: "0 0 18 20"
+        viewBox: "0 0 48 48"
     }, props), /*#__PURE__*/ React.createElement("path", {
         fill: "currentColor",
-        d: "M15 15H3V13H15Zm0-4H3V9H15Zm0-4H3V5H15ZM0 20l1.5-1.5L3 20l1.5-1.5L6 20l1.5-1.5L9 20l1.5-1.5L12 20l1.5-1.5L15 20l1.5-1.5L18 20V0L16.5 1.5 15 0 13.5 1.5 12 0 10.5 1.5 9 0 7.5 1.5 6 0 4.5 1.5 3 0 1.5 1.5 0 0Z"
+        d: "M26 30C26 35.524 30.476 40 36 40C41.524 40 46 35.524 46 30H26Z M12 40C17.524 40 22 35.524 22 30H2C2 35.524 6.476 40 12 40Z M26 16V14H33.312L29.112 28H33.29L36 18.962L38.71 28H42.888L38.688 14H44V10H26V6H22V10H4V14H9.312L5.112 28H9.288L12 18.962L14.712 28H18.888L14.688 14H22V16H26Z"
     })));
 });
 
@@ -3326,13 +3384,13 @@ function _extends$t() {
     };
     return _extends$t.apply(this, arguments);
 }
-var ReportFlag = ((props)=>{
+var Search = ((props)=>{
     return(/*#__PURE__*/ React.createElement("svg", _extends$t({
         xmlns: "http://www.w3.org/2000/svg",
         viewBox: "0 0 24 24"
     }, props), /*#__PURE__*/ React.createElement("path", {
         fill: "currentColor",
-        d: "M3 2.001h2v20H3zM20 6.002h-5v-3c0-.552-.447-1-1-1H7c-.553 0-1 .448-1 1v10c0 .552.447 1 1 1h5l-1.8 2.4c-.227.303-.265.708-.095 1.047.17.339.516.553.894.553h9c.553 0 1-.448 1-1v-10c.001-.552-.446-1-.999-1z"
+        d: "M21.707 20.293L16.314 14.9C17.403 13.504 18 11.799 18 10C18 7.863 17.167 5.854 15.656 4.344C14.146 2.832 12.137 2 10 2C7.863 2 5.854 2.832 4.344 4.344C2.833 5.854 2 7.863 2 10C2 12.137 2.833 14.146 4.344 15.656C5.854 17.168 7.863 18 10 18C11.799 18 13.504 17.404 14.9 16.314L20.293 21.706L21.707 20.293ZM10 16C8.397 16 6.891 15.376 5.758 14.243C4.624 13.11 4 11.603 4 10C4 8.398 4.624 6.891 5.758 5.758C6.891 4.624 8.397 4 10 4C11.603 4 13.109 4.624 14.242 5.758C15.376 6.891 16 8.398 16 10C16 11.603 15.376 13.11 14.242 14.243C13.109 15.376 11.603 16 10 16Z"
     })));
 });
 
@@ -3350,13 +3408,13 @@ function _extends$s() {
     };
     return _extends$s.apply(this, arguments);
 }
-var Scale = ((props)=>{
+var Server = ((props)=>{
     return(/*#__PURE__*/ React.createElement("svg", _extends$s({
         xmlns: "http://www.w3.org/2000/svg",
-        viewBox: "0 0 48 48"
+        viewBox: "0 0 24 24"
     }, props), /*#__PURE__*/ React.createElement("path", {
         fill: "currentColor",
-        d: "M26 30C26 35.524 30.476 40 36 40C41.524 40 46 35.524 46 30H26Z M12 40C17.524 40 22 35.524 22 30H2C2 35.524 6.476 40 12 40Z M26 16V14H33.312L29.112 28H33.29L36 18.962L38.71 28H42.888L38.688 14H44V10H26V6H22V10H4V14H9.312L5.112 28H9.288L12 18.962L14.712 28H18.888L14.688 14H22V16H26Z"
+        d: "M13 19h1a1 1 0 0 1 1 1h7v2h-7a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1H2v-2h7a1 1 0 0 1 1-1h1v-2H4a1 1 0 0 1-1-1v-4a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1h-7v2M4 3h16a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1m5 4h1V5H9v2m0 8h1v-2H9v2M5 5v2h2V5H5m0 8v2h2v-2H5z"
     })));
 });
 
@@ -3374,13 +3432,13 @@ function _extends$r() {
     };
     return _extends$r.apply(this, arguments);
 }
-var Search = ((props)=>{
+var Spotify = ((props)=>{
     return(/*#__PURE__*/ React.createElement("svg", _extends$r({
         xmlns: "http://www.w3.org/2000/svg",
-        viewBox: "0 0 24 24"
+        viewBox: "0 0 16 16"
     }, props), /*#__PURE__*/ React.createElement("path", {
         fill: "currentColor",
-        d: "M21.707 20.293L16.314 14.9C17.403 13.504 18 11.799 18 10C18 7.863 17.167 5.854 15.656 4.344C14.146 2.832 12.137 2 10 2C7.863 2 5.854 2.832 4.344 4.344C2.833 5.854 2 7.863 2 10C2 12.137 2.833 14.146 4.344 15.656C5.854 17.168 7.863 18 10 18C11.799 18 13.504 17.404 14.9 16.314L20.293 21.706L21.707 20.293ZM10 16C8.397 16 6.891 15.376 5.758 14.243C4.624 13.11 4 11.603 4 10C4 8.398 4.624 6.891 5.758 5.758C6.891 4.624 8.397 4 10 4C11.603 4 13.109 4.624 14.242 5.758C15.376 6.891 16 8.398 16 10C16 11.603 15.376 13.11 14.242 14.243C13.109 15.376 11.603 16 10 16Z"
+        d: "M12.7609503,7.08043507 C10.1796226,5.54647845 5.92178025,5.40543597 3.45759439,6.15380317 C3.06179846,6.27398591 2.64333918,6.05046133 2.5234242,5.65450895 C2.40350922,5.25826952 2.62670026,4.83983073 3.02268744,4.71945662 C5.85139953,3.86028398 10.5538071,4.02620506 13.52548,5.79134121 C13.8813999,6.00280925 13.9981592,6.46277616 13.7872083,6.81834866 C13.5760661,7.17449528 13.1160095,7.2919031 12.7609503,7.08043507 Z M12.7456938,9.37785148 C12.5639139,9.67256952 12.1782795,9.76502256 11.883727,9.58404861 C9.72377106,8.25738585 6.4301382,7.87299604 3.87475822,8.64810544 C3.54335063,8.74813503 3.19341953,8.56150265 3.09273996,8.2309159 C2.99292418,7.89984962 3.17979084,7.55075308 3.51062257,7.45005215 C6.42975429,6.56484307 10.0587298,6.99354129 12.5395359,8.51700243 C12.8340884,8.69826409 12.9268019,9.08380478 12.7456938,9.37785148 Z M11.7108365,11.5428368 C11.566471,11.780912 11.2582675,11.8554793 11.0223905,11.7103962 C9.13604653,10.5509855 6.76173752,10.28918 3.96555508,10.9314428 C3.69610478,10.9935661 3.42751778,10.823788 3.36603055,10.5528184 C3.30435146,10.2819451 3.47260203,10.0118436 3.74262788,9.95000969 C6.80260111,9.2465882 9.42736749,9.54929481 11.5446963,10.8504123 C11.7807651,10.995399 11.8551061,11.3055334 11.7108365,11.5428368 Z M0,7.99990447 C0,12.4185663 3.58181579,16 8,16 C12.4183753,16 16,12.4185663 16,7.99990447 C16,3.58172026 12.4183753,0 8,0 C3.58181579,0 0,3.58172026 0,7.99990447 Z"
     })));
 });
 
@@ -3398,13 +3456,13 @@ function _extends$q() {
     };
     return _extends$q.apply(this, arguments);
 }
-var Server = ((props)=>{
+var Sync = ((props)=>{
     return(/*#__PURE__*/ React.createElement("svg", _extends$q({
         xmlns: "http://www.w3.org/2000/svg",
         viewBox: "0 0 24 24"
     }, props), /*#__PURE__*/ React.createElement("path", {
         fill: "currentColor",
-        d: "M13 19h1a1 1 0 0 1 1 1h7v2h-7a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1H2v-2h7a1 1 0 0 1 1-1h1v-2H4a1 1 0 0 1-1-1v-4a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1h-7v2M4 3h16a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1m5 4h1V5H9v2m0 8h1v-2H9v2M5 5v2h2V5H5m0 8v2h2v-2H5z"
+        d: "M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6c0 1.01-.25 1.97-.7 2.8l1.46 1.46A7.93 7.93 0 0 0 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6c0-1.01.25-1.97.7-2.8L5.24 7.74A7.93 7.93 0 0 0 4 12c0 4.42 3.58 8 8 8v3l4-4l-4-4v3z"
     })));
 });
 
@@ -3422,13 +3480,13 @@ function _extends$p() {
     };
     return _extends$p.apply(this, arguments);
 }
-var Spotify = ((props)=>{
+var Tag = ((props)=>{
     return(/*#__PURE__*/ React.createElement("svg", _extends$p({
         xmlns: "http://www.w3.org/2000/svg",
-        viewBox: "0 0 16 16"
+        viewBox: "0 0 24 24"
     }, props), /*#__PURE__*/ React.createElement("path", {
         fill: "currentColor",
-        d: "M12.7609503,7.08043507 C10.1796226,5.54647845 5.92178025,5.40543597 3.45759439,6.15380317 C3.06179846,6.27398591 2.64333918,6.05046133 2.5234242,5.65450895 C2.40350922,5.25826952 2.62670026,4.83983073 3.02268744,4.71945662 C5.85139953,3.86028398 10.5538071,4.02620506 13.52548,5.79134121 C13.8813999,6.00280925 13.9981592,6.46277616 13.7872083,6.81834866 C13.5760661,7.17449528 13.1160095,7.2919031 12.7609503,7.08043507 Z M12.7456938,9.37785148 C12.5639139,9.67256952 12.1782795,9.76502256 11.883727,9.58404861 C9.72377106,8.25738585 6.4301382,7.87299604 3.87475822,8.64810544 C3.54335063,8.74813503 3.19341953,8.56150265 3.09273996,8.2309159 C2.99292418,7.89984962 3.17979084,7.55075308 3.51062257,7.45005215 C6.42975429,6.56484307 10.0587298,6.99354129 12.5395359,8.51700243 C12.8340884,8.69826409 12.9268019,9.08380478 12.7456938,9.37785148 Z M11.7108365,11.5428368 C11.566471,11.780912 11.2582675,11.8554793 11.0223905,11.7103962 C9.13604653,10.5509855 6.76173752,10.28918 3.96555508,10.9314428 C3.69610478,10.9935661 3.42751778,10.823788 3.36603055,10.5528184 C3.30435146,10.2819451 3.47260203,10.0118436 3.74262788,9.95000969 C6.80260111,9.2465882 9.42736749,9.54929481 11.5446963,10.8504123 C11.7807651,10.995399 11.8551061,11.3055334 11.7108365,11.5428368 Z M0,7.99990447 C0,12.4185663 3.58181579,16 8,16 C12.4183753,16 16,12.4185663 16,7.99990447 C16,3.58172026 12.4183753,0 8,0 C3.58181579,0 0,3.58172026 0,7.99990447 Z"
+        d: "M21.707 13.293l-11-11C10.519 2.105 10.266 2 10 2H3c-.553 0-1 .447-1 1v7c0 .266.105.519.293.707l11 11c.195.195.451.293.707.293s.512-.098.707-.293l7-7c.391-.391.391-1.023 0-1.414zM7 9c-1.106 0-2-.896-2-2 0-1.106.894-2 2-2 1.104 0 2 .894 2 2 0 1.104-.896 2-2 2z"
     })));
 });
 
@@ -3446,13 +3504,13 @@ function _extends$o() {
     };
     return _extends$o.apply(this, arguments);
 }
-var Sync = ((props)=>{
+var Theme = ((props)=>{
     return(/*#__PURE__*/ React.createElement("svg", _extends$o({
         xmlns: "http://www.w3.org/2000/svg",
         viewBox: "0 0 24 24"
     }, props), /*#__PURE__*/ React.createElement("path", {
         fill: "currentColor",
-        d: "M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6c0 1.01-.25 1.97-.7 2.8l1.46 1.46A7.93 7.93 0 0 0 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6c0-1.01.25-1.97.7-2.8L5.24 7.74A7.93 7.93 0 0 0 4 12c0 4.42 3.58 8 8 8v3l4-4l-4-4v3z"
+        d: "M7 14c-1.66 0-3 1.34-3 3 0 1.31-1.16 2-2 2 .92 1.22 2.49 2 4 2 2.21 0 4-1.79 4-4 0-1.66-1.34-3-3-3zm13.71-9.37l-1.34-1.34c-.39-.39-1.02-.39-1.41 0L9 12.25 11.75 15l8.96-8.96c.39-.39.39-1.02 0-1.41z"
     })));
 });
 
@@ -3470,13 +3528,13 @@ function _extends$n() {
     };
     return _extends$n.apply(this, arguments);
 }
-var Tag = ((props)=>{
+var ThumbsDown = ((props)=>{
     return(/*#__PURE__*/ React.createElement("svg", _extends$n({
         xmlns: "http://www.w3.org/2000/svg",
-        viewBox: "0 0 24 24"
+        viewBox: "0 0 15 12"
     }, props), /*#__PURE__*/ React.createElement("path", {
         fill: "currentColor",
-        d: "M21.707 13.293l-11-11C10.519 2.105 10.266 2 10 2H3c-.553 0-1 .447-1 1v7c0 .266.105.519.293.707l11 11c.195.195.451.293.707.293s.512-.098.707-.293l7-7c.391-.391.391-1.023 0-1.414zM7 9c-1.106 0-2-.896-2-2 0-1.106.894-2 2-2 1.104 0 2 .894 2 2 0 1.104-.896 2-2 2z"
+        d: "M9.33333 0H3.33333C2.78 0 2.30667 0.333333 2.10667 0.813333L0.0933333 5.51333C0.0333333 5.66667 0 5.82667 0 6V7.33333C0 8.06667 0.6 8.66667 1.33333 8.66667H5.54L4.90667 11.7133L4.88667 11.9267C4.88667 12.2 5 12.4533 5.18 12.6333L5.88667 13.3333L10.28 8.94C10.52 8.7 10.6667 8.36667 10.6667 8V1.33333C10.6667 0.6 10.0667 0 9.33333 0ZM12 0V8H14.6667V0H12Z"
     })));
 });
 
@@ -3494,13 +3552,13 @@ function _extends$m() {
     };
     return _extends$m.apply(this, arguments);
 }
-var Theme = ((props)=>{
+var ThumbsUp = ((props)=>{
     return(/*#__PURE__*/ React.createElement("svg", _extends$m({
         xmlns: "http://www.w3.org/2000/svg",
-        viewBox: "0 0 24 24"
+        viewBox: "0 0 15 14"
     }, props), /*#__PURE__*/ React.createElement("path", {
         fill: "currentColor",
-        d: "M7 14c-1.66 0-3 1.34-3 3 0 1.31-1.16 2-2 2 .92 1.22 2.49 2 4 2 2.21 0 4-1.79 4-4 0-1.66-1.34-3-3-3zm13.71-9.37l-1.34-1.34c-.39-.39-1.02-.39-1.41 0L9 12.25 11.75 15l8.96-8.96c.39-.39.39-1.02 0-1.41z"
+        d: "M0 13.3333H2.66667V5.33333H0V13.3333ZM14.6667 6C14.6667 5.26667 14.0667 4.66667 13.3333 4.66667H9.12667L9.76 1.62L9.78 1.40667C9.78 1.13333 9.66667 0.88 9.48667 0.7L8.78 0L4.39333 4.39333C4.14667 4.63333 4 4.96667 4 5.33333V12C4 12.7333 4.6 13.3333 5.33333 13.3333H11.3333C11.8867 13.3333 12.36 13 12.56 12.52L14.5733 7.82C14.6333 7.66667 14.6667 7.50667 14.6667 7.33333V6Z"
     })));
 });
 
@@ -3518,13 +3576,13 @@ function _extends$l() {
     };
     return _extends$l.apply(this, arguments);
 }
-var ThumbsDown = ((props)=>{
+var Unlink = ((props)=>{
     return(/*#__PURE__*/ React.createElement("svg", _extends$l({
         xmlns: "http://www.w3.org/2000/svg",
-        viewBox: "0 0 15 12"
+        viewBox: "0 0 24 24"
     }, props), /*#__PURE__*/ React.createElement("path", {
         fill: "currentColor",
-        d: "M9.33333 0H3.33333C2.78 0 2.30667 0.333333 2.10667 0.813333L0.0933333 5.51333C0.0333333 5.66667 0 5.82667 0 6V7.33333C0 8.06667 0.6 8.66667 1.33333 8.66667H5.54L4.90667 11.7133L4.88667 11.9267C4.88667 12.2 5 12.4533 5.18 12.6333L5.88667 13.3333L10.28 8.94C10.52 8.7 10.6667 8.36667 10.6667 8V1.33333C10.6667 0.6 10.0667 0 9.33333 0ZM12 0V8H14.6667V0H12Z"
+        d: "M21.94 11.23C21.57 8.76 19.32 7 16.82 7h-2.87c-.52 0-.95.43-.95.95s.43.95.95.95h2.9c1.6 0 3.04 1.14 3.22 2.73.17 1.43-.64 2.69-1.85 3.22l1.4 1.4c1.63-1.02 2.64-2.91 2.32-5.02zM4.12 3.56c-.39-.39-1.02-.39-1.41 0s-.39 1.02 0 1.41l2.4 2.4c-1.94.8-3.27 2.77-3.09 5.04C2.23 15.05 4.59 17 7.23 17h2.82c.52 0 .95-.43.95-.95s-.43-.95-.95-.95H7.16c-1.63 0-3.1-1.19-3.25-2.82-.15-1.72 1.11-3.17 2.75-3.35l2.1 2.1c-.43.09-.76.46-.76.92v.1c0 .52.43.95.95.95h1.78L13 15.27V17h1.73l3.3 3.3c.39.39 1.02.39 1.41 0 .39-.39.39-1.02 0-1.41L4.12 3.56zM16 11.95c0-.52-.43-.95-.95-.95h-.66l1.49 1.49c.07-.13.12-.28.12-.44v-.1z"
     })));
 });
 
@@ -3542,56 +3600,8 @@ function _extends$k() {
     };
     return _extends$k.apply(this, arguments);
 }
-var ThumbsUp = ((props)=>{
-    return(/*#__PURE__*/ React.createElement("svg", _extends$k({
-        xmlns: "http://www.w3.org/2000/svg",
-        viewBox: "0 0 15 14"
-    }, props), /*#__PURE__*/ React.createElement("path", {
-        fill: "currentColor",
-        d: "M0 13.3333H2.66667V5.33333H0V13.3333ZM14.6667 6C14.6667 5.26667 14.0667 4.66667 13.3333 4.66667H9.12667L9.76 1.62L9.78 1.40667C9.78 1.13333 9.66667 0.88 9.48667 0.7L8.78 0L4.39333 4.39333C4.14667 4.63333 4 4.96667 4 5.33333V12C4 12.7333 4.6 13.3333 5.33333 13.3333H11.3333C11.8867 13.3333 12.36 13 12.56 12.52L14.5733 7.82C14.6333 7.66667 14.6667 7.50667 14.6667 7.33333V6Z"
-    })));
-});
-
-function _extends$j() {
-    _extends$j = Object.assign || function(target) {
-        for(var i = 1; i < arguments.length; i++){
-            var source = arguments[i];
-            for(var key in source){
-                if (Object.prototype.hasOwnProperty.call(source, key)) {
-                    target[key] = source[key];
-                }
-            }
-        }
-        return target;
-    };
-    return _extends$j.apply(this, arguments);
-}
-var Unlink = ((props)=>{
-    return(/*#__PURE__*/ React.createElement("svg", _extends$j({
-        xmlns: "http://www.w3.org/2000/svg",
-        viewBox: "0 0 24 24"
-    }, props), /*#__PURE__*/ React.createElement("path", {
-        fill: "currentColor",
-        d: "M21.94 11.23C21.57 8.76 19.32 7 16.82 7h-2.87c-.52 0-.95.43-.95.95s.43.95.95.95h2.9c1.6 0 3.04 1.14 3.22 2.73.17 1.43-.64 2.69-1.85 3.22l1.4 1.4c1.63-1.02 2.64-2.91 2.32-5.02zM4.12 3.56c-.39-.39-1.02-.39-1.41 0s-.39 1.02 0 1.41l2.4 2.4c-1.94.8-3.27 2.77-3.09 5.04C2.23 15.05 4.59 17 7.23 17h2.82c.52 0 .95-.43.95-.95s-.43-.95-.95-.95H7.16c-1.63 0-3.1-1.19-3.25-2.82-.15-1.72 1.11-3.17 2.75-3.35l2.1 2.1c-.43.09-.76.46-.76.92v.1c0 .52.43.95.95.95h1.78L13 15.27V17h1.73l3.3 3.3c.39.39 1.02.39 1.41 0 .39-.39.39-1.02 0-1.41L4.12 3.56zM16 11.95c0-.52-.43-.95-.95-.95h-.66l1.49 1.49c.07-.13.12-.28.12-.44v-.1z"
-    })));
-});
-
-function _extends$i() {
-    _extends$i = Object.assign || function(target) {
-        for(var i = 1; i < arguments.length; i++){
-            var source = arguments[i];
-            for(var key in source){
-                if (Object.prototype.hasOwnProperty.call(source, key)) {
-                    target[key] = source[key];
-                }
-            }
-        }
-        return target;
-    };
-    return _extends$i.apply(this, arguments);
-}
 var Unpin = ((props)=>{
-    return(/*#__PURE__*/ React.createElement("svg", _extends$i({
+    return(/*#__PURE__*/ React.createElement("svg", _extends$k({
         xmlns: "http://www.w3.org/2000/svg",
         viewBox: "0 0 24 24"
     }, props), /*#__PURE__*/ React.createElement("g", {
@@ -3614,8 +3624,8 @@ var Unpin = ((props)=>{
     }))));
 });
 
-function _extends$h() {
-    _extends$h = Object.assign || function(target) {
+function _extends$j() {
+    _extends$j = Object.assign || function(target) {
         for(var i = 1; i < arguments.length; i++){
             var source = arguments[i];
             for(var key in source){
@@ -3626,10 +3636,10 @@ function _extends$h() {
         }
         return target;
     };
-    return _extends$h.apply(this, arguments);
+    return _extends$j.apply(this, arguments);
 }
 var Verified = ((props)=>{
-    return(/*#__PURE__*/ React.createElement("svg", _extends$h({
+    return(/*#__PURE__*/ React.createElement("svg", _extends$j({
         xmlns: "http://www.w3.org/2000/svg",
         viewBox: "0 0 16 16"
     }, props), /*#__PURE__*/ React.createElement("path", {
@@ -3638,8 +3648,8 @@ var Verified = ((props)=>{
     })));
 });
 
-function _extends$g() {
-    _extends$g = Object.assign || function(target) {
+function _extends$i() {
+    _extends$i = Object.assign || function(target) {
         for(var i = 1; i < arguments.length; i++){
             var source = arguments[i];
             for(var key in source){
@@ -3650,10 +3660,10 @@ function _extends$g() {
         }
         return target;
     };
-    return _extends$g.apply(this, arguments);
+    return _extends$i.apply(this, arguments);
 }
 var VerifiedBadge = ((props)=>{
-    return(/*#__PURE__*/ React.createElement("svg", _extends$g({
+    return(/*#__PURE__*/ React.createElement("svg", _extends$i({
         xmlns: "http://www.w3.org/2000/svg",
         viewBox: "0 0 16 16"
     }, props), /*#__PURE__*/ React.createElement("path", {
@@ -3733,8 +3743,8 @@ var Icons$1 = /*#__PURE__*/Object.freeze({
     FontAwesome: FontAwesome
 });
 
-function _extends$f() {
-    _extends$f = Object.assign || function(target) {
+function _extends$h() {
+    _extends$h = Object.assign || function(target) {
         for(var i = 1; i < arguments.length; i++){
             var source = arguments[i];
             for(var key in source){
@@ -3745,7 +3755,7 @@ function _extends$f() {
         }
         return target;
     };
-    return _extends$f.apply(this, arguments);
+    return _extends$h.apply(this, arguments);
 }
 const [useNoticesStore, NoticesApi] = createStore({
     notices: {
@@ -3860,7 +3870,7 @@ function Notice(props) {
 function NoticesContainer() {
     const notices = useNoticesStore((s)=>Object.entries(s.notices)
     );
-    return(/*#__PURE__*/ React.createElement(ErrorBoundary, null, notices.map(([id, notice])=>/*#__PURE__*/ React.createElement(Notice, _extends$f({
+    return(/*#__PURE__*/ React.createElement(ErrorBoundary, null, notices.map(([id, notice])=>/*#__PURE__*/ React.createElement(Notice, _extends$h({
             id: id
         }, notice, {
             key: id
@@ -3896,10 +3906,10 @@ class Notices {
             id: id
         });
     }
-    static remove(id) {
+    static remove(id1) {
         const state = NoticesApi.getState();
-        if (!state.notices[id]) throw new Error(`Notice with id ${id} already exists!`);
-        delete state.notices[id];
+        if (!state.notices[id1]) throw new Error(`Notice with id ${id1} already exists!`);
+        delete state.notices[id1];
         NoticesApi.setState({
             notices: {
                 ...state.notices
@@ -3959,8 +3969,8 @@ var Announcement = fromPromise(promise.then(()=>{
     };
 }));
 
-function _extends$e() {
-    _extends$e = Object.assign || function(target) {
+function _extends$g() {
+    _extends$g = Object.assign || function(target) {
         for(var i = 1; i < arguments.length; i++){
             var source = arguments[i];
             for(var key in source){
@@ -3971,17 +3981,17 @@ function _extends$e() {
         }
         return target;
     };
-    return _extends$e.apply(this, arguments);
+    return _extends$g.apply(this, arguments);
 }
-const useAnnouncements = createStore({
+const useAnnouncements1 = createStore({
     elements: {
     }
 });
-const AnnouncementsStore = useAnnouncements;
-function AnnouncementContainer({ store: useAnnouncements1  }) {
-    const elements = useAnnouncements1((state)=>state.elements
+const AnnouncementsStore = useAnnouncements1;
+function AnnouncementContainer({ store: useAnnouncements  }) {
+    const elements = useAnnouncements((state)=>state.elements
     );
-    return(/*#__PURE__*/ React.createElement(React.Fragment, null, Object.values(elements).map((notice)=>/*#__PURE__*/ React.createElement(Announcement, _extends$e({
+    return(/*#__PURE__*/ React.createElement(React.Fragment, null, Object.values(elements).map((notice)=>/*#__PURE__*/ React.createElement(Announcement, _extends$g({
         }, notice, {
             key: notice.id
         }))
@@ -4239,8 +4249,8 @@ var __cache = {
     }
 };
 
-function _extends$d() {
-    _extends$d = Object.assign || function(target) {
+function _extends$f() {
+    _extends$f = Object.assign || function(target) {
         for(var i = 1; i < arguments.length; i++){
             var source = arguments[i];
             for(var key in source){
@@ -4251,7 +4261,7 @@ function _extends$d() {
         }
         return target;
     };
-    return _extends$d.apply(this, arguments);
+    return _extends$f.apply(this, arguments);
 }
 function RadioGroup({ children: title , note , required , ...props }) {
     const RadioGroup1 = Components$1.get("RadioGroup");
@@ -4259,12 +4269,12 @@ function RadioGroup({ children: title , note , required , ...props }) {
         title: title,
         note: note,
         required: required
-    }, /*#__PURE__*/ React.createElement(RadioGroup1, _extends$d({
+    }, /*#__PURE__*/ React.createElement(RadioGroup1, _extends$f({
     }, props))));
 }
 
-function _extends$c() {
-    _extends$c = Object.assign || function(target) {
+function _extends$e() {
+    _extends$e = Object.assign || function(target) {
         for(var i = 1; i < arguments.length; i++){
             var source = arguments[i];
             for(var key in source){
@@ -4275,7 +4285,7 @@ function _extends$c() {
         }
         return target;
     };
-    return _extends$c.apply(this, arguments);
+    return _extends$e.apply(this, arguments);
 }
 function SelectInput(props) {
     const { SelectInput: SelectInput1  } = DiscordModules;
@@ -4286,7 +4296,7 @@ function SelectInput(props) {
         note: note,
         required: required,
         noteHasMargin: true
-    }, /*#__PURE__*/ React.createElement(SelectInput1, _extends$c({
+    }, /*#__PURE__*/ React.createElement(SelectInput1, _extends$e({
     }, props, {
         required: required
     }))));
@@ -4324,8 +4334,8 @@ var Category = fromPromise(promise.then(()=>{
     };
 }));
 
-function _extends$b() {
-    _extends$b = Object.assign || function(target) {
+function _extends$d() {
+    _extends$d = Object.assign || function(target) {
         for(var i = 1; i < arguments.length; i++){
             var source = arguments[i];
             for(var key in source){
@@ -4336,9 +4346,9 @@ function _extends$b() {
         }
         return target;
     };
-    return _extends$b.apply(this, arguments);
+    return _extends$d.apply(this, arguments);
 }
-const ColorPicker = fromPromise(Webpack.whenReady.then(()=>{
+const ColorPicker1 = fromPromise(Webpack.whenReady.then(()=>{
     try {
         const GuildFolderSettingsModal = Webpack.findByDisplayName("GuildFolderSettingsModal");
         if (!GuildFolderSettingsModal) throw "GuildFolderSettingsModal was not found!";
@@ -4348,12 +4358,12 @@ const ColorPicker = fromPromise(Webpack.whenReady.then(()=>{
             props: {
             }
         });
-        const ColorPicker1 = findInReactTree(rendered, (e)=>{
+        const ColorPicker = findInReactTree(rendered, (e)=>{
             var ref;
             return (e === null || e === void 0 ? void 0 : (ref = e.props) === null || ref === void 0 ? void 0 : ref.defaultColor) != null;
         }).type;
-        if (typeof ColorPicker1 !== "function") throw "ColorPicker could not be found!";
-        return (props)=>/*#__PURE__*/ React.createElement(ErrorBoundary, null, /*#__PURE__*/ React.createElement(ColorPicker1, _extends$b({
+        if (typeof ColorPicker !== "function") throw "ColorPicker could not be found!";
+        return (props)=>/*#__PURE__*/ React.createElement(ErrorBoundary, null, /*#__PURE__*/ React.createElement(ColorPicker, _extends$d({
             }, props)))
         ;
     } catch (error) {
@@ -4370,7 +4380,7 @@ function ColorPickerInput(props) {
         title: title,
         required: required,
         note: note
-    }, /*#__PURE__*/ React.createElement(ColorPicker, {
+    }, /*#__PURE__*/ React.createElement(ColorPicker1, {
         colors: defaultColors,
         defaultColor: typeof defaultValue === "number" ? defaultValue : DEFAULT_ROLE_COLOR,
         onChange: onChange,
@@ -4379,8 +4389,8 @@ function ColorPickerInput(props) {
     })));
 }
 
-function _extends$a() {
-    _extends$a = Object.assign || function(target) {
+function _extends$c() {
+    _extends$c = Object.assign || function(target) {
         for(var i = 1; i < arguments.length; i++){
             var source = arguments[i];
             for(var key in source){
@@ -4391,7 +4401,7 @@ function _extends$a() {
         }
         return target;
     };
-    return _extends$a.apply(this, arguments);
+    return _extends$c.apply(this, arguments);
 }
 const SliderInput = fromPromise(promise.then(()=>{
     const { Slider  } = DiscordModules;
@@ -4402,7 +4412,7 @@ const SliderInput = fromPromise(promise.then(()=>{
             title: title,
             note: note,
             required: required
-        }, /*#__PURE__*/ React.createElement(Slider, _extends$a({
+        }, /*#__PURE__*/ React.createElement(Slider, _extends$c({
         }, Object.assign({
         }, props, {
             className: [
@@ -4414,8 +4424,8 @@ const SliderInput = fromPromise(promise.then(()=>{
     };
 }));
 
-function _extends$9() {
-    _extends$9 = Object.assign || function(target) {
+function _extends$b() {
+    _extends$b = Object.assign || function(target) {
         for(var i = 1; i < arguments.length; i++){
             var source = arguments[i];
             for(var key in source){
@@ -4426,7 +4436,7 @@ function _extends$9() {
         }
         return target;
     };
-    return _extends$9.apply(this, arguments);
+    return _extends$b.apply(this, arguments);
 }
 function Checkbox({ children: title , note , required , ...props }) {
     const Checkbox1 = Components$1.get("Checkbox");
@@ -4434,7 +4444,7 @@ function Checkbox({ children: title , note , required , ...props }) {
         title: title,
         note: note,
         required: required
-    }, /*#__PURE__*/ React.createElement(Checkbox1, _extends$9({
+    }, /*#__PURE__*/ React.createElement(Checkbox1, _extends$b({
     }, props))));
 }
 
@@ -4479,7 +4489,7 @@ let Components = {
     AsyncComponent,
     modal: Modal,
     Icons: Icons$1,
-    ColorPicker,
+    ColorPicker: ColorPicker1,
     Divider
 };
 promise.then(async ()=>{
@@ -4791,19 +4801,19 @@ class StyleManager extends Emitter {
             this.startTheme(data);
         }
     }
-    static unloadAddon(addon, log = true) {
-        const theme = this.resolve(addon);
-        if (!addon) return;
+    static unloadAddon(addon1, log1 = true) {
+        const theme = this.resolve(addon1);
+        if (!addon1) return;
         const success = this.stopTheme(theme);
         this.clearCache(theme.path);
-        if (log) {
+        if (log1) {
             Logger$4.log(`${theme.displayName} was unloaded!`);
         }
         return success;
     }
-    static reloadTheme(addon) {
-        const theme = this.resolve(addon);
-        if (!addon) return;
+    static reloadTheme(addon2) {
+        const theme = this.resolve(addon2);
+        if (!addon2) return;
         const success = this.unloadAddon(theme, false);
         if (!success) {
             return Logger$4.error(`Something went wrong while trying to unload ${theme.displayName}:`);
@@ -4811,12 +4821,12 @@ class StyleManager extends Emitter {
         this.startTheme(theme, false);
         Logger$4.log(`Finished reloading ${theme.displayName}.`);
     }
-    static startTheme(addon, log = true) {
-        const theme = this.resolve(addon);
+    static startTheme(addon3, log2 = true) {
+        const theme = this.resolve(addon3);
         if (!theme) return;
         try {
             theme._load();
-            if (log) {
+            if (log2) {
                 Logger$4.log(`${theme.displayName} has been loaded!`);
             }
         } catch (error) {
@@ -4824,12 +4834,12 @@ class StyleManager extends Emitter {
         }
         return true;
     }
-    static stopTheme(addon, log = true) {
-        const theme = this.resolve(addon);
+    static stopTheme(addon4, log3 = true) {
+        const theme = this.resolve(addon4);
         if (!theme) return;
         try {
             theme._unload();
-            if (log) {
+            if (log3) {
                 Logger$4.log(`${theme.displayName} has been stopped!`);
             }
         } catch (error) {
@@ -4838,38 +4848,38 @@ class StyleManager extends Emitter {
         }
         return true;
     }
-    static enableTheme(addon, log = true) {
-        const theme = this.resolve(addon);
+    static enableTheme(addon5, log4 = true) {
+        const theme = this.resolve(addon5);
         if (!theme) return;
         this.states[theme.entityID] = true;
         DataStore$1.trySaveData("themes", this.states);
         this.startTheme(theme, false);
-        if (log) {
+        if (log4) {
             Logger$4.log(`${theme.displayName} has been enabled!`);
             this.emit("toggle", theme.entityID, true);
         }
     }
-    static disableTheme(addon, log = true) {
-        const theme = this.resolve(addon);
+    static disableTheme(addon6, log5 = true) {
+        const theme = this.resolve(addon6);
         if (!theme) return;
         this.states[theme.entityID] = false;
         DataStore$1.trySaveData("themes", this.states);
         this.stopTheme(theme, false);
-        if (log) {
+        if (log5) {
             Logger$4.log(`${theme.displayName} has been disabled!`);
             this.emit("toggle", theme.entityID, false);
         }
     }
-    static delete(addon) {
-        const theme = this.resolve(addon);
+    static delete(addon7) {
+        const theme = this.resolve(addon7);
         if (!theme) return;
         this.unloadAddon(theme);
         this.themes.delete(theme.entityID);
         PCCompatNative.executeJS(`require("electron").shell.trashItem(${JSON.stringify(theme.path)})`);
         this.emit("delete", theme);
     }
-    static toggle(addon) {
-        const theme = this.resolve(addon);
+    static toggle(addon8) {
+        const theme = this.resolve(addon8);
         if (!theme) return;
         if (this.isEnabled(theme.entityID)) this.disable(theme);
         else this.enable(theme);
@@ -4913,35 +4923,35 @@ class EventEmitter {
         this.maxListeners = count;
         return this;
     }
-    emit(event, ...args) {
+    emit(event, ...args1) {
         if (!this.events[event]) return this;
         for (const [index, listener] of this.events[event].entries()){
             try {
-                listener(...args);
+                listener(...args1);
             } catch (error) {
                 Logger$b.error("Emitter", `Cannot fire listener for event ${event} at position ${index}:`, error);
             }
         }
         return this;
     }
-    off(event, callback) {
-        if (!this.events[event]) return;
-        this.events[event].delete(callback);
+    off(event1, callback) {
+        if (!this.events[event1]) return;
+        this.events[event1].delete(callback);
         return this;
     }
-    on(event, callback) {
-        if (!this.events[event]) this.events[event] = new Set();
-        this.emit("newListener", event, callback);
-        this.events[event].add(callback);
+    on(event2, callback1) {
+        if (!this.events[event2]) this.events[event2] = new Set();
+        this.emit("newListener", event2, callback1);
+        this.events[event2].add(callback1);
         return this;
     }
-    once(event, callback) {
-        this.on(event, callback);
+    once(event3, callback2) {
+        this.on(event3, callback2);
         return this;
     }
-    removeAllListeners(event) {
-        if (this.events[event]) {
-            this.events[event].clear();
+    removeAllListeners(event4) {
+        if (this.events[event4]) {
+            this.events[event4].clear();
         }
         return this;
     }
@@ -5104,9 +5114,9 @@ var url = {
 
 const Logger$3 = Logger$b.create("HTTP");
 class HTTPError extends Error {
-    constructor(message, res){
+    constructor(message, res1){
         super(message);
-        Object.assign(this, res);
+        Object.assign(this, res1);
         this.name = this.constructor.name;
     }
 }
@@ -5116,20 +5126,20 @@ class GenericRequest {
             [key]: value
         };
     }
-    query(key, value) {
-        Object.assign(this.opts.query, this._objectify(key, value));
+    query(key1, value1) {
+        Object.assign(this.opts.query, this._objectify(key1, value1));
         return this;
     }
-    set(key, value) {
-        Object.assign(this.opts.headers, this._objectify(key, value));
+    set(key2, value2) {
+        Object.assign(this.opts.headers, this._objectify(key2, value2));
         return this;
     }
-    send(data) {
-        if (data instanceof Object) {
+    send(data1) {
+        if (data1 instanceof Object) {
             const serialize = this.opts.headers["Content-Type"] === "application/x-www-form-urlencoded" ? querystring.encode : JSON.stringify;
-            this.opts.data = serialize(data);
+            this.opts.data = serialize(data1);
         } else {
-            this.opts.data = data;
+            this.opts.data = data1;
         }
         return this;
     }
@@ -5188,8 +5198,8 @@ class GenericRequest {
         }
         return this._res = this.execute().then(resolver, rejector);
     }
-    catch(rejector) {
-        return this.then(null, rejector);
+    catch(rejector1) {
+        return this.then(null, rejector1);
     }
     constructor(method, uri){
         this.opts = {
@@ -5391,22 +5401,22 @@ class Module {
         })`);
         wrapped(this.require, this, this.exports, this.filename, this.path, window);
     }
-    constructor(id, parent, require){
+    constructor(id, parent1, require1){
         this.id = id;
         this.path = path.dirname(id);
         this.exports = {
         };
-        this.parent = parent;
+        this.parent = parent1;
         this.filename = id;
         this.loaded = false;
         this.children = [];
-        this.require = require;
-        if (parent) parent.children.push(this);
+        this.require = require1;
+        if (parent1) parent1.children.push(this);
     }
 }
-function resolve(path1) {
+function resolve(path) {
     for(const key in cache$2){
-        if (key.startsWith(path1)) return key;
+        if (key.startsWith(path)) return key;
     }
 }
 function getExtension(mod) {
@@ -5542,12 +5552,16 @@ const Logger$2 = Logger$b.create("DataStore");
 const DataStore = new class DataStore extends Store {
     tryLoadData(name, def = {
     }) {
-        if (this.cache.has(name)) return this.cache.get(name);
+        const { Lodash  } = DiscordModules;
+        if (this.cache.has(name)) return Lodash.merge({
+        }, def, this.cache.get(name));
         try {
             const location = path.resolve(this.configFolder, `${name}.json`);
             if (!fs.existsSync(location)) return def;
-            const data = Require(location);
+            let data = Require(location);
             if (Object.keys(data).length === 0) return def;
+            data = Lodash.merge({
+            }, def, data);
             this.cache.set(name, data);
             return data;
         } catch (error) {
@@ -5555,22 +5569,22 @@ const DataStore = new class DataStore extends Store {
             return def;
         }
     }
-    trySaveData(name, data, emit, event = "data-update") {
-        this.cache.set(name, data);
+    trySaveData(name1, data, emit, event = "data-update") {
+        this.cache.set(name1, data);
         try {
-            fs.writeFileSync(path.resolve(this.configFolder, `${name}.json`), JSON.stringify(data, null, "\t"), "utf8");
+            fs.writeFileSync(path.resolve(this.configFolder, `${name1}.json`), JSON.stringify(data, null, "\t"), "utf8");
         } catch (error) {
-            Logger$2.error(`Failed to save data of ${name}:`, error);
+            Logger$2.error(`Failed to save data of ${name1}:`, error);
         }
-        if (emit) this.emit(event, name, data);
+        if (emit) this.emit(event, name1, data);
     }
-    getMisc(misc = "", def) {
+    getMisc(misc = "", def1) {
         var ref;
-        return (ref = getProps(this.tryLoadData("misc"), misc)) !== null && ref !== void 0 ? ref : def;
+        return (ref = getProps(this.tryLoadData("misc"), misc)) !== null && ref !== void 0 ? ref : def1;
     }
-    setMisc(misc = this.getMisc("", {
+    setMisc(misc1 = this.getMisc("", {
     }), prop, value) {
-        this.trySaveData("misc", _.set(misc, prop.split("."), value));
+        this.trySaveData("misc", _.set(misc1, prop.split("."), value));
         this.emit("misc");
     }
     constructor(){
@@ -5710,6 +5724,56 @@ const openFile = function(filepath) {
     });
 };
 
+function _extends$a() {
+    _extends$a = Object.assign || function(target) {
+        for(var i = 1; i < arguments.length; i++){
+            var source = arguments[i];
+            for(var key in source){
+                if (Object.prototype.hasOwnProperty.call(source, key)) {
+                    target[key] = source[key];
+                }
+            }
+        }
+        return target;
+    };
+    return _extends$a.apply(this, arguments);
+}
+function FolderOpened(props) {
+    return(/*#__PURE__*/ React.createElement("svg", _extends$a({
+        width: "24",
+        height: "24",
+        viewBox: "0 0 576 512"
+    }, props), /*#__PURE__*/ React.createElement("path", {
+        fill: "currentColor",
+        d: "M572.694 292.093L500.27 416.248A63.997 63.997 0 0 1 444.989 448H45.025c-18.523 0-30.064-20.093-20.731-36.093l72.424-124.155A64 64 0 0 1 152 256h399.964c18.523 0 30.064 20.093 20.73 36.093zM152 224h328v-48c0-26.51-21.49-48-48-48H272l-64-64H48C21.49 64 0 85.49 0 112v278.046l69.077-118.418C86.214 242.25 117.989 224 152 224z"
+    })));
+}
+
+function _extends$9() {
+    _extends$9 = Object.assign || function(target) {
+        for(var i = 1; i < arguments.length; i++){
+            var source = arguments[i];
+            for(var key in source){
+                if (Object.prototype.hasOwnProperty.call(source, key)) {
+                    target[key] = source[key];
+                }
+            }
+        }
+        return target;
+    };
+    return _extends$9.apply(this, arguments);
+}
+function Folder(props) {
+    return(/*#__PURE__*/ React.createElement("svg", _extends$9({
+        width: "24",
+        height: "24",
+        viewBox: "0 0 512 512"
+    }, props), /*#__PURE__*/ React.createElement("path", {
+        fill: "currentColor",
+        d: "M464 128H272l-64-64H48C21.49 64 0 85.49 0 112v288c0 26.51 21.49 48 48 48h416c26.51 0 48-21.49 48-48V176c0-26.51-21.49-48-48-48z"
+    })));
+}
+
 function _extends$8() {
     _extends$8 = Object.assign || function(target) {
         for(var i = 1; i < arguments.length; i++){
@@ -5724,14 +5788,14 @@ function _extends$8() {
     };
     return _extends$8.apply(this, arguments);
 }
-function FolderOpened(props) {
+function PaintBrush(props) {
     return(/*#__PURE__*/ React.createElement("svg", _extends$8({
         width: "24",
         height: "24",
-        viewBox: "0 0 576 512"
+        viewBox: "0 0 512 512"
     }, props), /*#__PURE__*/ React.createElement("path", {
         fill: "currentColor",
-        d: "M572.694 292.093L500.27 416.248A63.997 63.997 0 0 1 444.989 448H45.025c-18.523 0-30.064-20.093-20.731-36.093l72.424-124.155A64 64 0 0 1 152 256h399.964c18.523 0 30.064 20.093 20.73 36.093zM152 224h328v-48c0-26.51-21.49-48-48-48H272l-64-64H48C21.49 64 0 85.49 0 112v278.046l69.077-118.418C86.214 242.25 117.989 224 152 224z"
+        d: "M167.02 309.34c-40.12 2.58-76.53 17.86-97.19 72.3-2.35 6.21-8 9.98-14.59 9.98-11.11 0-45.46-27.67-55.25-34.35C0 439.62 37.93 512 128 512c75.86 0 128-43.77 128-120.19 0-3.11-.65-6.08-.97-9.13l-88.01-73.34zM457.89 0c-15.16 0-29.37 6.71-40.21 16.45C213.27 199.05 192 203.34 192 257.09c0 13.7 3.25 26.76 8.73 38.7l63.82 53.18c7.21 1.8 14.64 3.03 22.39 3.03 62.11 0 98.11-45.47 211.16-256.46 7.38-14.35 13.9-29.85 13.9-45.99C512 20.64 486 0 457.89 0z"
     })));
 }
 
@@ -5749,14 +5813,14 @@ function _extends$7() {
     };
     return _extends$7.apply(this, arguments);
 }
-function Folder(props) {
+function Save(props) {
     return(/*#__PURE__*/ React.createElement("svg", _extends$7({
         width: "24",
         height: "24",
-        viewBox: "0 0 512 512"
+        viewBox: "0 0 448 512"
     }, props), /*#__PURE__*/ React.createElement("path", {
         fill: "currentColor",
-        d: "M464 128H272l-64-64H48C21.49 64 0 85.49 0 112v288c0 26.51 21.49 48 48 48h416c26.51 0 48-21.49 48-48V176c0-26.51-21.49-48-48-48z"
+        d: "M433.941 129.941l-83.882-83.882A48 48 0 0 0 316.118 32H48C21.49 32 0 53.49 0 80v352c0 26.51 21.49 48 48 48h352c26.51 0 48-21.49 48-48V163.882a48 48 0 0 0-14.059-33.941zM224 416c-35.346 0-64-28.654-64-64 0-35.346 28.654-64 64-64s64 28.654 64 64c0 35.346-28.654 64-64 64zm96-304.52V212c0 6.627-5.373 12-12 12H76c-6.627 0-12-5.373-12-12V108c0-6.627 5.373-12 12-12h228.52c3.183 0 6.235 1.264 8.485 3.515l3.48 3.48A11.996 11.996 0 0 1 320 111.48z"
     })));
 }
 
@@ -5774,14 +5838,18 @@ function _extends$6() {
     };
     return _extends$6.apply(this, arguments);
 }
-function PaintBrush(props) {
+function VerifiedShield(props) {
     return(/*#__PURE__*/ React.createElement("svg", _extends$6({
-        width: "24",
+        xmlns: "http://www.w3.org/2000/svg",
         height: "24",
-        viewBox: "0 0 512 512"
+        viewBox: "0 0 24 24",
+        width: "24"
     }, props), /*#__PURE__*/ React.createElement("path", {
-        fill: "currentColor",
-        d: "M167.02 309.34c-40.12 2.58-76.53 17.86-97.19 72.3-2.35 6.21-8 9.98-14.59 9.98-11.11 0-45.46-27.67-55.25-34.35C0 439.62 37.93 512 128 512c75.86 0 128-43.77 128-120.19 0-3.11-.65-6.08-.97-9.13l-88.01-73.34zM457.89 0c-15.16 0-29.37 6.71-40.21 16.45C213.27 199.05 192 203.34 192 257.09c0 13.7 3.25 26.76 8.73 38.7l63.82 53.18c7.21 1.8 14.64 3.03 22.39 3.03 62.11 0 98.11-45.47 211.16-256.46 7.38-14.35 13.9-29.85 13.9-45.99C512 20.64 486 0 457.89 0z"
+        d: "M0 0h24v24H0z",
+        fill: "none"
+    }), /*#__PURE__*/ React.createElement("path", {
+        d: "M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z",
+        fill: "currentColor"
     })));
 }
 
@@ -5799,14 +5867,18 @@ function _extends$5() {
     };
     return _extends$5.apply(this, arguments);
 }
-function Save(props) {
+function Sass(props) {
     return(/*#__PURE__*/ React.createElement("svg", _extends$5({
         width: "24",
         height: "24",
-        viewBox: "0 0 448 512"
+        viewBox: "0 0 500 500",
+        xmlSpace: "preserve",
+        xmlns: "http://www.w3.org/2000/svg"
     }, props), /*#__PURE__*/ React.createElement("path", {
-        fill: "currentColor",
-        d: "M433.941 129.941l-83.882-83.882A48 48 0 0 0 316.118 32H48C21.49 32 0 53.49 0 80v352c0 26.51 21.49 48 48 48h352c26.51 0 48-21.49 48-48V163.882a48 48 0 0 0-14.059-33.941zM224 416c-35.346 0-64-28.654-64-64 0-35.346 28.654-64 64-64s64 28.654 64 64c0 35.346-28.654 64-64 64zm96-304.52V212c0 6.627-5.373 12-12 12H76c-6.627 0-12-5.373-12-12V108c0-6.627 5.373-12 12-12h228.52c3.183 0 6.235 1.264 8.485 3.515l3.48 3.48A11.996 11.996 0 0 1 320 111.48z"
+        d: "M419.047 96.227C406.855 48.39 327.54 32.67 252.472 59.336c-44.68 15.876-93.029 40.785-127.81 73.31-41.349 38.675-47.943 72.329-45.216 86.396 9.583 49.621 77.585 82.068 105.535 106.125v.144c-8.246 4.051-68.565 34.585-82.684 65.8-14.893 32.932 2.372 56.556 13.804 59.742 35.424 9.858 71.765-7.866 91.312-37.01 18.852-28.12 17.279-64.422 9.085-82.488 11.3-2.976 24.476-4.313 41.218-2.36 47.248 5.52 56.517 35.017 54.747 47.367s-11.681 19.14-14.998 21.185-4.326 2.767-4.05 4.287c.406 2.216 1.94 2.137 4.758 1.652 3.894-.655 24.804-10.042 25.709-32.827 1.14-28.934-26.587-61.302-75.684-60.45-20.216.354-32.933 2.268-42.123 5.69-.681-.774-1.363-1.548-2.084-2.308-30.35-32.382-86.46-55.285-84.088-98.823.866-15.824 6.372-57.5 107.817-108.053 83.104-41.414 149.638-30.009 161.135-4.759 16.427 36.079-35.554 103.137-121.857 112.812-32.88 3.684-50.199-9.06-54.499-13.805-4.536-4.995-5.204-5.218-6.909-4.287-2.753 1.534-1.01 5.939 0 8.574 2.583 6.712 13.15 18.603 31.176 24.516 15.863 5.204 54.459 8.062 101.157-9.99 52.282-20.255 93.12-76.523 81.124-123.549zM196.584 339.995c3.92 14.5 3.487 28.016-.564 40.247a65.289 65.289 0 0 1-3.225 7.97c-3.12 6.477-7.315 12.534-12.441 18.132-15.654 17.07-37.508 23.533-46.882 18.092-10.12-5.873-5.047-29.943 13.084-49.11 19.52-20.635 47.602-33.902 47.602-33.902l-.039-.08 2.465-1.35z",
+        fill: "#ec407a",
+        stroke: "#ec407a",
+        "stroke-width": "16.286552999999998"
     })));
 }
 
@@ -5824,22 +5896,16 @@ function _extends$4() {
     };
     return _extends$4.apply(this, arguments);
 }
-const Icons = {
-    FolderOpened,
-    Folder,
-    PaintBrush,
-    Save
-};
-function Icon({ name , ...props }) {
-    const IconComponent = Icons[name];
-    let extraProps = {
-    };
-    if (!IconComponent) return null;
-    if (props.size) {
-        extraProps.width = extraProps.height = props.size;
-    }
-    return(/*#__PURE__*/ React.createElement(IconComponent, _extends$4({
-    }, props, extraProps)));
+function Css(props) {
+    return(/*#__PURE__*/ React.createElement("svg", _extends$4({
+        width: "24",
+        height: "24",
+        viewBox: "0 0 24 24",
+        xmlns: "http://www.w3.org/2000/svg"
+    }, props), /*#__PURE__*/ React.createElement("path", {
+        d: "m5 3-.65 3.34h13.59L17.5 8.5H3.92l-.66 3.33h13.59l-.76 3.81-5.48 1.81-4.75-1.81.33-1.64H2.85l-.79 4 7.85 3 9.05-3 1.2-6.03.24-1.21L21.94 3H5z",
+        fill: "#42a5f5"
+    })));
 }
 
 function _extends$3() {
@@ -5856,16 +5922,20 @@ function _extends$3() {
     };
     return _extends$3.apply(this, arguments);
 }
-function Css(props) {
+function WarningShield(props) {
     return(/*#__PURE__*/ React.createElement("svg", _extends$3({
-        width: "24",
+        xmlns: "http://www.w3.org/2000/svg",
+        "enable-background": "new 0 0 24 24",
         height: "24",
         viewBox: "0 0 24 24",
-        xmlns: "http://www.w3.org/2000/svg"
-    }, props), /*#__PURE__*/ React.createElement("path", {
-        d: "m5 3-.65 3.34h13.59L17.5 8.5H3.92l-.66 3.33h13.59l-.76 3.81-5.48 1.81-4.75-1.81.33-1.64H2.85l-.79 4 7.85 3 9.05-3 1.2-6.03.24-1.21L21.94 3H5z",
-        fill: "#42a5f5"
-    })));
+        width: "24"
+    }, props), /*#__PURE__*/ React.createElement("g", null, /*#__PURE__*/ React.createElement("path", {
+        d: "M0,0h24v24H0V0z",
+        fill: "none"
+    })), /*#__PURE__*/ React.createElement("g", null, /*#__PURE__*/ React.createElement("path", {
+        d: "M12,2L4,5v6.09c0,5.05,3.41,9.76,8,10.91c4.59-1.15,8-5.86,8-10.91V5L12,2z M13,16h-2v-2h2V16z M13,12h-2V7h2V12z",
+        fill: "currentColor"
+    }))));
 }
 
 function _extends$2() {
@@ -5882,19 +5952,26 @@ function _extends$2() {
     };
     return _extends$2.apply(this, arguments);
 }
-function Sass(props) {
-    return(/*#__PURE__*/ React.createElement("svg", _extends$2({
-        width: "24",
-        height: "24",
-        viewBox: "0 0 500 500",
-        xmlSpace: "preserve",
-        xmlns: "http://www.w3.org/2000/svg"
-    }, props), /*#__PURE__*/ React.createElement("path", {
-        d: "M419.047 96.227C406.855 48.39 327.54 32.67 252.472 59.336c-44.68 15.876-93.029 40.785-127.81 73.31-41.349 38.675-47.943 72.329-45.216 86.396 9.583 49.621 77.585 82.068 105.535 106.125v.144c-8.246 4.051-68.565 34.585-82.684 65.8-14.893 32.932 2.372 56.556 13.804 59.742 35.424 9.858 71.765-7.866 91.312-37.01 18.852-28.12 17.279-64.422 9.085-82.488 11.3-2.976 24.476-4.313 41.218-2.36 47.248 5.52 56.517 35.017 54.747 47.367s-11.681 19.14-14.998 21.185-4.326 2.767-4.05 4.287c.406 2.216 1.94 2.137 4.758 1.652 3.894-.655 24.804-10.042 25.709-32.827 1.14-28.934-26.587-61.302-75.684-60.45-20.216.354-32.933 2.268-42.123 5.69-.681-.774-1.363-1.548-2.084-2.308-30.35-32.382-86.46-55.285-84.088-98.823.866-15.824 6.372-57.5 107.817-108.053 83.104-41.414 149.638-30.009 161.135-4.759 16.427 36.079-35.554 103.137-121.857 112.812-32.88 3.684-50.199-9.06-54.499-13.805-4.536-4.995-5.204-5.218-6.909-4.287-2.753 1.534-1.01 5.939 0 8.574 2.583 6.712 13.15 18.603 31.176 24.516 15.863 5.204 54.459 8.062 101.157-9.99 52.282-20.255 93.12-76.523 81.124-123.549zM196.584 339.995c3.92 14.5 3.487 28.016-.564 40.247a65.289 65.289 0 0 1-3.225 7.97c-3.12 6.477-7.315 12.534-12.441 18.132-15.654 17.07-37.508 23.533-46.882 18.092-10.12-5.873-5.047-29.943 13.084-49.11 19.52-20.635 47.602-33.902 47.602-33.902l-.039-.08 2.465-1.35z",
-        fill: "#ec407a",
-        stroke: "#ec407a",
-        "stroke-width": "16.286552999999998"
-    })));
+const Icons = {
+    FolderOpened,
+    Folder,
+    PaintBrush,
+    Save,
+    VerifiedShield,
+    Sass,
+    Css,
+    WarningShield
+};
+function Icon({ name , ...props }) {
+    const IconComponent = Icons[name];
+    let extraProps = {
+    };
+    if (!IconComponent) return null;
+    if (props.size) {
+        extraProps.width = extraProps.height = props.size;
+    }
+    return(/*#__PURE__*/ React.createElement(IconComponent, _extends$2({
+    }, props, extraProps)));
 }
 
 function _extends$1() {
@@ -6244,7 +6321,7 @@ class QuickCSS {
             render: ()=>DiscordModules.React.createElement(QuickCSSPanel, {
                 })
             ,
-            order: 3
+            order: 4
         });
         this.loadMonaco();
         DataStore$1.on("QUICK_CSS_UPDATE", this.onDataUpdate);
@@ -6357,6 +6434,254 @@ var manifest = {
     changelog: changelog
 };
 
+const period = "@@@===@@@";
+const commitFields = [
+    "hash",
+    "hash_short",
+    "author",
+    "date",
+    "message"
+];
+const hashFields = [
+    "short",
+    "full"
+];
+class Git {
+    static async executeCmd(cmd, cwd) {
+        return new Promise((resolve, reject)=>{
+            const id = "GIT_CMD_" + Math.random().toString(36).slice(2);
+            PCCompatNative.IPC.on(id, (error, res)=>{
+                if (error) reject(error);
+                else resolve(res);
+            });
+            PCCompatNative.executeJS(`void require("child_process").exec(${JSON.stringify(cmd)}, {
+                cwd: ${JSON.stringify(cwd)}
+            }, (error, res) => {
+                PCCompatNative.IPC.dispatch(${JSON.stringify(id)}, error, res);
+                delete PCCompatEvents[${JSON.stringify(id)}];
+            })`);
+        });
+    }
+    static async hasGitInstalled() {
+        try {
+            await this.executeCmd("git --version");
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }
+    static async isGitRepo(cwd1) {
+        try {
+            const result = await this.executeCmd("git rev-parse --is-inside-work-tree", cwd1);
+            return result === "true";
+        } catch (e) {
+            return false;
+        }
+    }
+    static async getBranchName(cwd2) {
+        try {
+            const result = await this.executeCmd("git branch -a", cwd2);
+            if (!result) return null;
+            return result.slice(2, result.indexOf("\n"));
+        } catch (error) {
+            console.error(error);
+            return null;
+        }
+    }
+    static async getLatestCommit(cwd3, target = "master") {
+        try {
+            return this.parsePeriods(hashFields, await this.executeCmd(`git log -1 ${target} --pretty=format:"%h${period}%H"`, cwd3));
+        } catch (error) {
+            console.error(error);
+            return {
+                hasError: true
+            };
+        }
+    }
+    static async getDiff(cwd4, target1 = "master") {
+        try {
+            const result = await this.executeCmd(`git log ${target1}..origin/${target1} --pretty=format:"%H${period}%h${period}%an${period}%ar${period}%s"`, cwd4);
+            return result.split("\n").map((p)=>this.parsePeriods(commitFields, p)
+            );
+        } catch (error) {
+            console.error(error);
+            return null;
+        }
+    }
+    static parsePeriods(fields, out) {
+        return Object.fromEntries(out.split(period).map((c, i)=>[
+                fields[i],
+                c
+            ]
+        ));
+    }
+}
+
+const UpdatesStore = createStore({
+});
+
+function makeLazy(factory, fallback) {
+    return function LazyComponent(props) {
+        const [state, setState] = React.useState({
+            resolved: false,
+            value: void 0
+        });
+        React.useEffect(()=>{
+            if (state.resolved) return;
+            factory(props).then((value)=>{
+                setState({
+                    value,
+                    resolved: true
+                });
+            });
+        }, [
+            state
+        ]);
+        return state.resolved ? state.value : React.createElement(fallback, props);
+    };
+}
+
+const [useUpdatesStore$1] = UpdatesStore;
+const basePath$1 = PCCompatNative.getBasePath();
+const LoadingSpinner = ()=>{
+    return React.createElement(DiscordModules.Spinner, {
+        type: DiscordModules.Spinner.Type.LOW_MOTION,
+        className: "pc-spinner"
+    });
+};
+const CurrentBranch = makeLazy(async ()=>{
+    const { Link  } = DiscordModules;
+    const branch = await Git.getBranchName(basePath$1);
+    return(/*#__PURE__*/ React.createElement(Link, {
+        href: `https://github.com/strencher-kernel/pc-compat/tree/${branch}`
+    }, branch));
+}, LoadingSpinner);
+const CurrentCommitHash = makeLazy(async ()=>{
+    const { Text , Link  } = DiscordModules;
+    const hash = await Git.getLatestCommit(basePath$1, await Git.getBranchName(basePath$1));
+    if (hash.hasError) return(/*#__PURE__*/ React.createElement(Text, {
+        color: Text.Colors.RED
+    }, "error"));
+    return(/*#__PURE__*/ React.createElement(Link, {
+        href: `https://github.com/strencher-kernel/pc-compat/tree/${hash.full}`
+    }, hash.short));
+}, LoadingSpinner);
+function UpdaterCard({ hasPendingUpdates , onUpdate  }) {
+    const updaterInfo = DataStore$1.useEvent("data-update", (name)=>{
+        return DataStore$1.tryLoadData("info", {
+            latestUsedVersion: "0.0.0",
+            lastCheckedUpdate: "---"
+        });
+    }, (name)=>name === "info"
+    );
+    const isFetching = useUpdatesStore$1((u)=>u.isFetching
+    );
+    const { Flex , Text , Moment , Button  } = DiscordModules;
+    const headerText = React.useMemo(()=>{
+        if (isFetching) return "Fetching updates...";
+        if (hasPendingUpdates) return "Something needs to be updated!";
+        return "Everyt hing is up to date.";
+    }, [
+        isFetching,
+        updaterInfo,
+        hasPendingUpdates
+    ]);
+    const headerIcon = React.useMemo(()=>{
+        if (isFetching) return(/*#__PURE__*/ React.createElement(DiscordIcon, {
+            name: "UpdateAvailable",
+            width: "70",
+            height: "70",
+            className: "pcu-shield"
+        }));
+        return(/*#__PURE__*/ React.createElement(Icon, {
+            name: hasPendingUpdates ? "WarningShield" : "VerifiedShield",
+            size: "70",
+            className: joinClassNames("pcu-shield", hasPendingUpdates ? "pcu-shield-warn" : "pcu-shield-ok")
+        }));
+    }, [
+        isFetching,
+        updaterInfo,
+        hasPendingUpdates
+    ]);
+    return(/*#__PURE__*/ React.createElement(Flex, {
+        className: "pcu-card",
+        direction: Flex.Direction.VERTICAL
+    }, /*#__PURE__*/ React.createElement(Flex, {
+        justify: Flex.Justify.BETWEEN,
+        align: Flex.Align.CENTER
+    }, /*#__PURE__*/ React.createElement(Flex, {
+        className: "pcu-shield-container",
+        direction: Flex.Direction.HORIZONTAL,
+        align: Flex.Align.START,
+        justify: Flex.Justify.CENTER
+    }, headerIcon, /*#__PURE__*/ React.createElement(Flex.Child, null, /*#__PURE__*/ React.createElement(Text, {
+        size: Text.Sizes.SIZE_24,
+        color: Text.Colors.HEADER_PRIMARY
+    }, headerText), /*#__PURE__*/ React.createElement(Text, {
+        size: Text.Sizes.SIZE_14,
+        color: Text.Colors.HEADER_SECONDARY
+    }, "Last Checked:", updaterInfo.lastCheckedUpdate !== "---" && updaterInfo.lastCheckedUpdate != null ? " " + Moment(updaterInfo.lastCheckedUpdate).calendar() : " " + updaterInfo.lastCheckedUpdate))), /*#__PURE__*/ React.createElement("div", {
+        className: "pcu-git-info"
+    }, /*#__PURE__*/ React.createElement(Text, {
+        className: "pcu-git-info-item"
+    }, "Branch: ", /*#__PURE__*/ React.createElement(CurrentBranch, null)), /*#__PURE__*/ React.createElement(Text, {
+        className: "pcu-git-info-item"
+    }, "Commit: ", /*#__PURE__*/ React.createElement(CurrentCommitHash, null)))), /*#__PURE__*/ React.createElement(Divider, null), /*#__PURE__*/ React.createElement(Flex, {
+        direction: Flex.Direction.HORIZONTAL
+    }, /*#__PURE__*/ React.createElement(Button, {
+        disabled: isFetching,
+        color: Button.Colors.BRAND,
+        size: Button.Sizes.SMALL,
+        onClick: onUpdate
+    }, "Check for Updates"))));
+}
+
+const [useUpdatesStore, UpdatesApi] = UpdatesStore;
+const basePath = PCCompatNative.getBasePath();
+function useCommitDiff() {
+    const [diff, setDiff] = React.useState([]);
+    React.useEffect(()=>{
+        Git.getBranchName(basePath).then((branch)=>{
+            Git.getDiff(basePath, branch).then(setDiff);
+        });
+    }, []);
+    return diff;
+}
+function UpdaterPanel() {
+    const commitDiff = useCommitDiff();
+    const handleFetchStart = function() {
+        UpdatesApi.setState({
+            isFetching: true
+        });
+        setTimeout(()=>{
+            const data = DataStore$1.tryLoadData("info", {
+            });
+            DataStore$1.trySaveData("info", {
+                ...data,
+                lastCheckedUpdate: new Date().toJSON()
+            }, true);
+            console.log("saveData");
+            UpdatesApi.setState({
+                isFetching: false
+            });
+        }, 5000);
+    };
+    return(/*#__PURE__*/ React.createElement("div", null, /*#__PURE__*/ React.createElement(UpdaterCard, {
+        hasPendingUpdates: commitDiff.length > 0,
+        onUpdate: handleFetchStart
+    })));
+}
+
+class Updater {
+    static initialize() {
+        SettingsRenderer.registerPanel(this.constructor.name, {
+            label: "Updater",
+            order: 3,
+            render: ()=>/*#__PURE__*/ React.createElement(UpdaterPanel, null)
+        });
+    }
+}
+
 /// <reference path="../../types.d.ts" />
 if (!("process" in window)) {
     PCCompatNative.IPC.dispatch(EXPOSE_PROCESS_GLOBAL);
@@ -6383,6 +6708,7 @@ var index = new class PCCompat {
         });
         SettingsRenderer.patchSettingsView();
         QuickCSS.initialize();
+        Updater.initialize();
         PluginManager.initialize();
         StyleManager.initialize();
         this.checkForChangelog();
