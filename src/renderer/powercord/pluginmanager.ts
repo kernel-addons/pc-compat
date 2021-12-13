@@ -22,7 +22,7 @@ export default class PluginManager extends Emitter {
     static get addons() {return Array.from(this.plugins, e => e[1]);}
 
     static initialize() {
-        SettingsRenderer.registerPanel("plugins", {
+        SettingsRenderer.registerPanel("pc-moduleManager-plugins", {
             label: "Plugins",
             order: 1,
             render: () => DiscordModules.React.createElement(AddonPanel, {type: "plugin", manager: this})

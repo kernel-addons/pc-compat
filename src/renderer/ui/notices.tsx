@@ -2,7 +2,7 @@ import DOM from "@modules/dom";
 import DiscordModules, {promise} from "@modules/discord";
 import createStore from "@flux/zustand";
 import ErrorBoundary from "@powercord/components/errorboundary";
-import {joinClassNames} from "@modules/utilities";
+import {joinClassNames, uuid} from "@modules/utilities";
 import DiscordIcon from "./discordicon";
 import createDispatcher from "@flux/dispatcher";
 import {FontAwesome} from "@powercord/components/icons";
@@ -11,17 +11,29 @@ const [useNoticesStore, NoticesApi] = createStore({notices: {}});
 const Dispatcher = createDispatcher();
 
 const types = {
-    info: 'info-circle-regular',
-    warning: 'exclamation-circle-regular',
-    danger: 'times-circle-regular',
-    success: 'check-circle-regular'
+    info: {
+        icon: 'info-circle',
+        color: 'var(--info-help-foreground)'
+    },
+    warning: {
+        icon: 'exclamation-circle',
+        color: 'var(--info-warning-foreground)'
+    },
+    danger: {
+        icon: 'times-circle',
+        color: 'var(--info-danger-foreground)'
+    },
+    success: {
+        icon: 'check-circle',
+        color: 'var(--info-positive-foreground)'
+    }
 };
 
 export function Notice(props) {
     const {ReactSpring: {useSpring, animated}, Button, Markdown} = DiscordModules;
     const [closing, setClosing] = React.useState(false);
 
-    if (props.type && types[props.type]) props.icon = types[props.type];
+    if (props.type && types[props.type]) props.icon = {...types[props.type]};
 
     const spring = useSpring({
         from: {
@@ -63,7 +75,15 @@ export function Notice(props) {
         >
             <div className="pc-notice-header">
                 <div className="pc-notice-header-name">
-                    {props.icon && <FontAwesome className="pc-notice-icon" icon={props.icon} />}
+                    {props.icon && typeof props.icon == 'object' ?
+                        <FontAwesome
+                            className="pc-notice-icon"
+                            spin={props.icon.spin}
+                            icon={props.icon.icon}
+                            color={props.icon.color}
+                        /> :
+                        <FontAwesome className="pc-notice-icon" icon={props.icon} />
+                    }
                     {props.header}
                 </div>
                 <Button
@@ -143,7 +163,7 @@ export default class Notices {
     static show(options: any) {
         const state = NoticesApi.getState();
 
-        if (state.notices[options.id]) throw new Error(`Notice with id ${options.id} already exists!`);
+        if (!options.id || state.notices[options.id]) options.id = uuid();
 
         NoticesApi.setState({
             notices: {
@@ -161,7 +181,7 @@ export default class Notices {
     static close(id: string) {
         const state = NoticesApi.getState();
 
-        if (!state.notices[id]) throw new Error(`Notice with id ${id} already exists!`);
+        if (!state.notices[id]) throw new Error(`Notice with id ${id} does not exist!`);
 
         Dispatcher.emit({type: "SET_CLOSING", id: id});
     }

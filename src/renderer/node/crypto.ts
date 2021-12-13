@@ -1,6 +1,7 @@
 const methods: String[] = PCCompatNative.executeJS(`Object.keys(require("crypto"))`);
 
-const crypto = {};
+// @ts-ignore
+const crypto: typeof import("crypto") = {}
 for(const key of methods) {
    // @ts-ignore
    crypto[key] = PCCompatNative.executeJS(`require("crypto").${key}`)

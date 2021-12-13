@@ -1,4 +1,6 @@
 import DiscordModules from "./discord";
+import crypto from "../node/crypto";
+
 export function sleep(time: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, time));
 };
@@ -82,3 +84,7 @@ export function matchAll(regex: RegExp, input: string, parent = false) {
 
     return output;
 };
+
+export function uuid(multiplier = 20) {
+    return "x".repeat(multiplier).replace(/[xy]/g, () => crypto.randomBytes(1)[0].toString()[0])
+}

@@ -26,9 +26,8 @@ export default class SettingsRenderer {
         if (tab) throw new Error(`Settings tab ${id} is already registered!`);
 
         const panel = {
-            section: "pc-moduleManager-" + label,
+            section: id,
             label: label,
-            id: id,
             order: order,
             className: `pccompat-settings-${id}-item`,
             element: () => DiscordModules.React.createElement(SettingsPanel, {

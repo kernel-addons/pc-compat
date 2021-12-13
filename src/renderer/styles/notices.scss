@@ -1,15 +1,21 @@
 .pc-notices {
+    padding: 20px;
     position: fixed;
+    pointer-events: none;
     display: flex;
     flex-direction: column;
-    bottom: 20px;
+    bottom: 0;
     align-items: flex-end;
-    right: 20px;
-    z-index: 1;
+    right: 0;
+    z-index: 101;
+
+    & > * {
+        pointer-events: auto;
+    }
 
     .pc-notice-container {
         position: relative;
-        border-radius: 4px;
+        border-radius: 5px;
         color: #ddd;
         background: var(--background-secondary-alt);
         min-width: 250px;
@@ -32,7 +38,7 @@
             align-items: center;
         }
 
-        .pc-notice-icon::before {
+        .pc-notice-icon {
             margin-right: 10px;
         }
 
@@ -121,5 +127,14 @@
     to {
         transform: translateX(500px);
         opacity: 0;
+    }
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
     }
 }

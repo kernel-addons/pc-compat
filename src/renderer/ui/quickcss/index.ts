@@ -18,8 +18,8 @@ export default class QuickCSS {
         const {Lodash} = DiscordModules;
         Lodash.bindAll(this, ["onDataUpdate"]);
 
-        SettingsRenderer.registerPanel(QuickCSS.name, {
-            label: "QuickCSS",
+        SettingsRenderer.registerPanel("CustomCSS", {
+            label: "Quick CSS",
             render: () => DiscordModules.React.createElement(QuickCSSPanel, {}),
             order: 4
         });

@@ -17,7 +17,7 @@ export function SideBarButton({label, icon, selected, onClick, className = ""}) 
         <div className={joinClassNames("pc-quickcss-sidebar-icon", [selected, "pc-quickcss-selected"], className)} onClick={onClick} key={label}>
             <Tooltips.Tooltip text={label} position="right">
                 {props => (
-                    typeof icon === "string" ? <Icon name={icon} {...props} /> : React.createElement(icon, props) 
+                    typeof icon === "string" ? <Icon name={icon} {...props} /> : React.createElement(icon, props)
                 )}
             </Tooltips.Tooltip>
         </div>
@@ -28,7 +28,7 @@ export function SideBarFile({filepath, selected}) {
     return (
         <div className={joinClassNames("pc-quickcss-sidebar-files-file", [selected, "pc-quickcss-selected"])} onClick={() => {
             if (selected) return;
-            
+
             openFile(filepath);
             PanelAPI.setState({selectedFile: filepath});
         }} key={filepath}>
@@ -61,6 +61,12 @@ export default function SideBar() {
         if (!cache.has(state.selectedFile)) return;
 
         fs.writeFileSync(state.selectedFile, cache.get(state.selectedFile), "utf8");
+        powercord.api.notices.sendToast(null, {
+            content: 'Your changes to the current file were saved.',
+            header: 'Changes saved',
+            type: 'success',
+            timeout: 1500
+        })
     };
 
     const handleCreateFile = function () {
@@ -76,7 +82,7 @@ export default function SideBar() {
             }
         });
     };
-    
+
     return (
         <div className={joinClassNames("pc-quickcss-sidebar", [state.sidebarVisible, "pc-visible"])}>
             <div className="pc-quickcss-sidebar-iconsrow">

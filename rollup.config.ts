@@ -15,15 +15,13 @@ const aliases = {
     "@node":        path.resolve(__dirname, "./src/renderer/node"),
     "@common":      path.resolve(__dirname, "./src/common"),
     "@classes":     path.resolve(__dirname, "./src/renderer/classes"),
-    "@flux":      path.resolve(__dirname, "./src/renderer/flux")
+    "@flux":        path.resolve(__dirname, "./src/renderer/flux")
 };
 
 export default args => {
     const {mode = "renderer", source = true} = args;
     delete args.mode;
     delete args.source;
-
-    console.log(`SourceMaps: ${source}`);
 
     return defineConfig({
         input: `./src/${mode}/index.ts`,
@@ -39,14 +37,14 @@ export default args => {
             source && sourcemaps({include: "./src/**"}),
             // AliasLoader(),
             alias({
-                entries: mode === "renderer" 
+                entries: mode === "renderer"
                     ? aliases
                     : void 0
             }),
             resolve({
                 browser: mode === "renderer",
                 extensions: [".ts", ".tsx", ".js", ".jsx", ".scss"],
-                preferBuiltins: false,                
+                preferBuiltins: false,
             }),
             // Using esFormatter along with sourceMaps: true freezes rollup. Pain.
             !source && esFormatter({

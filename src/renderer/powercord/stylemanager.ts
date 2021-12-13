@@ -20,7 +20,7 @@ export default class StyleManager extends Emitter {
     static get addons() {return Array.from(this.themes, e => e[1]);}
 
     static initialize() {
-        SettingsRenderer.registerPanel("themes", {
+        SettingsRenderer.registerPanel("pc-moduleManager-themes", {
             label: "Themes",
             order: 2,
             render: () => DiscordModules.React.createElement(AddonPanel, {type: "theme", manager: this})
