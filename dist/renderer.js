@@ -1918,6 +1918,18 @@ function AddonPanel({ manager , type  }) {
         query: query,
         className: "pc-settings-addons-search"
     }), /*#__PURE__*/ React.createElement(Tooltips.Tooltip, {
+        text: "Open folder",
+        position: "bottom"
+    }, (props)=>/*#__PURE__*/ React.createElement(Button, _extends$T({
+        }, props, {
+            size: Button.Sizes.NONE,
+            look: Button.Looks.BLANK,
+            className: "pc-settings-open-folder",
+            onClick: ()=>PCCompatNative.executeJS(`require("electron").shell.openPath('${JSON.stringify(manager.folder)}')`)
+        }), /*#__PURE__*/ React.createElement(DiscordIcon, {
+            name: "Folder"
+        }))
+    ), /*#__PURE__*/ React.createElement(Tooltips.Tooltip, {
         text: "Options",
         position: "bottom"
     }, (props)=>/*#__PURE__*/ React.createElement(Button, _extends$T({

@@ -1,6 +1,7 @@
 import {DataStore, DiscordModules} from "@modules";
 import DiscordIcon from "@ui/discordicon";
 import AddonCard from "./addoncard";
+import path from "@node/path";
 
 export type SearchOptions = {
     description: boolean;
@@ -151,6 +152,19 @@ export default function AddonPanel({manager, type}) {
                     query={query}
                     className="pc-settings-addons-search"
                 />
+                <Tooltips.Tooltip text="Open folder" position="bottom">
+                    {props => (
+                        <Button
+                            {...props}
+                            size={Button.Sizes.NONE}
+                            look={Button.Looks.BLANK}
+                            className="pc-settings-open-folder"
+                            onClick={() => PCCompatNative.executeJS(`require("electron").shell.openPath('${JSON.stringify(manager.folder)}')`)}
+                        >
+                            <DiscordIcon name="Folder" />
+                        </Button>
+                    )}
+                </Tooltips.Tooltip>
                 <Tooltips.Tooltip text="Options" position="bottom">
                     {props => (
                         <Button
@@ -162,7 +176,8 @@ export default function AddonPanel({manager, type}) {
                                 ContextMenu.open(e, () => (
                                     <OverflowContextMenu type={type} />
                                 ));
-                            }}>
+                            }}
+                        >
                             <DiscordIcon name="OverflowMenu" />
                         </Button>
                     )}
