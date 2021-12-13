@@ -1,8 +1,11 @@
 import Patcher from "./patcher";
 import Webpack from "./webpack"
-import {promise} from "./discord";
+import DiscordModules, {promise} from "./discord";
 import {forceUpdateElement} from "@powercord/util";
-import Logger from "./logger";
+import LoggerModule from "./logger";
+import {fromPromise} from "@powercord/components/asynccomponent";
+
+const Logger = new LoggerModule("ComponentPatcher");
 
 const patchAvatars = function () {
    const Avatar = Webpack.findByProps("AnimatedAvatar");
@@ -24,12 +27,23 @@ const patchAvatars = function () {
 
 const injectMessageName = function () {
    const Message = Webpack.findModule(m => m?.toString()?.indexOf("childrenSystemMessage") > -1);
-   if (!Message) return Logger.warn("ComponentPatcher", "Message Component was not found!");
+   if (!Message) return Logger.warn("Message Component was not found!");
    
    Message.displayName = "Message";
 };
 
+const injectAsyncFlux = function () {
+   const Flux = Webpack.findByProps("connectStores");
+
+   Flux.connectStoresAsync = function (stores: Promise<any>[], factory: Function) {
+      return (Component: any) => fromPromise(Promise.all(stores).then((stores) => {
+         return Flux.connectStores(stores, (props: any) => factory(stores, props))(Component);
+      }));
+   };
+}
+
 export default promise.then(() => {
    patchAvatars();
    injectMessageName();
+   injectAsyncFlux();
 });

@@ -2,15 +2,16 @@ import {promise} from "@modules/discord";
 import {getSettings} from "@powercord/classes/settings";
 
 export let store = null;
-
 export let settings = new Map();
+export const tabs = new Proxy(settings, {
+    has(target, key) {return settings.has(key) || target[key] != null;},
+    set(target, key, value) {return target[key] = value, true;},
+    get(target, key) {
+        // JS Proxy doesn't allow me to override this using the "has" handler.
+        if (key === "hasOwnProperty") return (key: string) => {return settings.has(key) || key in settings;};
 
-export let tabs = settings;
-
-Object.defineProperty(settings, "hasOwnProperty", {
-    value: settings.has.bind(settings),
-    configurable: true,
-    writable: false
+        return settings.get(key) ?? target[key];
+    }
 });
 
 promise.then(() => {

@@ -11,6 +11,7 @@ export * as util from "./util";
 export * as modal from "./modal";
 export {default as http} from "./http/index";
 export {default as constants} from "./constants";
+export * as compilers from "./compilers";
 
 export let initialized = false;
 
