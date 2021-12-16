@@ -14,11 +14,21 @@ export default function AsyncComponent({_provider, _fallback, ...props}) {
 };
 
 export function from(promise: Promise<any>, fallback?: any) {
-    return props => DiscordModules.React.createElement(AsyncComponent, {
-        _provider: () => promise,
-        _fallback: fallback,
-        ...props
+    const value = {resolved: false, component: null};
+
+    promise.then((component) => {
+        Object.assign(value, {component, resolved: true});
     });
+
+    return props => {
+        if (value.resolved) return React.createElement(value.component, props);
+
+        return DiscordModules.React.createElement(AsyncComponent, {
+            _provider: () => promise,
+            _fallback: fallback,
+            ...props
+        });
+    };
 };
 export const fromPromise = from; // Alias
 
