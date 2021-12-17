@@ -27,9 +27,11 @@ export default function UpdaterPanel() {
 
         setTimeout(() => {
             const data = DataStore.tryLoadData("info", {});
-            DataStore.trySaveData("info", {...data, lastCheckedUpdate: new Date().toJSON()}, true);
-            console.log("saveData");
             UpdatesApi.setState({isFetching: false});
+            DataStore.trySaveData("info", {
+                ...data,
+                lastCheckedUpdate: new Date().toJSON()
+            }, true, "updates");
         }, 5000);
     };
 

@@ -43,18 +43,21 @@ export const CurrentCommitHash = makeLazy(async () => {
     );
 }, LoadingSpinner);
 
+export const defaultInfo = {latestUsedVersion: "0.0.0", lastCheckedUpdate: "---"};
+
 export default function UpdaterCard({hasPendingUpdates, onUpdate}) {
-    const updaterInfo = DataStore.useEvent("data-update", (name) => {
-        return DataStore.tryLoadData("info", {latestUsedVersion: "0.0.0", lastCheckedUpdate: "---"});
+    const {Flex, Text, Moment, Button} = DiscordModules;
+    
+    const updaterInfo = DataStore.useEvent("updates" as any, () => {
+        return DataStore.tryLoadData("info", defaultInfo);
     }, (name) => name === "info");
     const isFetching = useUpdatesStore(u => u.isFetching);
-    const {Flex, Text, Moment, Button} = DiscordModules;
 
     const headerText = React.useMemo(() => {
         if (isFetching) return "Fetching updates...";
         if (hasPendingUpdates) return "Something needs to be updated!";
         
-        return "Everyt hing is up to date.";
+        return "Everything is up to date.";
     }, [isFetching, updaterInfo, hasPendingUpdates]);
 
     const headerIcon = React.useMemo(() => {

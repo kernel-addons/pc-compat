@@ -26,19 +26,19 @@ export default class Store<events = string> {
 
     emit(event: events, ...args: any[]) {
         if (!this.has(event)) return;
+        const toFire = [...this.events[event as unknown as string]];
 
-        for (const listener of this.events[event as unknown as string]) {
+        for (const listener of toFire) {
             try {listener(...args);}
             catch (error) {this.logger.error(`Store:${this.constructor.name}`, error);}
         }
     }
 
-    useEvent(event: events, listener: Function, validate: ValidateListener = () => true) {
-        const [state, setState] = DiscordModules.React.useState(listener());
-
+    useEvent(event: events, factory: Function, validate: ValidateListener = () => true) {
+        const [state, setState] = DiscordModules.React.useState(factory());
         DiscordModules.React.useEffect(() => {
-            return this.on(event, (...args) => validate(...args) && (() => setState(listener())));
-        }, [event, listener]);
+            return this.on(event, (...args) => validate(...args) && setState(factory()));
+        }, [event, factory]);
 
         return state;
     }

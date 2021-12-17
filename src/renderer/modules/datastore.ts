@@ -66,7 +66,7 @@ const DataStore = new class DataStore extends Store<"misc" | "data-update"> {
 
     setMisc(misc: any = this.getMisc("", {}), prop: string, value: any) {
         this.trySaveData("misc", _.set(misc, prop.split("."), value))
-        this.emit("misc");
+        this.emit("misc", misc, value);
     }
 }
 
