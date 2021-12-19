@@ -3,16 +3,20 @@
 var electron = require('electron');
 var Module = require('module');
 var path = require('path');
+var fs = require('fs');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
 var Module__default = /*#__PURE__*/_interopDefaultLegacy(Module);
 var path__default = /*#__PURE__*/_interopDefaultLegacy(path);
+var fs__default = /*#__PURE__*/_interopDefaultLegacy(fs);
 
 // Main
 const MAIN_EVENT = "pccompat-main-event";
+const COMPILE_SASS = "pccompat-compile-sass";
 const GET_APP_PATH = "pccompat-get-app-path";
 const SET_DEV_TOOLS = "pccompat-open-devtools";
+const GET_WINDOW_DATA = "pccompat-get-window-data";
 // Preload
 const EXPOSE_PROCESS_GLOBAL = "pccompat-expose-process-global";
 
@@ -65,6 +69,54 @@ function cloneObject(target, newObject = {
     }, newObject);
 }
 
+// @ts-nocheck
+function handleSplash(API) {
+    const { windowOptions  } = electron.ipcRenderer.sendSync(GET_WINDOW_DATA);
+    if (!windowOptions.webPreferences.nativeWindowOpen) {
+        Module__default["default"]._extensions[".scss"] = (module, filename)=>{
+            const content = electron.ipcRenderer.sendSync(COMPILE_SASS, filename);
+            module.filecontent = content;
+            module.exports = content;
+            return content;
+        };
+        Module__default["default"]._extensions[".css"] = (module, filename)=>{
+            const content = fs__default["default"].readFileSync(filename, "utf8");
+            module.filecontent = content;
+            module.exports = content;
+            return module.exports;
+        }, window.onload = ()=>{
+            let themes = {
+            };
+            try {
+                const settings = path__default["default"].resolve(API.getBasePath(), "config", "themes.json");
+                if (fs__default["default"].existsSync(settings)) themes = JSON.parse(fs__default["default"].readFileSync(settings, {
+                    encoding: "utf-8"
+                }));
+            } catch (e) {
+                console.error("Couldn't read theme settings file, is it corrupt?", e);
+            }
+            for (const [theme, enabled] of Object.entries(themes)){
+                if (!enabled) continue;
+                try {
+                    const folder = path__default["default"].resolve(API.getBasePath(), "themes", theme);
+                    const manifestPath = path__default["default"].resolve(folder, "powercord_manifest.json");
+                    const manifest = JSON.parse(fs__default["default"].readFileSync(manifestPath, {
+                        encoding: "utf-8"
+                    }));
+                    if (!manifest?.splashTheme) continue;
+                    const styles = require(path__default["default"].resolve(folder, manifest.splashTheme));
+                    const stylesheet = document.createElement("style");
+                    stylesheet.id = theme;
+                    stylesheet.innerHTML = styles;
+                    document.head.appendChild(stylesheet);
+                } catch (e) {
+                    console.error(`Couldn't initialize ${theme}`, e);
+                }
+            }
+        };
+    }
+}
+
 const nodeModulesPath = path__default["default"].resolve(process.cwd(), "resources", "app-original.asar", "node_modules");
 // @ts-ignore - Push modules
 if (!Module__default["default"].globalPaths.includes(nodeModulesPath)) Module__default["default"].globalPaths.push(nodeModulesPath);
@@ -83,6 +135,8 @@ const API = {
     },
     IPC: IPC
 };
+// Splash screen
+handleSplash(API);
 // Expose Native bindings and cloned process global.
 Object.defineProperties(window, {
     PCCompatNative: {

@@ -26,9 +26,13 @@ const COMPILE_SASS = "pccompat-compile-sass";
 const COMPILE_JSX = "pccompat-compile-jsx";
 const GET_APP_PATH = "pccompat-get-app-path";
 const SET_DEV_TOOLS = "pccompat-open-devtools";
+const GET_WINDOW_DATA = "pccompat-get-window-data";
 
 electron.ipcMain.on(GET_APP_PATH, (event)=>{
     event.returnValue = electron.app.getAppPath();
+});
+electron.ipcMain.on(GET_WINDOW_DATA, (event)=>{
+    event.returnValue = event.sender.kernelWindowData;
 });
 electron.ipcMain.on(COMPILE_SASS, (event, file)=>{
     let result = "";

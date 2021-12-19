@@ -1,9 +1,10 @@
 import IPC, {events} from "./ipc";
-import {contextBridge, ipcRenderer, webFrame} from "electron";
+import {contextBridge, ipcRenderer} from "electron";
 import {cloneObject, getKeys} from "../common/util";
 import Module from "module";
 import path from "path";
 import * as IPCEvents from "../common/ipcevents";
+import handleSplash from './splash';
 
 const nodeModulesPath = path.resolve(process.cwd(), "resources", "app-original.asar", "node_modules");
 // @ts-ignore - Push modules
@@ -24,6 +25,9 @@ const API = {
     },
     IPC: IPC
 };
+
+// Splash screen
+handleSplash(API);
 
 // Expose Native bindings and cloned process global.
 Object.defineProperties(window, {
