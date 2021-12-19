@@ -13,21 +13,22 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@types/lodash": "^4.14.176"
-  },
-  "dependencies": {
     "@rollup/plugin-alias": "^3.1.8",
     "@rollup/plugin-json": "^4.1.0",
     "@rollup/plugin-node-resolve": "^13.0.6",
-    "@swc/core": "^1.2.111",
-    "@types/react": "^17.0.34",
+    "@types/electron": "^1.6.10",
+    "@types/lodash": "^4.14.176",
+    "@types/react": "^17.0.37",
     "@types/react-dom": "^17.0.11",
-    "esformatter-quotes": "^1.1.0",
-    "node-watch": "^0.7.2",
-    "rollup": "^2.59.0",
+    "rollup": "^2.61.0",
     "rollup-plugin-esformatter": "^2.0.1",
     "rollup-plugin-sourcemaps": "^0.6.3",
-    "rollup-plugin-swc": "^0.2.0",
+    "rollup-plugin-swc": "^0.2.0"
+  },
+  "dependencies": {
+    "@swc/core": "^1.2.111",
+    "esformatter-quotes": "^1.1.0",
+    "node-watch": "^0.7.2",
     "sass": "^1.43.4",
     "sucrase": "^3.20.3"
   }
