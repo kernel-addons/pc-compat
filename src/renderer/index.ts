@@ -23,13 +23,14 @@ export default new class PCCompat {
     start() {promise.then(this.onStart.bind(this));}
 
     async onStart() {
+        StyleManager.initialize();
         this.expose("React", DiscordModules.React);
         this.expose("powercord", Require("powercord"));
         this.expose("PCInternals", Internals);
         await initializeWebpack();
-        
+
         powercord.api.commands.initialize();
-        
+
         Object.defineProperty(window, "powercord_require", {
             value: Require,
             configurable: false,
@@ -43,7 +44,6 @@ export default new class PCCompat {
         QuickCSS.initialize();
         Updater.initialize();
         PluginManager.initialize();
-        StyleManager.initialize();
 
         this.checkForChangelog();
         this.patchSettingsHeader();
