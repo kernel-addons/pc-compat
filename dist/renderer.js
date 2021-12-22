@@ -1222,15 +1222,6 @@ var components = {
     }
 };
 
-const methods$3 = PCCompatNative.executeJS(`Object.keys(require("crypto"))`);
-// @ts-ignore
-const crypto = {
-};
-for (const key of methods$3){
-    // @ts-ignore
-    crypto[key] = PCCompatNative.executeJS(`require("crypto").${key}`);
-}
-
 function sleep(time) {
     return new Promise((resolve)=>setTimeout(resolve, time)
     );
@@ -1304,9 +1295,13 @@ function matchAll(regex, input, parent = false) {
     }
     return output;
 }
-function uuid(multiplier = 20) {
-    return "x".repeat(multiplier).replace(/[xy]/g, ()=>crypto.randomBytes(1)[0].toString()[0]
-    );
+function uuid(length = 30) {
+    let uuid1 = "";
+    do {
+        const random1 = Math.random() * 16 | 0;
+        uuid1 += (uuid1.length == 12 ? 4 : uuid1.length == 16 ? random1 & 3 | 8 : random1).toString(16);
+    }while (uuid1.length < length)
+    return uuid1;
 }
 
 var utilities = /*#__PURE__*/Object.freeze({
@@ -5354,12 +5349,21 @@ const util = PCCompatNative.executeJS(`require("util")`);
 
 const zlib = PCCompatNative.executeJS(`require("zlib")`);
 
-const methods$2 = PCCompatNative.executeJS(`Object.keys(require("stream"))`);
+const methods$3 = PCCompatNative.executeJS(`Object.keys(require("stream"))`);
 const stream = {
+};
+for (const key of methods$3){
+    // @ts-ignore
+    stream[key] = PCCompatNative.executeJS(`require("stream").${key}`);
+}
+
+const methods$2 = PCCompatNative.executeJS(`Object.keys(require("crypto"))`);
+// @ts-ignore
+const crypto = {
 };
 for (const key of methods$2){
     // @ts-ignore
-    stream[key] = PCCompatNative.executeJS(`require("stream").${key}`);
+    crypto[key] = PCCompatNative.executeJS(`require("crypto").${key}`);
 }
 
 const methods$1 = PCCompatNative.executeJS(`Object.keys(require("net"))`);

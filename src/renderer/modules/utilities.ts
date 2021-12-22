@@ -1,5 +1,4 @@
 import DiscordModules from "./discord";
-import crypto from "../node/crypto";
 
 export function sleep(time: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, time));
@@ -85,6 +84,13 @@ export function matchAll(regex: RegExp, input: string, parent = false) {
     return output;
 };
 
-export function uuid(multiplier = 20) {
-    return "x".repeat(multiplier).replace(/[xy]/g, () => crypto.randomBytes(1)[0].toString()[0])
+export function uuid(length = 30) {
+    let uuid = "";
+
+    do {
+        const random = Math.random() * 16 | 0;
+        uuid += (uuid.length == 12 ? 4 : (uuid.length == 16 ? (random & 3 | 8) : random)).toString(16);
+    } while(uuid.length < length);
+
+    return uuid;
 }
