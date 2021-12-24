@@ -763,7 +763,13 @@ const promise = Promise.all([
     ));
     Object.assign(DiscordModules, filters1.reduce((modules, { id , map  }, index)=>{
         const mapper = map ?? NOOP_RET;
-        modules[id] = mapper(result[index]);
+        const res = mapper(result[index]);
+        modules[id] = res;
+        if (id == 'React') Object.defineProperty(window, 'React', {
+            value: res,
+            configurable: true,
+            writable: true
+        });
         return modules;
     }, {
     }));
@@ -6736,7 +6742,6 @@ var index = new class PCCompat {
     }
     async onStart() {
         StyleManager.initialize();
-        this.expose("React", DiscordModules.React);
         this.expose("powercord", Require("powercord"));
         this.expose("PCInternals", Internals);
         await init();

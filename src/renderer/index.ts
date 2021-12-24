@@ -24,7 +24,6 @@ export default new class PCCompat {
 
     async onStart() {
         StyleManager.initialize();
-        this.expose("React", DiscordModules.React);
         this.expose("powercord", Require("powercord"));
         this.expose("PCInternals", Internals);
         await initializeWebpack();
