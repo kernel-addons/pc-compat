@@ -6120,6 +6120,7 @@ function SideBar() {
     const handleSaveFile = function() {
         if (!cache$1.has(state.selectedFile)) return;
         fs.writeFileSync(state.selectedFile, cache$1.get(state.selectedFile), "utf8");
+        DataStore$1.emit("QUICK_CSS_UPDATE", state.selectedFile);
         powercord.api.notices.sendToast(null, {
             content: 'Your changes to the current file were saved.',
             header: 'Changes saved',
@@ -6380,19 +6381,21 @@ class QuickCSS {
     static shouldCompile(file) {
         return path.extname(file) !== ".css";
     }
-    static onDataUpdate() {
-        const files = getConfig().states;
-        for(const file in files){
-            if (this.injectedFiles[file] && !files[file]) this.injectedFiles[file].destroy();
-            if (!files[file]) continue;
-            if (!fs.existsSync(file)) {
-                closeFile(file);
+    static onDataUpdate(file) {
+        const files = file && {
+            [file]: true
+        } || getConfig().states;
+        for(const file1 in files){
+            if (this.injectedFiles[file1] && (file1 || !files[file1])) this.injectedFiles[file1].destroy();
+            if (!files[file1]) continue;
+            if (!fs.existsSync(file1)) {
+                closeFile(file1);
                 continue;
             }
-            const code = this.shouldCompile(file) ? SASS.compile(file) : fs.readFileSync(file, "utf8");
-            const id = path.basename(file).split(".").join("-");
+            const code = this.shouldCompile(file1) ? SASS.compile(file1) : fs.readFileSync(file1, "utf8");
+            const id = path.basename(file1).split(".").join("-");
             DOM.injectCSS(id, code);
-            this.injectedFiles[file] = {
+            this.injectedFiles[file1] = {
                 destroy () {
                     DOM.clearCSS(id);
                 }

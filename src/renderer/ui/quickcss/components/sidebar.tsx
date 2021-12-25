@@ -1,3 +1,4 @@
+import DataStore from "@modules/datastore";
 import DiscordModules from "@modules/discord";
 import Logger from "@modules/logger";
 import {joinClassNames} from "@modules/utilities";
@@ -61,6 +62,8 @@ export default function SideBar() {
         if (!cache.has(state.selectedFile)) return;
 
         fs.writeFileSync(state.selectedFile, cache.get(state.selectedFile), "utf8");
+        DataStore.emit("QUICK_CSS_UPDATE", state.selectedFile);
+
         powercord.api.notices.sendToast(null, {
             content: 'Your changes to the current file were saved.',
             header: 'Changes saved',
