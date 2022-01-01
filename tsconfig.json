@@ -8,6 +8,7 @@
         "moduleResolution": "node",
         "resolveJsonModule": true,
         "experimentalDecorators": true,
+        "module": "es2022",
         "paths": {
             "@powercord/*": ["src/renderer/powercord/*"],
             "@powercord": ["src/renderer/powercord/index"],

@@ -21,7 +21,7 @@ const patchAvatars = function () {
       return <Avatar.default {...res.props} />;
    })
 
-   const AvatarWrapper = Webpack.findByProps([ "wrapper", "avatar" ])?.wrapper?.split(" ")?.[0];
+   const AvatarWrapper = Webpack.findByProps("wrapper", "avatar")?.wrapper?.split(" ")?.[0];
    setImmediate(() => forceUpdateElement(`.${AvatarWrapper}`));
 };
 

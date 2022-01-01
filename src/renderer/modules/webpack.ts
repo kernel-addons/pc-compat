@@ -1,5 +1,7 @@
 // @ts-nocheck
 
+import Frozen from "@decorators/frozen";
+
 if (typeof (Array.prototype.at) !== "function") {
     Array.prototype.at = function (index) {
         return index < 0 ? this[this.length - Math.abs(index)] : this[index];
@@ -26,7 +28,8 @@ export class Filters {
 
 export type ModuleFilter = (module: any, index: number) => boolean;
 
-export default new class Webpack {
+@Frozen
+class WebpackModule {
     whenReady: Promise<void>;
     cache = null;
     get Filters() {return Filters;}
@@ -48,7 +51,7 @@ export default new class Webpack {
             Dispatcher.subscribe(ActionTypes.START_SESSION, listener);
         }));
 
-        window.Webpack = this;
+        window.PCWebpack = this;
     }
 
     async waitFor(filter: ModuleFilter, {retries = 100, all = false, forever = false, delay = 50} = {}) {
@@ -79,17 +82,21 @@ export default new class Webpack {
         return req;
     }
 
-    findModule(filter: ModuleFilter, {all = false, cache = true, force = false} = {}) {
+    findModule(filter: ModuleFilter, {all = false, cache = true, force = false, default: defaultExports = false} = {}) {
         if (typeof (filter) !== "function") return void 0;
 
         const __webpack_require__ = this.request(cache);
         const found = [];
+        let hasError = null;
 
         if (!__webpack_require__) return;
 
         const wrapFilter = function (module: any, index: number) {
             try {return filter(module, index);}
-            catch {return false;}
+            catch (error) {
+                hasError ??= error;
+                return false;
+            }
         };
 
         for (const id in __webpack_require__.c) {
@@ -103,9 +110,14 @@ export default new class Webpack {
                         found.push(module);
                     }
 
-                    if (module.__esModule && module.default != null && wrapFilter(module.default, id)) {
-                        if (!all) return module.default;
-                        found.push(module.default);
+                    if (module.__esModule &&
+                        module.default != null &&
+                        typeof module.default !== "number" &&
+                        wrapFilter(module.default, id)
+                    ) {
+                        const exports = defaultExports ? module : module.default;
+                        if (!all) return exports;
+                        found.push(exports);
                     }
 
                     if (force && module.__esModule) for (const key in module) {
@@ -131,18 +143,29 @@ export default new class Webpack {
             }
         }
         
+        if (hasError) {
+            setImmediate(() => {
+                console.warn("[Webpack] filter threw an error. This can cause lag spikes at the user's end. Please fix asap.\n\n", hasError);
+            });
+        }
+
         return all ? found : found[0];
     }
 
     findModules(filter: ModuleFilter) {return this.findModule(filter, {all: true});}
 
-    bulk(...options: ModuleFilter[]) {
+    bulk(...options: any[]) {
         const [filters, {wait = false, ...rest}] = this.parseOptions(options);
         const found = new Array(filters.length);
         const searchFunction = wait ? this.waitFor : this.findModule;
-        const wrappedFilters = filters.map(filter => (m) => {
-            try {return filter(m);}
-            catch (error) {return false;}
+        const wrappedFilters = filters.map(filter => {
+            if (Array.isArray(filter)) filter = Filters.byProps(...filter);
+            if (typeof (filter) === "string") filter = Filters.byDisplayName(filter);
+
+            return (m) => {
+                try {return filter(m);}
+                catch (error) {return false;}
+            };
         });
 
         const returnValue = searchFunction.call(this, (module: any) => {
@@ -184,7 +207,7 @@ export default new class Webpack {
     }
 
     findByDisplayName(...options: any[]) {
-        const [displayNames, {bulk = false, default: defaultExport = false, wait = false, ...rest}] = this.parseOptions(options);
+        const [displayNames, {bulk = false, wait = false, ...rest}] = this.parseOptions(options);
 
         if (!bulk && !wait) {
             return this.findModule(Filters.byDisplayName(displayNames[0]), rest);
@@ -247,3 +270,7 @@ export default new class Webpack {
     /**@deprecated @see Webpack.on */
     get once() {return this.on;}
 }
+
+const Webpack = new WebpackModule;
+
+export default Webpack;

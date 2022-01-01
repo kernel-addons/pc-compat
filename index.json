@@ -3,20 +3,23 @@
     "author": "Strencher",
     "id": "strencher.pc-compat",
     "description": "Allows you to load powerCord plugins within Kernel.",
-    "version": "1.1.0-dev",
+    "version": "1.2.0-dev",
     "changelog": [
         {
-            "type": "PROGRESS",
-            "title": "Reloading",
+            "type": "ADDED",
+            "title": "Added",
             "items": [
-                "You can now look for missing entities in any of the addon tabs."
+                "Added a `electron.remote` API back from when contextIsolation wasn't a thing. This gives plugins more flexibility.",
+                "Added developer mode and now stuff that's still under development is hidden behind that.",
+                "Added a little version tag into discord's settings."
             ]
         },
         {
             "type": "IMPROVED",
             "title": "Improved speed",
             "items": [
-                "Boot times have decreased due to some tweaks in how the package is compiled."
+                "The bundle is now minified to tweak loading speed and bundle size.",
+                "Users can now install only needed depdendencies using `pnpm initialize`. We recommend you to do this to speed up loading and remove development dependencies."
             ]
         },
         {
@@ -24,7 +27,10 @@
             "title": "Fixes",
             "items": [
                 "Fixed some logging errors due to a replaced logger module.",
-                "Fixed a few plugins that depend on `powercord/constants` to have `SETTINGS_FOLDER` as a path."
+                "Fixed a few plugins that depend on `powercord/constants` to have `SETTINGS_FOLDER` as a path.",
+                "Fixed the `buffer` module entirely. Should now be exposed properly.",
+                "Fixed node globalPaths for pnpm installations.",
+                "Fixed some electron API related stuff."
             ]
         }
     ]

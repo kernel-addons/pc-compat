@@ -1,7 +1,6 @@
 /// <reference path="../../types.d.ts" />
 import {Constants} from "@data";
-import {DiscordModules, DOM} from "@modules";
-import * as IPCEvents from "@common/ipcevents";
+import {DOM} from "@modules";
 import {require as Require, path} from "@node";
 import {init as initializeWebpack} from "@powercord/webpack";
 import PluginManager from "@powercord/pluginmanager";
@@ -14,13 +13,15 @@ import manifest from "../../index.json";
 import {Modals} from "./ui";
 import DiscordIcon from "@ui/discordicon";
 import Updater from "@ui/updater";
+import VersionTag from "@ui/components/versiontag";
 
-if (!("process" in window)) {
-    PCCompatNative.IPC.dispatch(IPCEvents.EXPOSE_PROCESS_GLOBAL);
-}
+const Logger = Internals.Logger.create("Core");
 
 export default new class PCCompat {
-    start() {promise.then(this.onStart.bind(this));}
+    start() {
+        Logger.log("Loading");
+        promise.then(this.onStart.bind(this));
+    }
 
     async onStart() {
         StyleManager.initialize();
@@ -46,6 +47,7 @@ export default new class PCCompat {
 
         this.checkForChangelog();
         this.patchSettingsHeader();
+        this.patchVersionTag();
     }
 
     expose(name: string, namespace: any) {
@@ -62,7 +64,7 @@ export default new class PCCompat {
         if (latestUsedVersion !== manifest.version) {
             Internals.DataStore.trySaveData("info", {latestUsedVersion: manifest.version});
 
-            Modals.showChangeLog("PCCompat Changelog", manifest.changelog);
+            Modals.showChangeLog("PCCompat Changelog", manifest.changelog as unknown as any);
         }
     }
 
@@ -83,10 +85,22 @@ export default new class PCCompat {
                     look: Button.Looks.BLANK,
                     size: Button.Sizes.NONE,
                     className: "pc-changelog-button",
-                    onClick: () => {Modals.showChangeLog("PCCompat Changelog", manifest.changelog);},
+                    onClick: () => {Modals.showChangeLog("PCCompat Changelog", manifest.changelog as unknown as any);},
                     children: React.createElement(DiscordIcon, {name: "Info"})
                 }))
             ];
+        });
+    }
+
+    patchVersionTag(): void {
+        const ClientDebugInfo = Internals.Webpack.findByDisplayName("ClientDebugInfo", {default: true});
+
+        Internals.Patcher.after("DebugInfo", ClientDebugInfo, "default", (_, [props], res) => {  
+            const childs = res.props.children;
+            if (!Array.isArray(childs)) return res;
+
+            childs.push(React.createElement(VersionTag, {kernel: !props.hasKernelTag}));
+            props.hasKernelTag ??= true;
         });
     }
 

@@ -1,17 +1,32 @@
-const ipcRenderer: typeof import("electron/renderer").ipcRenderer = PCCompatNative.executeJS(`Object.keys(require("electron").ipcRenderer)`).slice(3).reduce((newElectron: object, key: string) => {
-    newElectron[key] = PCCompatNative.executeJS(`require("electron").ipcRenderer[${JSON.stringify(key)}].bind(require("electron").ipcRenderer)`);
+export const ipcRenderer: Electron.IpcRenderer = PCCompatNative.executeJS(`PCCompatNative.cloneObject(require("electron").ipcRenderer)`);
 
-    return newElectron;
-}, {});
-
-const shell: typeof import("electron").shell = PCCompatNative.executeJS(`require("electron").shell`);
-const clipboard: typeof import("electron").clipboard = PCCompatNative.executeJS(`require("electron").clipboard`);
-const contextBridge: typeof import("electron").contextBridge = {
+export const shell: Electron.Shell = PCCompatNative.executeJS(`require("electron").shell`);
+export const clipboard: Electron.Clipboard = PCCompatNative.executeJS(`require("electron").clipboard`);
+export const contextBridge: Electron.ContextBridge = {
     exposeInMainWorld(name: string, value: any) {
         window[name] = value;
     }
 };
 
-const electron = {ipcRenderer, shell, contextBridge, clipboard};
+export let remote: typeof import("@electron/remote/renderer") = null;
+
+// @ts-ignore
+export const electron: {
+    ipcRenderer: Electron.IpcRenderer,
+    shell: Electron.Shell,
+    clipboard: Electron.Clipboard,
+    contextBridge: Electron.ContextBridge,
+    remote: typeof import("@electron/remote/renderer")
+} = {
+    ipcRenderer,
+    shell,
+    contextBridge,
+    clipboard,
+    get remote() {return remote;}
+};
+
+export function setRemote(module: any) {
+    remote = module;
+};
 
 export default electron;

@@ -28,7 +28,9 @@ export default class Store<events = string> {
         if (!this.has(event)) return;
         const toFire = [...this.events[event as unknown as string]];
 
-        for (const listener of toFire) {
+        for (let index = 0; index < toFire.length; index++) {
+            const listener = toFire[index];
+            
             try {listener(...args);}
             catch (error) {this.logger.error(`Store:${this.constructor.name}`, error);}
         }

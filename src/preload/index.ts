@@ -1,10 +1,13 @@
-import IPC, {events} from "./ipc";
+import createIPC from "./ipc";
 import {contextBridge, ipcRenderer} from "electron";
 import {cloneObject, getKeys} from "../common/util";
 import Module from "module";
 import path from "path";
 import * as IPCEvents from "../common/ipcevents";
 import handleSplash from './splash';
+import Process from "./process";
+
+const {IPC, events} = createIPC();
 
 const nodeModulesPath = path.resolve(process.cwd(), "resources", "app-original.asar", "node_modules");
 // @ts-ignore - Push modules
@@ -23,7 +26,9 @@ const API = {
     setDevtools(opened: boolean) {
         return ipcRenderer.invoke(IPCEvents.SET_DEV_TOOLS, opened);
     },
-    IPC: IPC
+    IPC: IPC,
+    cloneObject,
+    getKeys
 };
 
 // Splash screen
@@ -49,11 +54,11 @@ IPC.on(IPCEvents.EXPOSE_PROCESS_GLOBAL, () => {
     try {
         if (!process.contextIsolated) {
             Object.defineProperty(window, "process", {
-                value: cloneObject(process),
+                value: Process,
                 configurable: true
             });
         } else {
-            contextBridge.exposeInMainWorld("process", cloneObject(process));
+            contextBridge.exposeInMainWorld("process", Process);
         }
     } catch (error) {
         error.name = "NativeError";

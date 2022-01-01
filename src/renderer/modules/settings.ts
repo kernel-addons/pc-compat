@@ -19,7 +19,7 @@ export default class SettingsRenderer {
 
     static panels: any[] = [];
 
-    static registerPanel(id: string, options: {label: string, render: () => import("react").ReactElement, header?: import("react").ReactElement, order: number}) {
+    static registerPanel(id: string, options: {label: string, render: () => import("react").ReactElement, header?: import("react").ReactElement, order: number, predicate?(): boolean}) {
         const {label, render, order} = options;
         const tab = this.panels.find(e => e.id === id)
 
@@ -30,6 +30,7 @@ export default class SettingsRenderer {
             label: label,
             order: order,
             className: `pccompat-settings-${id}-item`,
+            predicate: options.predicate ?? (() => true),
             element: () => DiscordModules.React.createElement(SettingsPanel, {
                 name: label,
                 store: getSettings(id),
@@ -68,8 +69,15 @@ export default class SettingsRenderer {
 
             const index = res.findIndex(s => s?.section?.toLowerCase() === "changelog") - 1;
             if (index < 0) return;
+            const panels: any[] = [...SettingsRenderer.defaultPanels];
 
-            res.splice(index, 0, ...SettingsRenderer.defaultPanels.concat(SettingsRenderer.panels));
+            for (let i = 0; i < this.panels.length; i++) {
+                if (this.panels[i].predicate && !this.panels[i].predicate()) continue;
+
+                panels.push(this.panels[i]);
+            }
+
+            res.splice(index, 0, ...panels);
         });
     }
 

@@ -96,7 +96,8 @@ export default class PluginManager extends Emitter {
     }
 
     static resolve(pluginOrName: any): Plugin {
-        if (typeof (pluginOrName) === "string") return this.plugins.get(pluginOrName);
+        if (this.plugins.has(pluginOrName)) return this.plugins.get(pluginOrName);
+        if (this.getByDisplayName(pluginOrName)) return this.getByDisplayName(pluginOrName);
 
         return pluginOrName;
     }
@@ -271,6 +272,10 @@ export default class PluginManager extends Emitter {
 
     static getPlugins() {
         return [...this.plugins.keys()];
+    }
+
+    static getByDisplayName(displayName: string): any {
+        return this.addons.find(e => e?.manifest?.name === displayName);
     }
 
     static get enable() {return this.enablePlugin;}
