@@ -28,10 +28,10 @@ export default class StyleManager extends Emitter {
 
         this.states = DataStore.tryLoadData("themes");
 
-        this.loadAllThemes();
+        this.loadAll();
     }
 
-    static loadAllThemes() {
+    static loadAll(missing = false) {
         if (!fs.existsSync(this.folder)) {
             try {
                 fs.mkdirSync(this.folder);
@@ -41,17 +41,43 @@ export default class StyleManager extends Emitter {
         }
 
         if (!fs.statSync(this.folder).isDirectory()) return void Logger.error("StyleManager", `Plugins dir isn't a folder.`);
-        Logger.log("StyleManager", "Loading themes...");
+        if  (!missing) Logger.log("StyleManager", "Loading themes...");
+
+        const missingEntities = [];
         for (const file of fs.readdirSync(this.folder, "utf8")) {
             const location = path.resolve(this.folder, file);
             if (!fs.statSync(location).isDirectory()) continue;
             if (!this.mainFiles.some(f => fs.existsSync(path.join(location, f)))) continue;
 
             try {
-                this.loadTheme(location);
+                if (missing) {
+                    const theme = this.resolve(file);
+                    if (theme) continue;
+
+                    this.loadTheme(location);
+                    missingEntities.push(this.resolve(file).displayName);
+                } else {
+                    this.loadTheme(location);
+                }
             } catch (error) {
                 Logger.error(`Failed to load theme ${file}:`, error);
             }
+        }
+
+        if (missing && missingEntities.length) {
+            powercord.api.notices.sendToast(null, {
+                content: `The following themes were loaded: ${missingEntities.join(', ')}`,
+                header: "Missing themes found",
+                type: "success"
+            });
+
+            this.emit("entityChange");
+        } else if (missing && !missingEntities.length) {
+            powercord.api.notices.sendToast(null, {
+                content: "Couldn't find any themes that aren't already loaded.",
+                header: "Missing themes not found",
+                type: "danger"
+            });
         }
     }
 
@@ -242,4 +268,5 @@ export default class StyleManager extends Emitter {
     static get reload() {return this.reloadTheme;}
     static get remount() {return this.reloadTheme;}
     static get getThemes() {return [...this.themes.keys()];}
+    static get loadAllThemes() {return this.loadAll;}
 }

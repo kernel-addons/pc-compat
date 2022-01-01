@@ -126,8 +126,12 @@ export default function AddonPanel({manager, type}) {
 
     React.useEffect(() => {
         manager.on("delete", () => {
-            setAddons(manager.addons)
+            setAddons(manager.addons);
         });
+
+        manager.on("entityChange", () => {
+            setAddons(manager.addons);
+        })
     }, [manager]);
 
     React.useEffect(() => {
@@ -152,6 +156,19 @@ export default function AddonPanel({manager, type}) {
                     query={query}
                     className="pc-settings-addons-search"
                 />
+                <Tooltips.Tooltip text="Load missing" position="bottom">
+                    {props => (
+                        <Button
+                            {...props}
+                            size={Button.Sizes.NONE}
+                            look={Button.Looks.BLANK}
+                            className="pc-settings-load-missing"
+                            onClick={() => manager.loadAll(true)}
+                        >
+                            <DiscordIcon name="Replay" width={24} height={24} />
+                        </Button>
+                    )}
+                </Tooltips.Tooltip>
                 <Tooltips.Tooltip text="Open folder" position="bottom">
                     {props => (
                         <Button

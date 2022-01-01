@@ -537,7 +537,7 @@ function _classPrivateMethodGet(receiver, privateSet, fn) {
     return fn;
 }
 var _parseType = new WeakSet(), _log = new WeakSet();
-class Logger$c {
+class Logger$f {
     log(...message) {
         _classPrivateMethodGet(this, _log, log).call(this, "log", ...message);
     }
@@ -554,7 +554,7 @@ class Logger$c {
         _classPrivateMethodGet(this, _log, log).call(this, "debug", ...message);
     }
     static create(name) {
-        return new Logger$c(name);
+        return new Logger$f(name);
     }
     constructor(name){
         _parseType.add(this);
@@ -577,7 +577,7 @@ function log(type, ...message) {
     console[_classPrivateMethodGet(this, _parseType, parseType).call(this, type)](`%c[Powercord:${this.module}]%c`, "color: #7289da; font-weight: 700;", "", ...message);
 }
 
-const Logger$b = Logger$c.create("Patcher");
+const Logger$e = Logger$f.create("Patcher");
 class Patcher {
     static getPatchesByCaller(id) {
         if (!id) return [];
@@ -600,7 +600,7 @@ class Patcher {
                     const tempArgs = beforePatch.callback(this, args, patch.originalFunction.bind(this));
                     if (Array.isArray(tempArgs)) args = tempArgs;
                 } catch (error) {
-                    Logger$b.error(`Could not fire before patch for ${patch.functionName} of ${beforePatch.caller}`, error);
+                    Logger$e.error(`Could not fire before patch for ${patch.functionName} of ${beforePatch.caller}`, error);
                 }
             }
             const insteadPatches = patch.children.filter((e)=>e.type === "instead"
@@ -611,7 +611,7 @@ class Patcher {
                     const tempReturn = insteadPatch.callback(this, args, patch.originalFunction.bind(this));
                     if (typeof tempReturn !== "undefined") returnValue = tempReturn;
                 } catch (error) {
-                    Logger$b.error(`Could not fire instead patch for ${patch.functionName} of ${insteadPatch.caller}`, error);
+                    Logger$e.error(`Could not fire instead patch for ${patch.functionName} of ${insteadPatch.caller}`, error);
                 }
             }
             for (const afterPatch of patch.children.filter((e)=>e.type === "after"
@@ -621,7 +621,7 @@ class Patcher {
                     );
                     if (typeof tempReturn !== "undefined") returnValue = tempReturn;
                 } catch (error) {
-                    Logger$b.error(`Could not fire after patch for ${patch.functionName} of ${afterPatch.caller}`, error);
+                    Logger$e.error(`Could not fire after patch for ${patch.functionName} of ${afterPatch.caller}`, error);
                 }
             }
             return returnValue;
@@ -938,7 +938,7 @@ function _extends$Y() {
     };
     return _extends$Y.apply(this, arguments);
 }
-const Logger$a = new Logger$c("ComponentPatcher");
+const Logger$d = new Logger$f("ComponentPatcher");
 const patchAvatars = function() {
     const Avatar = Webpack.findByProps("AnimatedAvatar");
     Patcher.after("pc-utility-classes-avatar", Avatar, "default", (_, args, res)=>{
@@ -961,7 +961,7 @@ const patchAvatars = function() {
 const injectMessageName = function() {
     const Message = Webpack.findModule((m)=>m?.toString()?.indexOf("childrenSystemMessage") > -1
     );
-    if (!Message) return Logger$a.warn("Message Component was not found!");
+    if (!Message) return Logger$d.warn("Message Component was not found!");
     Message.displayName = "Message";
 };
 const injectAsyncFlux = function() {
@@ -1020,12 +1020,13 @@ class Store {
         return state;
     }
     constructor(){
-        this.logger = new Logger$c("Store");
+        this.logger = new Logger$f("Store");
         this.events = {
         };
     }
 }
 
+const Logger$c = Logger$f.create("EventEmitter");
 class Emitter {
     static has(event) {
         return event in this.events;
@@ -1580,7 +1581,7 @@ const ColorPicker = fromPromise(Webpack.whenReady.then(()=>{
             }, props)))
         ;
     } catch (error) {
-        Logger$c.error("Failed to get ColorPicker component!", error);
+        Logger$f.error("Failed to get ColorPicker component!", error);
         return ()=>null
         ;
     }
@@ -3518,6 +3519,9 @@ function AddonPanel({ manager , type  }) {
         manager.on("delete", ()=>{
             setAddons(manager.addons);
         });
+        manager.on("entityChange", ()=>{
+            setAddons(manager.addons);
+        });
     }, [
         manager
     ]);
@@ -3547,6 +3551,20 @@ function AddonPanel({ manager , type  }) {
         query: query,
         className: "pc-settings-addons-search"
     }), /*#__PURE__*/ React.createElement(Tooltips.Tooltip, {
+        text: "Load missing",
+        position: "bottom"
+    }, (props)=>/*#__PURE__*/ React.createElement(Button, _extends$d({
+        }, props, {
+            size: Button.Sizes.NONE,
+            look: Button.Looks.BLANK,
+            className: "pc-settings-load-missing",
+            onClick: ()=>manager.loadAll(true)
+        }), /*#__PURE__*/ React.createElement(DiscordIcon, {
+            name: "Replay",
+            width: 24,
+            height: 24
+        }))
+    ), /*#__PURE__*/ React.createElement(Tooltips.Tooltip, {
         text: "Open folder",
         position: "bottom"
     }, (props)=>/*#__PURE__*/ React.createElement(Button, _extends$d({
@@ -3682,7 +3700,7 @@ const electron = {
     clipboard
 };
 
-const Logger$9 = Logger$c.create("PluginManager");
+const Logger$b = Logger$f.create("PluginManager");
 class PluginManager extends Emitter {
     static get folder() {
         return path.resolve(DataStore$1.baseDir, "plugins");
@@ -3701,18 +3719,19 @@ class PluginManager extends Emitter {
                 })
         });
         this.states = DataStore$1.tryLoadData("plugins");
-        this.loadAllPlugins();
+        this.loadAll();
     }
-    static loadAllPlugins() {
+    static loadAll(missing = false) {
         if (!fs.existsSync(this.folder)) {
             try {
                 fs.mkdirSync(this.folder);
             } catch (error) {
-                return void Logger$9.error("PluginsManager", `Failed to create plugins folder:`, error);
+                return void Logger$b.error("PluginsManager", `Failed to create plugins folder:`, error);
             }
         }
-        if (!fs.statSync(this.folder).isDirectory()) return void Logger$9.error("PluginsManager", `Plugins dir isn't a folder.`);
-        Logger$9.log("PluginsManager", "Loading plugins...");
+        if (!fs.statSync(this.folder).isDirectory()) return void Logger$b.error("PluginsManager", `Plugins dir isn't a folder.`);
+        if (!missing) Logger$b.log("PluginsManager", "Loading plugins...");
+        const missingEntities = [];
         for (const file of fs.readdirSync(this.folder, "utf8")){
             const location = path.resolve(this.folder, file);
             if (!fs.statSync(location).isDirectory()) continue;
@@ -3722,10 +3741,31 @@ class PluginManager extends Emitter {
             )) continue;
             if (fs.existsSync(path.join(location, "node_modules"))) globalPaths.push(path.join(location, "node_modules"));
             try {
-                this.loadPlugin(location);
+                if (missing) {
+                    const plugin = this.resolve(file);
+                    if (plugin) continue;
+                    this.loadPlugin(location);
+                    missingEntities.push(this.resolve(file).displayName);
+                } else {
+                    this.loadPlugin(location);
+                }
             } catch (error) {
-                Logger$9.error(`Failed to load ${file}:`, error);
+                Logger$b.error(`Failed to load ${file}:`, error);
             }
+        }
+        if (missing && missingEntities.length) {
+            powercord.api.notices.sendToast(null, {
+                content: `The following plugins were loaded: ${missingEntities.join(', ')}`,
+                header: "Missing plugins found",
+                type: "success"
+            });
+            this.emit("entityChange");
+        } else if (missing && !missingEntities.length) {
+            powercord.api.notices.sendToast(null, {
+                content: "Couldn't find any plugins that aren't already loaded.",
+                header: "Missing plugins not found",
+                type: "danger"
+            });
         }
     }
     static clearCache(plugin) {
@@ -3781,10 +3821,10 @@ class PluginManager extends Emitter {
             });
             exports = new data(path.basename(location), location);
         } catch (error) {
-            return void Logger$9.error(`Failed to compile ${manifest.name || path.basename(location)}:`, error);
+            return void Logger$b.error(`Failed to compile ${manifest.name || path.basename(location)}:`, error);
         }
         if (log) {
-            Logger$9.log(`${manifest.name} was loaded!`);
+            Logger$b.log(`${manifest.name} was loaded!`);
         }
         this.plugins.set(path.basename(location), exports);
         if (this.isEnabled(path.basename(location))) {
@@ -3798,7 +3838,7 @@ class PluginManager extends Emitter {
         this.plugins.delete(plugin.entityID);
         this.clearCache(plugin.path);
         if (log) {
-            Logger$9.log(`${plugin.displayName} was unloaded!`);
+            Logger$b.log(`${plugin.displayName} was unloaded!`);
         }
         return success;
     }
@@ -3807,10 +3847,10 @@ class PluginManager extends Emitter {
         if (!addon) return;
         const success = this.unloadAddon(plugin, false);
         if (!success) {
-            return Logger$9.error(`Something went wrong while trying to unload ${plugin.displayName}:`);
+            return Logger$b.error(`Something went wrong while trying to unload ${plugin.displayName}:`);
         }
         this.loadPlugin(plugin.path, false);
-        Logger$9.log(`Finished reloading ${plugin.displayName}.`);
+        Logger$b.log(`Finished reloading ${plugin.displayName}.`);
     }
     static startPlugin(addon, log = true) {
         const plugin = this.resolve(addon);
@@ -3818,10 +3858,10 @@ class PluginManager extends Emitter {
         try {
             if (typeof plugin.startPlugin === "function") plugin.startPlugin();
             if (log) {
-                Logger$9.log(`${plugin.displayName} has been started!`);
+                Logger$b.log(`${plugin.displayName} has been started!`);
             }
         } catch (error) {
-            Logger$9.error(`Could not start ${plugin.displayName}:`, error);
+            Logger$b.error(`Could not start ${plugin.displayName}:`, error);
         }
         return true;
     }
@@ -3831,10 +3871,10 @@ class PluginManager extends Emitter {
         try {
             if (typeof plugin.pluginWillUnload === "function") plugin.pluginWillUnload();
             if (log) {
-                Logger$9.log(`${plugin.displayName} has been stopped!`);
+                Logger$b.log(`${plugin.displayName} has been stopped!`);
             }
         } catch (error) {
-            Logger$9.error(`Could not stop ${plugin.displayName}:`, error);
+            Logger$b.error(`Could not stop ${plugin.displayName}:`, error);
             return false;
         }
         return true;
@@ -3846,7 +3886,7 @@ class PluginManager extends Emitter {
         DataStore$1.trySaveData("plugins", this.states);
         this.startPlugin(plugin, false);
         if (log) {
-            Logger$9.log(`${plugin.displayName} has been enabled!`);
+            Logger$b.log(`${plugin.displayName} has been enabled!`);
             this.emit("toggle", plugin.entityID, true);
         }
     }
@@ -3857,7 +3897,7 @@ class PluginManager extends Emitter {
         DataStore$1.trySaveData("plugins", this.states);
         this.stopPlugin(plugin, false);
         if (log) {
-            Logger$9.log(`${plugin.displayName} has been disabled!`);
+            Logger$b.log(`${plugin.displayName} has been disabled!`);
             this.emit("toggle", plugin.entityID, false);
         }
     }
@@ -3893,6 +3933,9 @@ class PluginManager extends Emitter {
     }
     static get remount() {
         return this.reloadPlugin;
+    }
+    static get loadAllPlugins() {
+        return this.loadAll;
     }
 }
 PluginManager.mainFiles = [
@@ -3937,7 +3980,7 @@ class Theme {
     }
 }
 
-const Logger$8 = Logger$c.create("StyleManager");
+const Logger$a = Logger$f.create("StyleManager");
 class StyleManager extends Emitter {
     static get folder() {
         return path.resolve(DataStore$1.baseDir, "themes");
@@ -3956,28 +3999,50 @@ class StyleManager extends Emitter {
                 })
         });
         this.states = DataStore$1.tryLoadData("themes");
-        this.loadAllThemes();
+        this.loadAll();
     }
-    static loadAllThemes() {
+    static loadAll(missing = false) {
         if (!fs.existsSync(this.folder)) {
             try {
                 fs.mkdirSync(this.folder);
             } catch (error) {
-                return void Logger$8.error("StyleManager", `Failed to create themes folder:`, error);
+                return void Logger$a.error("StyleManager", `Failed to create themes folder:`, error);
             }
         }
-        if (!fs.statSync(this.folder).isDirectory()) return void Logger$8.error("StyleManager", `Plugins dir isn't a folder.`);
-        Logger$8.log("StyleManager", "Loading themes...");
+        if (!fs.statSync(this.folder).isDirectory()) return void Logger$a.error("StyleManager", `Plugins dir isn't a folder.`);
+        if (!missing) Logger$a.log("StyleManager", "Loading themes...");
+        const missingEntities = [];
         for (const file of fs.readdirSync(this.folder, "utf8")){
             const location = path.resolve(this.folder, file);
             if (!fs.statSync(location).isDirectory()) continue;
             if (!this.mainFiles.some((f)=>fs.existsSync(path.join(location, f))
             )) continue;
             try {
-                this.loadTheme(location);
+                if (missing) {
+                    const theme = this.resolve(file);
+                    if (theme) continue;
+                    this.loadTheme(location);
+                    missingEntities.push(this.resolve(file).displayName);
+                } else {
+                    this.loadTheme(location);
+                }
             } catch (error) {
-                Logger$8.error(`Failed to load theme ${file}:`, error);
+                Logger$a.error(`Failed to load theme ${file}:`, error);
             }
+        }
+        if (missing && missingEntities.length) {
+            powercord.api.notices.sendToast(null, {
+                content: `The following themes were loaded: ${missingEntities.join(', ')}`,
+                header: "Missing themes found",
+                type: "success"
+            });
+            this.emit("entityChange");
+        } else if (missing && !missingEntities.length) {
+            powercord.api.notices.sendToast(null, {
+                content: "Couldn't find any themes that aren't already loaded.",
+                header: "Missing themes not found",
+                type: "danger"
+            });
         }
     }
     static clearCache(theme) {
@@ -4031,10 +4096,10 @@ class StyleManager extends Emitter {
                 }
             });
         } catch (error) {
-            return void Logger$8.error(`Failed to compile ${manifest.name || path.basename(location)}:`, error);
+            return void Logger$a.error(`Failed to compile ${manifest.name || path.basename(location)}:`, error);
         }
         if (log) {
-            Logger$8.log(`${manifest.name} was loaded!`);
+            Logger$a.log(`${manifest.name} was loaded!`);
         }
         this.themes.set(path.basename(location), data);
         if (this.isEnabled(path.basename(location))) {
@@ -4047,7 +4112,7 @@ class StyleManager extends Emitter {
         const success = this.stopTheme(theme);
         this.clearCache(theme.path);
         if (log) {
-            Logger$8.log(`${theme.displayName} was unloaded!`);
+            Logger$a.log(`${theme.displayName} was unloaded!`);
         }
         return success;
     }
@@ -4056,10 +4121,10 @@ class StyleManager extends Emitter {
         if (!addon) return;
         const success = this.unloadAddon(theme, false);
         if (!success) {
-            return Logger$8.error(`Something went wrong while trying to unload ${theme.displayName}:`);
+            return Logger$a.error(`Something went wrong while trying to unload ${theme.displayName}:`);
         }
         this.startTheme(theme, false);
-        Logger$8.log(`Finished reloading ${theme.displayName}.`);
+        Logger$a.log(`Finished reloading ${theme.displayName}.`);
     }
     static startTheme(addon, log = true) {
         const theme = this.resolve(addon);
@@ -4067,10 +4132,10 @@ class StyleManager extends Emitter {
         try {
             theme._load();
             if (log) {
-                Logger$8.log(`${theme.displayName} has been loaded!`);
+                Logger$a.log(`${theme.displayName} has been loaded!`);
             }
         } catch (error) {
-            Logger$8.error(`Could not load ${theme.displayName}:`, error);
+            Logger$a.error(`Could not load ${theme.displayName}:`, error);
         }
         return true;
     }
@@ -4080,10 +4145,10 @@ class StyleManager extends Emitter {
         try {
             theme._unload();
             if (log) {
-                Logger$8.log(`${theme.displayName} has been stopped!`);
+                Logger$a.log(`${theme.displayName} has been stopped!`);
             }
         } catch (error) {
-            Logger$8.error(`Could not stop ${theme.displayName}:`, error);
+            Logger$a.error(`Could not stop ${theme.displayName}:`, error);
             return false;
         }
         return true;
@@ -4095,7 +4160,7 @@ class StyleManager extends Emitter {
         DataStore$1.trySaveData("themes", this.states);
         this.startTheme(theme, false);
         if (log) {
-            Logger$8.log(`${theme.displayName} has been enabled!`);
+            Logger$a.log(`${theme.displayName} has been enabled!`);
             this.emit("toggle", theme.entityID, true);
         }
     }
@@ -4106,7 +4171,7 @@ class StyleManager extends Emitter {
         DataStore$1.trySaveData("themes", this.states);
         this.stopTheme(theme, false);
         if (log) {
-            Logger$8.log(`${theme.displayName} has been disabled!`);
+            Logger$a.log(`${theme.displayName} has been disabled!`);
             this.emit("toggle", theme.entityID, false);
         }
     }
@@ -4143,6 +4208,9 @@ class StyleManager extends Emitter {
         return [
             ...this.themes.keys()
         ];
+    }
+    static get loadAllThemes() {
+        return this.loadAll;
     }
 }
 StyleManager.mainFiles = [
@@ -4303,7 +4371,7 @@ class Clyde {
     }
 }
 
-const Logger$7 = Logger$c.create("Commands");
+const Logger$9 = Logger$f.create("Commands");
 const [useCommandsStore, CommandsApi] = createStore({
     header: "",
     active: false,
@@ -4415,7 +4483,7 @@ function registerCommand(options) {
                                             });
                                         }
                                     } catch (error) {
-                                        Logger$7.error(`Could not executor for ${options.command}-${command}:`, error);
+                                        Logger$9.error(`Could not executor for ${options.command}-${command}:`, error);
                                         Clyde.sendMessage(void 0, {
                                             content: ":x: An error occurred while running this command. Check your console."
                                         });
@@ -4429,7 +4497,7 @@ function registerCommand(options) {
                     executor(args);
                 }
             } catch (error) {
-                Logger$7.error(error);
+                Logger$9.error(error);
             }
         },
         applicationId: section.id,
@@ -4443,11 +4511,11 @@ function unregisterCommand(id) {
 Webpack.whenReady.then(()=>{
     const ChannelChatMemo = Webpack.findModule((m)=>m?.type?.toString().indexOf("useAndTrackNonFriendDMAccept") > -1
     );
-    if (!ChannelChatMemo) return void Logger$7.warn("Commands", "ChannelChat memo component not found!");
+    if (!ChannelChatMemo) return void Logger$9.warn("Commands", "ChannelChat memo component not found!");
     const unpatch = Patcher.after("Commands", ChannelChatMemo, "type", (_, __, returnValue1)=>{
         unpatch();
         const ChannelChat = returnValue1.type;
-        if (!ChannelChat) return void Logger$7.error("Commands", "Could no extract ChannelChat nested command!");
+        if (!ChannelChat) return void Logger$9.error("Commands", "Could no extract ChannelChat nested command!");
         Patcher.after("Commands", ChannelChat.prototype, "render", (_, __, returnValue)=>{
             const form = findInReactTree(returnValue, (n)=>n?.type === "form"
             )?.props?.children;
@@ -4565,7 +4633,7 @@ class DOM {
 DOM.elements = {
 };
 
-const Logger$6 = Logger$c.create("FLuxDispatcher");
+const Logger$8 = Logger$f.create("FLuxDispatcher");
 function createDispatcher() {
     const events = {
     };
@@ -4577,7 +4645,7 @@ function createDispatcher() {
                 try {
                     callback(event);
                 } catch (error) {
-                    Logger$6.error(`Could not fire callback for ${event}:`, error);
+                    Logger$8.error(`Could not fire callback for ${event}:`, error);
                 }
             }
         },
@@ -4803,7 +4871,7 @@ Notices.container = DOM.createElement("div", {
 promise.then(()=>Notices.initialize()
 );
 
-const Logger$5 = Logger$c.create("Notices:Announcement");
+const Logger$7 = Logger$f.create("Notices:Announcement");
 var Announcement = fromPromise(promise.then(()=>{
     const Notices = Webpack.findModule((m)=>m.default?.displayName === "Notice"
     );
@@ -4831,7 +4899,7 @@ var Announcement = fromPromise(promise.then(()=>{
                     return callback();
                 }
             } catch (err) {
-                return Logger$5.error(err);
+                return Logger$7.error(err);
             }
         };
         return(/*#__PURE__*/ React.createElement(Notice, {
@@ -4874,7 +4942,7 @@ function AnnouncementContainer({ store: useAnnouncements1  }) {
     )));
 }
 
-const Logger$4 = Logger$c.create("Announcements");
+const Logger$6 = Logger$f.create("Announcements");
 const [useAnnouncementsStore, AnnouncementsApi] = AnnouncementsStore;
 const patchClassNames = function() {
     const noticeClasses = Webpack.findByProps("notice", "colorDefault", "buttonMinor");
@@ -4893,7 +4961,7 @@ const patchNoticeContainer = async function() {
                 store: useAnnouncementsStore
             }));
         } catch (error) {
-            return Logger$4.error(error);
+            return Logger$6.error(error);
         }
     });
     instance.forceUpdate();
@@ -4902,7 +4970,7 @@ promise.then(()=>{
     patchClassNames();
     patchNoticeContainer();
 }).catch((error)=>{
-    Logger$4.error("Failed to initialize:", error);
+    Logger$6.error("Failed to initialize:", error);
 });
 function sendAnnouncement(id, options) {
     const state = AnnouncementsApi.getState();
@@ -4951,6 +5019,7 @@ var index$3 = /*#__PURE__*/Object.freeze({
     notices: notices
 });
 
+const Logger$5 = Logger$f.create("Events");
 class EventEmitter {
     static get EventEmitter() {
         return EventEmitter;
@@ -4969,7 +5038,7 @@ class EventEmitter {
             try {
                 listener(...args);
             } catch (error) {
-                Logger$c.error("Emitter", `Cannot fire listener for event ${event} at position ${index}:`, error);
+                Logger$5.error("Emitter", `Cannot fire listener for event ${event} at position ${index}:`, error);
             }
         }
         return this;
@@ -5150,7 +5219,7 @@ var url = {
     `)
 };
 
-const Logger$3 = Logger$c.create("HTTP");
+const Logger$4 = Logger$f.create("HTTP");
 class HTTPError extends Error {
     constructor(message, res){
         super(message);
@@ -5185,7 +5254,7 @@ class GenericRequest {
         return new Promise((resolve, reject)=>{
             const opts = Object.assign({
             }, this.opts);
-            Logger$3.debug("Performing request to", opts.uri);
+            Logger$4.debug("Performing request to", opts.uri);
             const { request  } = opts.uri.startsWith("https") ? https : http;
             if (Object.keys(opts.query)[0]) {
                 opts.uri += `?${querystring.encode(opts.query)}`;
@@ -5277,7 +5346,7 @@ const constants = {
     WEBSITE: 'https://github.com/strencher-kernel/pc-compat',
     I18N_WEBSITE: 'https://example.com',
     REPO_URL: 'strencher-kernel/pc-compat',
-    SETTINGS_FOLDER: null,
+    SETTINGS_FOLDER: path.resolve(PCCompatNative.getBasePath(), 'config'),
     CACHE_FOLDER: null,
     LOGS_FOLDER: null,
     DISCORD_INVITE: '8mPTjTZ4SZ',
@@ -5594,7 +5663,7 @@ const NodeModule = {
 
 var Require = createRequire(path.resolve(PCCompatNative.getBasePath(), "plugins"));
 
-const Logger$2 = Logger$c.create("DataStore");
+const Logger$3 = Logger$f.create("DataStore");
 const DataStore = new class DataStore extends Store {
     tryLoadData(name, def = {
     }) {
@@ -5611,7 +5680,7 @@ const DataStore = new class DataStore extends Store {
             this.cache.set(name, data);
             return data;
         } catch (error) {
-            Logger$2.error(`Data of ${name} corrupt:`, error);
+            Logger$3.error(`Data of ${name} corrupt:`, error);
             return def;
         }
     }
@@ -5620,7 +5689,7 @@ const DataStore = new class DataStore extends Store {
         try {
             fs.writeFileSync(path.resolve(this.configFolder, `${name}.json`), JSON.stringify(data, null, "\t"), "utf8");
         } catch (error) {
-            Logger$2.error(`Failed to save data of ${name}:`, error);
+            Logger$3.error(`Failed to save data of ${name}:`, error);
         }
         if (emit) this.emit(event, name, data);
     }
@@ -5641,7 +5710,7 @@ const DataStore = new class DataStore extends Store {
             try {
                 fs.mkdirSync(this.configFolder);
             } catch (error) {
-                Logger$2.error("Failed to create config folder:", error);
+                Logger$3.error("Failed to create config folder:", error);
             }
         }
     }
@@ -5656,7 +5725,7 @@ var Internals = /*#__PURE__*/Object.freeze({
     DataStore: DataStore$1,
     Patcher: Patcher,
     memoize: memoize,
-    Logger: Logger$c,
+    Logger: Logger$f,
     Utilities: utilities,
     DOM: DOM
 });
@@ -5724,13 +5793,13 @@ const [usePanelStore, PanelAPI] = createStore({
     selectedFile: null
 });
 
-const Logger$1 = Logger$c.create("QuickCSS:util");
+const Logger$2 = Logger$f.create("QuickCSS:util");
 const filesPath = path.resolve(PCCompatNative.getBasePath(), "config", "quickcss");
 const createStorage = function() {
     try {
         fs.mkdirSync(filesPath);
     } catch (error) {
-        Logger$1.error("Failed to create QuickCSS folder:", error);
+        Logger$2.error("Failed to create QuickCSS folder:", error);
     }
     return [];
 };
@@ -6061,6 +6130,7 @@ function _extends() {
     };
     return _extends.apply(this, arguments);
 }
+const Logger$1 = Logger$f.create("QuickCSS");
 function SideBarButton({ label , icon , selected , onClick , className =""  }) {
     const { Tooltips  } = DiscordModules;
     return(/*#__PURE__*/ React.createElement("div", {
@@ -6122,9 +6192,9 @@ function SideBar() {
         fs.writeFileSync(state.selectedFile, cache$1.get(state.selectedFile), "utf8");
         DataStore$1.emit("QUICK_CSS_UPDATE", state.selectedFile);
         powercord.api.notices.sendToast(null, {
-            content: 'Your changes to the current file were saved.',
-            header: 'Changes saved',
-            type: 'success',
+            content: "Your changes to the current file were saved.",
+            header: "Changes saved",
+            type: "success",
             timeout: 1500
         });
     };
@@ -6138,7 +6208,7 @@ function SideBar() {
                         selectedFile: location
                     });
                 } catch (error) {
-                    Logger$c.error("QuickCSS", "Failed to create file " + value, error);
+                    Logger$1.error("QuickCSS", "Failed to create file " + value, error);
                 }
             }
         });
@@ -6360,7 +6430,7 @@ function QuickCSSPanel() {
     })())));
 }
 
-const Logger = Logger$c.create("QuickCSS");
+const Logger = Logger$f.create("QuickCSS");
 class QuickCSS {
     static async initialize() {
         const { Lodash  } = DiscordModules;
@@ -6444,37 +6514,30 @@ QuickCSS.injectedFiles = {
 
 var name = "PCCompat";
 var author = "Strencher";
-var id = "pc-compat";
+var id = "strencher.pc-compat";
 var description = "Allows you to load powerCord plugins within Kernel.";
 var version = "1.1.0-dev";
 var changelog = [
     {
         type: "PROGRESS",
-        title: "Changelogs",
+        title: "Reloading",
         items: [
-            "We try to keep changelogs updated now."
+            "You can now look for missing entities in any of the addon tabs."
         ]
     },
     {
         type: "IMPROVED",
-        title: "Improved settings",
+        title: "Improved speed",
         items: [
-            "We improved how settings panels are handled so you won't have 10000 tabs and instead you have them now accessible via the settings button on plugin cards!"
+            "Boot times have decreased due to some tweaks in how the package is compiled."
         ]
     },
     {
-        type: "PROGRESS",
-        title: "More API's",
+        type: "FIXED",
+        title: "Fixes",
         items: [
-            "A lot of powercord's api's have been rewritten and ready to use for plugins now!",
-            "In case you experience bugs, please let us know inside the #package-support channel or via github issue."
-        ]
-    },
-    {
-        type: "ADDED",
-        title: "QuickCSS",
-        items: [
-            "A lot people have been asking for it, PCCompat has a QuickCSS editor now! Go check it out in the settings"
+            "Fixed some logging errors due to a replaced logger module.",
+            "Fixed a few plugins that depend on `powercord/constants` to have `SETTINGS_FOLDER` as a path."
         ]
     }
 ];
