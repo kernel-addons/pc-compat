@@ -2,6 +2,24 @@ import {DiscordModules} from "@modules";
 
 export const sleep = (time) => new Promise(f => setTimeout(f, time));
 
+/**
+*   Taken from StackOverflow
+*   @url https://stackoverflow.com/a/34841026
+*/
+
+export function formatTime(time) {
+    time = Math.floor(time / 1000);
+
+    const hours = Math.floor(time / 3600) % 24;
+    const minutes = Math.floor(time / 60) % 60;
+    const seconds = time % 60;
+
+    return [ hours, minutes, seconds ]
+      .map(v => v < 10 ? `0${v}` : v)
+      .filter((v, i) => v !== '00' || i > 0)
+      .join(':');
+};
+
 export function findInTree(tree = {}, filter = _ => _, {ignore = [], walkable = [], maxProperties = 100} = {}): any {
     let stack = [tree];
     const wrapFilter = function (...args) {
@@ -63,7 +81,7 @@ export function forceUpdateElement(selector: string) {
     getOwnerInstance(document.querySelector(selector))?.forceUpdate();
 };
 
-export async function waitFor(selector: string) { 
+export async function waitFor(selector: string) {
     let element = document.querySelector(selector);
 
     do {

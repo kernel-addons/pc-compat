@@ -19,6 +19,10 @@ Webpack.whenReady.then(() => {
     initialized = true;
 });
 
+export const account = null;
+
+export function fetchAccount () { return null };
+
 export function once(event: string, callback: Function) {
     switch (event) {
         case "loaded": {
