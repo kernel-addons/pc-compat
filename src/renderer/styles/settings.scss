@@ -19,6 +19,10 @@
 
         .pc-settings-overflow-menu, .pc-settings-open-folder, .pc-settings-load-missing {
             margin-left: 5px;
+
+            svg {
+                vertical-align: middle;
+            }
         }
 
         .pc-settings-addons-search {

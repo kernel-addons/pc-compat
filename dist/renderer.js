@@ -200,6 +200,9 @@ var Modules = {
             "default"
         ]
     },
+    Popout: {
+        name: "Popout"
+    },
     // Classes
     Margins: {
         props: [
@@ -3501,7 +3504,7 @@ function OverflowContextMenu({ type: addonType  }) {
     ))));
 }
 function AddonPanel({ manager , type  }) {
-    const { React: React1 , Button , ContextMenu , Tooltips , SearchBar , PlaceholderClasses  } = DiscordModules;
+    const { React: React1 , Button , Tooltips , SearchBar , PlaceholderClasses , Popout  } = DiscordModules;
     const { i18n: { Messages  }  } = powercord.webpack;
     const [query, setQuery] = React1.useState("");
     const [addons1, setAddons] = React1.useState(null);
@@ -3561,8 +3564,8 @@ function AddonPanel({ manager , type  }) {
             onClick: ()=>manager.loadAll(true)
         }), /*#__PURE__*/ React.createElement(DiscordIcon, {
             name: "Replay",
-            width: 24,
-            height: 24
+            width: 20,
+            height: 20
         }))
     ), /*#__PURE__*/ React.createElement(Tooltips.Tooltip, {
         text: "Open folder",
@@ -3574,25 +3577,32 @@ function AddonPanel({ manager , type  }) {
             className: "pc-settings-open-folder",
             onClick: ()=>PCCompatNative.executeJS(`require("electron").shell.openPath('${JSON.stringify(manager.folder)}')`)
         }), /*#__PURE__*/ React.createElement(DiscordIcon, {
-            name: "Folder"
+            name: "Folder",
+            width: 20,
+            height: 20
         }))
     ), /*#__PURE__*/ React.createElement(Tooltips.Tooltip, {
         text: "Options",
         position: "bottom"
-    }, (props)=>/*#__PURE__*/ React.createElement(Button, _extends$d({
-        }, props, {
-            size: Button.Sizes.NONE,
-            look: Button.Looks.BLANK,
-            className: "pc-settings-overflow-menu",
-            onClick: (e)=>{
-                ContextMenu.open(e, ()=>/*#__PURE__*/ React.createElement(OverflowContextMenu, {
-                        type: type
-                    })
-                );
-            }
-        }), /*#__PURE__*/ React.createElement(DiscordIcon, {
-            name: "OverflowMenu"
-        }))
+    }, (props)=>/*#__PURE__*/ React.createElement(Popout, {
+            position: Popout.Positions.TOP,
+            animation: Popout.Animation.SCALE,
+            align: Popout.Align.RIGHT,
+            spacing: 12,
+            renderPopout: ()=>/*#__PURE__*/ React.createElement(OverflowContextMenu, {
+                    type: type
+                })
+        }, (popoutProps)=>/*#__PURE__*/ React.createElement(Button, _extends$d({
+            }, props, popoutProps, {
+                size: Button.Sizes.NONE,
+                look: Button.Looks.BLANK,
+                className: "pc-settings-overflow-menu"
+            }), /*#__PURE__*/ React.createElement(DiscordIcon, {
+                name: "OverflowMenu",
+                width: "20",
+                height: "20"
+            }))
+        )
     )), /*#__PURE__*/ React.createElement("div", {
         className: "pc-settings-card-scroller"
     }, addons1?.length ? addons1.map((addon)=>/*#__PURE__*/ React.createElement(AddonCard, {
