@@ -781,6 +781,22 @@ const promise = Promise.all([
 const sleep$1 = (time)=>new Promise((f)=>setTimeout(f, time)
     )
 ;
+/**
+*   Taken from StackOverflow
+*   @url https://stackoverflow.com/a/34841026
+*/ function formatTime(time) {
+    time = Math.floor(time / 1000);
+    const hours = Math.floor(time / 3600) % 24;
+    const minutes = Math.floor(time / 60) % 60;
+    const seconds = time % 60;
+    return [
+        hours,
+        minutes,
+        seconds
+    ].map((v)=>v < 10 ? `0${v}` : v
+    ).filter((v, i)=>v !== '00' || i > 0
+    ).join(':');
+}
 function findInTree(tree = {
 }, filter = (_)=>_
 , { ignore =[] , walkable =[] , maxProperties =100  } = {
@@ -859,6 +875,7 @@ async function waitFor(selector) {
 var util$1 = /*#__PURE__*/Object.freeze({
     __proto__: null,
     sleep: sleep$1,
+    formatTime: formatTime,
     findInTree: findInTree,
     findInReactTree: findInReactTree,
     getReactInstance: getReactInstance,
@@ -5401,6 +5418,10 @@ let initialized = false;
 Webpack.whenReady.then(()=>{
     initialized = true;
 });
+const account = null;
+function fetchAccount() {
+    return null;
+}
 function once(event, callback) {
     switch(event){
         case "loaded":
@@ -5413,6 +5434,8 @@ function once(event, callback) {
 var powercord$1 = /*#__PURE__*/Object.freeze({
     __proto__: null,
     get initialized () { return initialized; },
+    account: account,
+    fetchAccount: fetchAccount,
     once: once,
     components: Components,
     webpack: webpack,
