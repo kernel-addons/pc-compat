@@ -1,4 +1,3 @@
-import {matchAll} from "@modules/utilities";
 import Webpack from "@modules/webpack";
 import LoggerModule from "@modules/logger";
 import Patcher from "@modules/patcher";
@@ -26,46 +25,45 @@ export function resetRow() {
 }
 
 export function initialize() {
-    const [AssetUtils, CommandUtils, { AUTOCOMPLETE_OPTIONS }] = Webpack.findByProps(["getApplicationIconURL"], ["useApplicationCommandsDiscoveryState"], ["AUTOCOMPLETE_OPTIONS"], {bulk: true});
+    const [AssetUtils, CommandUtils, Commands] = Webpack.findByProps(["getApplicationIconURL"], ["useApplicationCommandsDiscoveryState"], ["getBuiltInCommands"], {bulk: true});
 
     Patcher.after("PowercordCommands", AssetUtils, "getApplicationIconURL", (_, [props]) => {
         if (props.icon === "__POWERCORD__") return "https://cdn.discordapp.com/attachments/891039688352219198/908403940738093106/46755359.png";
     });
 
-    Patcher.after("PowercordCommands", CommandUtils, "useApplicationCommandsDiscoveryState", (_, [,,, isContextMenu], returnValue: any) => {
-        if (isContextMenu !== false) return;
+    Patcher.after("PowercordCommands", Commands, "getBuiltInCommands", (_, [,, isChat], res) => {
+        if (isChat !== false) return res;
+
+        return [...res, ...commands.values()]
+    })
+
+    Patcher.after("PowercordCommands", CommandUtils, "useApplicationCommandsDiscoveryState", (_, [,,, isChat], res: any) => {
+        if (isChat !== false) return res;
 
         const cmds = [...commands.values()];
 
-        if (!returnValue.discoverySections.find(d => d.key == section.id)) {
-            returnValue.applicationCommandSections.push(section);
-            returnValue.discoveryCommands.push(...cmds);
-            returnValue.commands.push(...cmds.filter(cmd => !returnValue.commands.some(e => e.name === cmd.name)));
+        if (!res.discoverySections.find(d => d.key == section.id)) {
+            res.applicationCommandSections.push(section);
+            res.discoveryCommands.push(...cmds);
+            res.commands.push(...cmds.filter(cmd => !res.commands.some(e => e.name === cmd.name)));
 
-            returnValue.discoverySections.push({
+            res.discoverySections.push({
                 data: cmds,
                 key: section.id,
                 section
             });
 
-            returnValue.sectionsOffset.push(commands.size);
+            res.sectionsOffset.push(commands.size);
+        }
+
+        const index = res.discoverySections.findIndex(e => e.key === "-2");
+        if (res.discoverySections[index]?.data) {
+            const section = res.discoverySections[index];
+            section.data = section.data.filter(c => !c.__powercord);
+
+            if (section.data.length == 0) res.discoverySections.splice(index, 1);
         }
     });
-
-    Patcher.after("PowercordCommands", AUTOCOMPLETE_OPTIONS.COMMANDS, 'queryResults', (_this, [,, query], res) => {
-        if (query == "") return res;
-
-        const matches = [...commands.keys()].filter(c => c.toLowerCase().startsWith(query.toLowerCase()));
-
-        return {
-            results: {
-                commands: [
-                    ...res.results.commands,
-                    ...matches.map(c => commands.get(c))
-                ].filter(Boolean)
-            }
-        }
-    })
 };
 
 export async function handleCommand(options, args) {
@@ -79,18 +77,18 @@ export async function handleCommand(options, args) {
         if (!res || !res.result) return;
 
         if (!res.send) {
-            const message = DiscordModules.MessageCreators.createBotMessage(channel);
-
-            message.author.username = res.username || "Powercord";
-            message.author.avatar = "__POWERCORD__";
+            const options: {
+                content?: string
+                embeds?: object[];
+            } = {};
 
             if (typeof res.result === "string") {
-                message.content = res.result;
+                options.content = res.result;
             } else {
-                message.embeds.push(res.result);
+                options.embeds.push(res.result);
             }
 
-            DiscordModules.MessageActions.receiveMessage(message.channel_id, message)
+            Clyde.sendMessage(channel, options);
         } else {
             DiscordModules.MessageActions.sendMessage(channel, {
                 content: res.result,
@@ -109,27 +107,26 @@ export async function handleCommand(options, args) {
 }
 
 
-export function registerCommand(options: any, result) {
+export function registerCommand(options: any) {
     const {command, executor, ...cmd} = options;
 
     // if (cmd.autocomplete) return Logger.warn("Commands", "Custom autocomplete is not supported yet!");
-
-    const cmdOptions: any[] = matchAll(optionsRegex, cmd.usage).map(([name]) => ({
-        type: 3,
-        name: name.slice(1, -1)
-    }));
-
-    cmdOptions.push({
-        type: 3,
-        required: false,
-        name: "args"
-    });
 
     commands.set(command, {
         type: 3,
         target: 1,
         id: command,
         name: command,
+        applicationId: section.id,
+        options: [
+            {
+                type: 3,
+                required: false,
+                description: `Usage: ${cmd.usage?.replace?.(/{c}/g, command) ?? command}`,
+                name: "args"
+            }
+        ],
+        ...cmd,
         __powercord: true,
         execute: async (result: any) => {
             try {
@@ -148,7 +145,7 @@ export function registerCommand(options: any, result) {
                                 handleCommand(options, args);
                             }
                         })),
-                        header: cmds.header ?? "result:"
+                        header: cmds.header ?? "Result:"
                     });
                 } else {
                     handleCommand(options, args);
@@ -156,10 +153,7 @@ export function registerCommand(options: any, result) {
             } catch (error) {
                 Logger.error(error);
             }
-        },
-        applicationId: section.id,
-        options: cmdOptions,
-        ...cmd,
+        }
     });
 };
 
