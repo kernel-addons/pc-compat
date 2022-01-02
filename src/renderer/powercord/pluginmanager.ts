@@ -56,7 +56,7 @@ export default class PluginManager extends Emitter {
 
             try {
                 if (missing) {
-                    const plugin = this.resolve(file);
+                    const plugin = this.resolve(file, true);
                     if (plugin) continue;
 
                     this.loadPlugin(location);
@@ -95,11 +95,11 @@ export default class PluginManager extends Emitter {
         }
     }
 
-    static resolve(pluginOrName: any): Plugin {
+    static resolve(pluginOrName: any, nullish: boolean = false): Plugin {
         if (this.plugins.has(pluginOrName)) return this.plugins.get(pluginOrName);
         if (this.getByDisplayName(pluginOrName)) return this.getByDisplayName(pluginOrName);
 
-        return pluginOrName;
+        return nullish ? null : pluginOrName;
     }
 
     static saveData() {
