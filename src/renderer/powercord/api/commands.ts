@@ -6,6 +6,7 @@ import {findInReactTree} from "@powercord/util";
 import createStore from "@flux/zustand";
 import CommandBar from "@ui/commandbar";
 import Clyde from "@modules/clyde";
+import DiscordModules from "@modules/discord";
 
 const Logger = LoggerModule.create("Commands");
 const [useCommandsStore, CommandsApi] = createStore({header: "", active: false, commands: []});
@@ -31,21 +32,23 @@ export function initialize() {
         if (props.icon === "__POWERCORD__") return "https://cdn.discordapp.com/attachments/891039688352219198/908403940738093106/46755359.png";
     });
 
-    Patcher.after("PowercordCommands", CommandUtils, "useApplicationCommandsDiscoveryState", (_, __, returnValue: any) => {
+    Patcher.after("PowercordCommands", CommandUtils, "useApplicationCommandsDiscoveryState", (_, [,,, isContextMenu], returnValue: any) => {
+        if (isContextMenu !== false) return;
+
         const cmds = [...commands.values()];
 
         if (!returnValue.discoverySections.find(d => d.key == section.id)) {
-            returnValue.applicationCommandSections.unshift(section);
-            returnValue.discoveryCommands.unshift(...cmds);
-            returnValue.commands.unshift(...cmds.filter(cmd => !returnValue.commands.some(e => e.name === cmd.name)));
+            returnValue.applicationCommandSections.push(section);
+            returnValue.discoveryCommands.push(...cmds);
+            returnValue.commands.push(...cmds.filter(cmd => !returnValue.commands.some(e => e.name === cmd.name)));
 
-            returnValue.discoverySections.unshift({
+            returnValue.discoverySections.push({
                 data: cmds,
                 key: section.id,
                 section
             });
 
-            returnValue.sectionsOffset.unshift(commands.size);
+            returnValue.sectionsOffset.push(commands.size);
         }
     });
 
@@ -65,7 +68,48 @@ export function initialize() {
     })
 };
 
-export function registerCommand(options: any) {
+export async function handleCommand(options, args) {
+    const {command, executor} = options;
+
+    try {
+        const channel = DiscordModules.SelectedChannelStore.getChannelId();
+
+        const res = await executor(args);
+
+        if (!res || !res.result) return;
+
+        if (!res.send) {
+            const message = DiscordModules.MessageCreators.createBotMessage(channel);
+
+            message.author.username = res.username || "Powercord";
+            message.author.avatar = "__POWERCORD__";
+
+            if (typeof res.result === "string") {
+                message.content = res.result;
+            } else {
+                message.embeds.push(res.result);
+            }
+
+            DiscordModules.MessageActions.receiveMessage(message.channel_id, message)
+        } else {
+            DiscordModules.MessageActions.sendMessage(channel, {
+                content: res.result,
+                invalidEmojis: [],
+                validNonShortcutEmojis: [],
+                tts: false
+            })
+        };
+    } catch (error) {
+        Logger.error(`Could not executor for ${options.command}-${command}:`, error);
+
+        Clyde.sendMessage(void 0, {
+            content: ":x: An error occurred while running this command. Check your console."
+        });
+    }
+}
+
+
+export function registerCommand(options: any, result) {
     const {command, executor, ...cmd} = options;
 
     // if (cmd.autocomplete) return Logger.warn("Commands", "Custom autocomplete is not supported yet!");
@@ -87,7 +131,7 @@ export function registerCommand(options: any) {
         id: command,
         name: command,
         __powercord: true,
-        execute: (result: any) => {
+        execute: async (result: any) => {
             try {
                 const args = Object.values(result).map(e => e[0].text) ?? [];
 
@@ -101,25 +145,13 @@ export function registerCommand(options: any) {
                             name: command,
                             action: () => {
                                 resetRow();
-                                try {
-                                    const res = executor([command]);
-
-                                    if (res?.result) {
-                                        Clyde.sendMessage(void 0, {content: res.result});
-                                    }
-                                } catch (error) {
-                                    Logger.error(`Could not executor for ${options.command}-${command}:`, error);
-
-                                    Clyde.sendMessage(void 0, {
-                                        content: ":x: An error occurred while running this command. Check your console."
-                                    });
-                                }
+                                handleCommand(options, args);
                             }
                         })),
                         header: cmds.header ?? "result:"
                     });
                 } else {
-                    executor(args);
+                    handleCommand(options, args);
                 }
             } catch (error) {
                 Logger.error(error);
