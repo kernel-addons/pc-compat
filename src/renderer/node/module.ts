@@ -186,6 +186,7 @@ function resolveGlobalPath(mod: string, globalPaths: string[]) {
 }
 
 function getGlobalPath(mod: string) {
+    console.log({mod});
     const fromGlobals = resolveGlobalPath(mod, globalPaths);
     if (fromGlobals) return fromGlobals;
 
@@ -198,9 +199,9 @@ function getGlobalPath(mod: string) {
 
 function getParent(_path: string, mod: string) {
     const concatPath = path.resolve(_path, mod);
-    const globalPath = path.join(getGlobalPath(mod), mod);
-
     if (fs.existsSync(concatPath)) return concatPath;
+
+    const globalPath = path.join(getGlobalPath(mod), mod);
     if (fs.existsSync(globalPath)) return globalPath;
 
     return "";

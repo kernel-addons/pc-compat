@@ -275,7 +275,7 @@ export default class PluginManager extends Emitter {
     }
 
     static getByDisplayName(displayName: string): any {
-        return this.addons.find(e => e?.manifest?.name === displayName);
+        return this.addons.find(e => e?.constructor?.name === displayName);
     }
 
     static get enable() {return this.enablePlugin;}
