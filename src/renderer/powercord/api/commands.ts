@@ -113,7 +113,6 @@ export function registerCommand(options: any) {
                 type: 3,
                 required: false,
                 description: `Usage: ${cmd.usage?.replace?.(/{c}/g, command) ?? command}`,
-                autocomplete: true,
                 name: "args"
             }
         ],
