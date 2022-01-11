@@ -1,17 +1,12 @@
 import Webpack from "@modules/webpack";
 import LoggerModule from "@modules/logger";
 import Patcher from "@modules/patcher";
-import {findInReactTree} from "@powercord/util";
-import createStore from "@flux/zustand";
-import CommandBar from "@ui/commandbar";
 import Clyde from "@modules/clyde";
 import DiscordModules from "@modules/discord";
 
 const Logger = LoggerModule.create("Commands");
-const [useCommandsStore, CommandsApi] = createStore({header: "", active: false, commands: []});
 
 export const commands = new Map();
-export const optionsRegex = /"(.+?)"/g;
 
 export const section = {
     id: "powercord",
@@ -19,10 +14,6 @@ export const section = {
     name: "Powercord",
     icon: "__POWERCORD__"
 };
-
-export function resetRow() {
-    CommandsApi.setState({active: false, commands: [], header: ""});
-}
 
 export function initialize() {
     const [AssetUtils, CommandUtils, Commands] = Webpack.findByProps(["getApplicationIconURL"], ["useApplicationCommandsDiscoveryState"], ["getBuiltInCommands"], {bulk: true});
@@ -40,9 +31,10 @@ export function initialize() {
     Patcher.after("PowercordCommands", CommandUtils, "useApplicationCommandsDiscoveryState", (_, [,,, isChat], res: any) => {
         if (isChat !== false) return res;
 
-        const cmds = [...commands.values()];
 
         if (!res.discoverySections.find(d => d.key == section.id)) {
+            const cmds = [...commands.values()];
+
             res.applicationCommandSections.push(section);
             res.discoveryCommands.push(...cmds);
             res.commands.push(...cmds.filter(cmd => !res.commands.some(e => e.name === cmd.name)));
@@ -110,8 +102,6 @@ export async function handleCommand(options, args) {
 export function registerCommand(options: any) {
     const {command, executor, ...cmd} = options;
 
-    // if (cmd.autocomplete) return Logger.warn("Commands", "Custom autocomplete is not supported yet!");
-
     commands.set(command, {
         type: 3,
         target: 1,
@@ -123,6 +113,7 @@ export function registerCommand(options: any) {
                 type: 3,
                 required: false,
                 description: `Usage: ${cmd.usage?.replace?.(/{c}/g, command) ?? command}`,
+                autocomplete: true,
                 name: "args"
             }
         ],
@@ -130,26 +121,7 @@ export function registerCommand(options: any) {
         __powercord: true,
         execute: async (result: any) => {
             try {
-                const args = Object.values(result).map(e => e[0].text) ?? [];
-
-                if (typeof (cmd.autocomplete) === "function") {
-                    const cmds = cmd.autocomplete(args);
-                    if (!cmds?.commands?.length) return;
-
-                    CommandsApi.setState({
-                        active: true,
-                        commands: cmds.commands.map(({command}) => ({
-                            name: command,
-                            action: () => {
-                                resetRow();
-                                handleCommand(options, args);
-                            }
-                        })),
-                        header: cmds.header ?? "Result:"
-                    });
-                } else {
-                    handleCommand(options, args);
-                }
+                handleCommand(options, Object.values(result).map((e: any) => e.value) ?? []);
             } catch (error) {
                 Logger.error(error);
             }
@@ -160,28 +132,3 @@ export function registerCommand(options: any) {
 export function unregisterCommand(id: string) {
     commands.delete(id);
 }
-
-Webpack.whenReady.then(() => {
-    const ChannelChatMemo = Webpack.findModule(m => m?.type?.toString().indexOf("useAndTrackNonFriendDMAccept") > -1);
-
-    if (!ChannelChatMemo) return void Logger.warn("Commands", "ChannelChat memo component not found!");
-
-    const unpatch = Patcher.after("Commands", ChannelChatMemo, "type", (_, __, returnValue: any) => {
-        unpatch();
-
-        const ChannelChat = returnValue.type;
-        if (!ChannelChat) return void Logger.error("Commands", "Could no extract ChannelChat nested command!");
-
-        Patcher.after("Commands", ChannelChat.prototype, "render", (_, __, returnValue) => {
-            const form = findInReactTree(returnValue, n => n?.type === "form")?.props?.children;
-            if (!Array.isArray(form)) return returnValue;
-
-            form?.unshift(
-                React.createElement(CommandBar, {
-                    store: useCommandsStore,
-                    onClose: resetRow
-                })
-            );
-        });
-    });
-});
