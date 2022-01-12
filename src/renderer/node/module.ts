@@ -163,7 +163,7 @@ export function getExtension(mod: string) {
 function collectPNPMStores(node_modules: string) {
     const store = path.join(node_modules, ".pnpm");
     if (!fs.existsSync(store) || !fs.statSync(store).isDirectory()) return [];
-    
+
     const result = [];
 
     for (const file of fs.readdirSync(store, "utf8")) {
@@ -186,7 +186,6 @@ function resolveGlobalPath(mod: string, globalPaths: string[]) {
 }
 
 function getGlobalPath(mod: string) {
-    console.log({mod});
     const fromGlobals = resolveGlobalPath(mod, globalPaths);
     if (fromGlobals) return fromGlobals;
 

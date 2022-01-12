@@ -49,6 +49,7 @@ promise.then(() => {
             return {
                 settings: this.settings,
                 getSetting: this.get.bind(this),
+                getSettings: () => this.settings,
                 updateSetting: this.set.bind(this),
                 toggleSetting: this.toggle.bind(this)
             };
