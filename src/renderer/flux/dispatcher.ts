@@ -1,7 +1,7 @@
 import DiscordModules from "@modules/discord";
 import LoggerModule from "@modules/logger";
 
-const Logger = LoggerModule.create("FLuxDispatcher");
+const Logger = LoggerModule.create("FluxDispatcher");
 
 export default function createDispatcher() {
     const events = {};
