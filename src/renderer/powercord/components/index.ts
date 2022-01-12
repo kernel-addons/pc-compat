@@ -1,7 +1,8 @@
-import { Webpack } from "../../modules";
+import Webpack from "@modules/webpack";
+import LoggerModule from "@modules/logger";
 import components from "../data/components";
-import {promise} from '../../modules/discord';
-import {createUpdateWrapper} from "../../modules/utilities";
+import {promise} from "@modules/discord";
+import {createUpdateWrapper} from "@modules/utilities";
 
 import TextInput from "./settings/textinput";
 import RadioGroup from "./settings/radiogroup";
@@ -16,7 +17,9 @@ import Icon from "./icon";
 
 import AsyncComponent from "./asynccomponent";
 import Modal from "./modal";
-import * as Icons from "./icons/index"
+import * as Icons from "./icons/index";
+
+new LoggerModule("Components", true);
 
 let Components = {
     settings: {
