@@ -3,8 +3,12 @@ export type LogType = keyof typeof console;
 export class Logger {
     module: string;
 
-    constructor(name: string) {
+    static cache: Map<string, Logger> = new Map();
+
+    constructor(name: string, shouldCache = false) {
         this.module = name;
+
+        if (shouldCache) Logger.cache.set(name, this);
     }
 
     #parseType(type: LogType) {
@@ -31,6 +35,10 @@ export class Logger {
 
     static create(name: string) {
         return new Logger(name);
+    }
+
+    static getLogger(name: string): Logger {
+        return this.cache.get(name);
     }
 }
 
