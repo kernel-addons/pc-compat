@@ -4,8 +4,7 @@
 ## Installation
 - Run `git clone https://github.com/strencher-kernel/pc-compat` inside your `packages` folder.
 - Run `cd pc-compat` once the repo has been cloned
-- Run `git switch -f dev` once you've entered the folder
-- Run `pnpm initialize`
+- Run `pnpm initialize` and ignore the warnings
 - Restart your Discord client completely (Closing via the tray icon) and enjoy
 
 ## Building from Source
