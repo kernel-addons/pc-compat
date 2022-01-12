@@ -30,10 +30,10 @@ export default class PluginManager extends Emitter {
 
         this.states = DataStore.tryLoadData("plugins");
 
-        this.loadAllPlugins();
+        this.loadAll();
     }
 
-    static loadAllPlugins() {
+    static loadAll(missing = false) {
         if (!fs.existsSync(this.folder)) {
             try {
                 fs.mkdirSync(this.folder);
@@ -43,7 +43,9 @@ export default class PluginManager extends Emitter {
         }
 
         if (!fs.statSync(this.folder).isDirectory()) return void Logger.error("PluginsManager", `Plugins dir isn't a folder.`);
-        Logger.log("PluginsManager", "Loading plugins...");
+        if (!missing) Logger.log("PluginsManager", "Loading plugins...");
+
+        const missingEntities = [];
         for (const file of fs.readdirSync(this.folder, "utf8")) {
             const location = path.resolve(this.folder, file);
             if (!fs.statSync(location).isDirectory()) continue;
@@ -53,10 +55,34 @@ export default class PluginManager extends Emitter {
             if (fs.existsSync(path.join(location, "node_modules"))) globalPaths.push(path.join(location, "node_modules"));
 
             try {
-                this.loadPlugin(location);
+                if (missing) {
+                    const plugin = this.resolve(file, true);
+                    if (plugin) continue;
+
+                    this.loadPlugin(location);
+                    missingEntities.push(this.resolve(file).displayName);
+                } else {
+                    this.loadPlugin(location);
+                }
             } catch (error) {
                 Logger.error(`Failed to load ${file}:`, error);
             }
+        }
+
+        if (missing && missingEntities.length) {
+            powercord.api.notices.sendToast(null, {
+                content: `The following plugins were loaded: ${missingEntities.join(', ')}`,
+                header: "Missing plugins found",
+                type: "success"
+            });
+
+            this.emit("entityChange");
+        } else if (missing && !missingEntities.length) {
+            powercord.api.notices.sendToast(null, {
+                content: "Couldn't find any plugins that aren't already loaded.",
+                header: "Missing plugins not found",
+                type: "danger"
+            });
         }
     }
 
@@ -69,10 +95,11 @@ export default class PluginManager extends Emitter {
         }
     }
 
-    static resolve(pluginOrName: any): Plugin {
-        if (typeof (pluginOrName) === "string") return this.plugins.get(pluginOrName);
+    static resolve(pluginOrName: any, nullish: boolean = false): Plugin {
+        if (this.plugins.has(pluginOrName)) return this.plugins.get(pluginOrName);
+        if (this.getByDisplayName(pluginOrName)) return this.getByDisplayName(pluginOrName);
 
-        return pluginOrName;
+        return nullish ? null : pluginOrName;
     }
 
     static saveData() {
@@ -247,8 +274,13 @@ export default class PluginManager extends Emitter {
         return [...this.plugins.keys()];
     }
 
+    static getByDisplayName(displayName: string): any {
+        return this.addons.find(e => e?.constructor?.name === displayName);
+    }
+
     static get enable() {return this.enablePlugin;}
     static get disable() {return this.disablePlugin;}
     static get reload() {return this.reloadPlugin;}
     static get remount() {return this.reloadPlugin;}
+    static get loadAllPlugins() {return this.loadAll;}
 }

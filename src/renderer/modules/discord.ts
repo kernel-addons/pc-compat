@@ -28,7 +28,7 @@ const filters = new Promise<any[]>(resolve => {
 
                     break;
                 };
-                    
+
                 default: {
                     filter = (m: any) => module.props.every((prop: string) => prop in m);
                 }
@@ -74,7 +74,14 @@ export const promise = Promise.all([filters, Webpack.whenReady]).then(([filters]
     Object.assign(DiscordModules,
         filters.reduce((modules, {id, map}, index) => {
             const mapper = map ?? NOOP_RET;
-            modules[id] = mapper(result[index]);
+            const res = mapper(result[index]);
+            modules[id] = res;
+
+            if (id == 'React') Object.defineProperty(window, 'React', {
+                value: res,
+                configurable: true,
+                writable: true
+            });
 
             return modules;
         }, {})

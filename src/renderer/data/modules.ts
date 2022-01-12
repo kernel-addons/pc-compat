@@ -120,6 +120,9 @@ export default {
     Scrollers: {
         props: ["ScrollerAuto", "ScrollerThin", "default"]
     },
+    Popout: {
+        name: "Popout"
+    },
     // Classes
     Margins: {
         props: ["marginXLarge"]

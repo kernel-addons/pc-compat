@@ -1,4 +1,6 @@
-import Logger from "@modules/logger";
+import LoggerModule from "@modules/logger";
+
+const Logger = LoggerModule.create("Events");
 
 export default class EventEmitter {
     static get EventEmitter() {return EventEmitter;}
@@ -63,7 +65,7 @@ export default class EventEmitter {
         };
 
         this.on(event, callback);
-        
+
         return this;
     }
 

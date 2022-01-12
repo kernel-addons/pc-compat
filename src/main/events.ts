@@ -8,6 +8,10 @@ ipcMain.on(IPCEvents.GET_APP_PATH, (event) => {
     event.returnValue = app.getAppPath();
 });
 
+ipcMain.on(IPCEvents.GET_WINDOW_DATA, (event) => {
+    event.returnValue = event.sender.kernelWindowData;
+});
+
 ipcMain.on(IPCEvents.COMPILE_SASS, (event, file) => {
     let result = "";
     try {

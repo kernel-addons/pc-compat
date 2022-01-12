@@ -61,10 +61,11 @@ export default class Git {
     static async getDiff(cwd: string, target: string = "master") {
         try {
             const result = await this.executeCmd(`git log ${target}..origin/${target} --pretty=format:"%H${period}%h${period}%an${period}%ar${period}%s"`, cwd);
+            if (!result) return [];
             return result.split("\n").map(p => this.parsePeriods(commitFields, p));
         } catch (error) {
             console.error(error);
-            return null;
+            return [];
         }
     }
 

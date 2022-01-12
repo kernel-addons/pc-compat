@@ -1,4 +1,6 @@
-import Logger from "@modules/logger";
+import LoggerModule from "@modules/logger";
+
+const Logger = LoggerModule.create("EventEmitter");
 
 export default class Emitter {
     static events: {[event: string]: Set<Function>;} = {};

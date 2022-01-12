@@ -1,11 +1,10 @@
 import swc from "rollup-plugin-swc";
 import {defineConfig} from "rollup";
-import esFormatter from "rollup-plugin-esformatter";
 import resolve from "@rollup/plugin-node-resolve";
 import path from "path";
 import alias from "@rollup/plugin-alias";
-import sourcemaps from "rollup-plugin-sourcemaps";
 import json from "@rollup/plugin-json";
+import {uglify} from "rollup-plugin-uglify";
 
 const aliases = {
     "@powercord":   path.resolve(__dirname, "./src/renderer/powercord"),
@@ -20,52 +19,58 @@ const aliases = {
 };
 
 export default args => {
-    const {mode = "renderer", source = true} = args;
+    const {mode = "renderer", minify = true} = args;
     delete args.mode;
-    delete args.source;
+    delete args.minify;
 
     return defineConfig({
         input: `./src/${mode}/index.ts`,
-        external: ["electron", "fs", "path", "module", "sucrase", "sass", "inspector"],
+        external: [
+            "electron",
+            "fs",
+            "path",
+            "module",
+            "sucrase",
+            "sass",
+            "inspector",
+            "@electron/remote/main",
+            "@electron/remote/renderer"
+        ],
         output: {
-            sourcemap: source,
             format: mode === "renderer" ? "esm" : "commonjs",
             file: `./dist/${mode}.js`
         },
 
         plugins: [
+            minify && uglify(),
             json(),
-            source && sourcemaps({include: "./src/**"}),
-            // AliasLoader(),
             alias({
-                entries: mode === "renderer"
-                    ? aliases
-                    : void 0
+                entries: aliases
             }),
             resolve({
                 browser: mode === "renderer",
                 extensions: [".ts", ".tsx", ".js", ".jsx", ".scss"],
                 preferBuiltins: false,
             }),
-            // Using esFormatter along with sourceMaps: true freezes rollup. Pain.
-            !source && esFormatter({
-                plugins: ["esformatter-quotes"],
-                quotes: {
-                    type: "double"
-                },
-                indent: {
-                    value: "\t"
-                }
-            }),
             swc({
-                sourceMaps: source,
+                minify: true,
                 jsc: {
                     parser: {
                         tsx: true,
                         syntax: "typescript",
                         decorators: true
                     },
-                    target: !source ? "es2019" : "es2022"
+                    target: "es2022",
+                    minify: {
+                        compress: {
+                            arguments: false,
+                            dead_code: true,
+                            keep_classnames: true
+                        }
+                    },
+                    transform: {
+                        react: {useBuiltins: true}
+                    }
                 }
             })
         ].filter(Boolean),

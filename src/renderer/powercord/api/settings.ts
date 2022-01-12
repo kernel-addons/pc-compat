@@ -22,7 +22,7 @@ promise.then(() => {
 });
 
 export function registerSettings(id: string, options: any) {
-    id = id || options.category;
+    id = powercord.pluginManager.resolve(id)?.entityID || powercord.pluginManager.resolve(options.category)?.entityID || id || options.category;
 
     options.render = connectStores(id)(options.render);
     settings.set(id, options);

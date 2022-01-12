@@ -33,11 +33,11 @@ export default class QuickCSS {
         return path.extname(file) !== ".css";
     }
 
-    static onDataUpdate() {
-        const files = getConfig().states;
+    static onDataUpdate(file?) {
+        const files = (file && {[file]: true}) || getConfig().states;
 
         for (const file in files) {
-            if (this.injectedFiles[file] && !files[file]) this.injectedFiles[file].destroy();
+            if (this.injectedFiles[file] && (file || !files[file])) this.injectedFiles[file].destroy();
             if (!files[file]) continue;
 
             if (!fs.existsSync(file)) {

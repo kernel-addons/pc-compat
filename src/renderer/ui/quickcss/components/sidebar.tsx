@@ -1,5 +1,6 @@
+import DataStore from "@modules/datastore";
 import DiscordModules from "@modules/discord";
-import Logger from "@modules/logger";
+import LoggerModule from "@modules/logger";
 import {joinClassNames} from "@modules/utilities";
 import {fs, path} from "@node";
 import DiscordIcon from "@ui/discordicon";
@@ -9,6 +10,8 @@ import {PanelAPI, usePanelStore} from "../store";
 import {createStorage, filesPath, openFile} from "../util";
 import {cache} from "./editor";
 import FileIcon from "./fileicon";
+
+const Logger = LoggerModule.create("QuickCSS");
 
 export function SideBarButton({label, icon, selected, onClick, className = ""}) {
     const {Tooltips} = DiscordModules;
@@ -61,10 +64,12 @@ export default function SideBar() {
         if (!cache.has(state.selectedFile)) return;
 
         fs.writeFileSync(state.selectedFile, cache.get(state.selectedFile), "utf8");
+        DataStore.emit("QUICK_CSS_UPDATE", state.selectedFile);
+
         powercord.api.notices.sendToast(null, {
-            content: 'Your changes to the current file were saved.',
-            header: 'Changes saved',
-            type: 'success',
+            content: "Your changes to the current file were saved.",
+            header: "Changes saved",
+            type: "success",
             timeout: 1500
         })
     };

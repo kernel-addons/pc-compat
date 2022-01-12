@@ -113,7 +113,7 @@ export function OverflowContextMenu({type: addonType}) {
 };
 
 export default function AddonPanel({manager, type}) {
-    const {React, Button, ContextMenu, Tooltips, SearchBar, PlaceholderClasses} = DiscordModules;
+    const {React, Button, Tooltips, SearchBar, PlaceholderClasses, Popout} = DiscordModules;
     const {i18n: {Messages}} = powercord.webpack;
 
     const [query, setQuery] = React.useState("");
@@ -126,8 +126,12 @@ export default function AddonPanel({manager, type}) {
 
     React.useEffect(() => {
         manager.on("delete", () => {
-            setAddons(manager.addons)
+            setAddons(manager.addons);
         });
+
+        manager.on("entityChange", () => {
+            setAddons(manager.addons);
+        })
     }, [manager]);
 
     React.useEffect(() => {
@@ -152,6 +156,19 @@ export default function AddonPanel({manager, type}) {
                     query={query}
                     className="pc-settings-addons-search"
                 />
+                <Tooltips.Tooltip text="Load missing" position="bottom">
+                    {props => (
+                        <Button
+                            {...props}
+                            size={Button.Sizes.NONE}
+                            look={Button.Looks.BLANK}
+                            className="pc-settings-load-missing"
+                            onClick={() => manager.loadAll(true)}
+                        >
+                            <DiscordIcon name="Replay" width={20} height={20} />
+                        </Button>
+                    )}
+                </Tooltips.Tooltip>
                 <Tooltips.Tooltip text="Open folder" position="bottom">
                     {props => (
                         <Button
@@ -161,25 +178,33 @@ export default function AddonPanel({manager, type}) {
                             className="pc-settings-open-folder"
                             onClick={() => PCCompatNative.executeJS(`require("electron").shell.openPath('${JSON.stringify(manager.folder)}')`)}
                         >
-                            <DiscordIcon name="Folder" />
+                            <DiscordIcon name="Folder" width={20} height={20} />
                         </Button>
                     )}
                 </Tooltips.Tooltip>
                 <Tooltips.Tooltip text="Options" position="bottom">
                     {props => (
-                        <Button
-                            {...props}
-                            size={Button.Sizes.NONE}
-                            look={Button.Looks.BLANK}
-                            className="pc-settings-overflow-menu"
-                            onClick={e => {
-                                ContextMenu.open(e, () => (
-                                    <OverflowContextMenu type={type} />
-                                ));
-                            }}
+                        <Popout
+                            position={Popout.Positions.TOP}
+                            animation={Popout.Animation.SCALE}
+                            align={Popout.Align.RIGHT}
+                            spacing={12}
+                            renderPopout={() => (
+                                <OverflowContextMenu type={type} />
+                            )}
                         >
-                            <DiscordIcon name="OverflowMenu" />
-                        </Button>
+                            {popoutProps => (
+                                <Button
+                                    {...props}
+                                    {...popoutProps}
+                                    size={Button.Sizes.NONE}
+                                    look={Button.Looks.BLANK}
+                                    className="pc-settings-overflow-menu"
+                                >
+                                    <DiscordIcon name="OverflowMenu" width="20" height="20" />
+                                </Button>
+                            )}
+                        </Popout>
                     )}
                 </Tooltips.Tooltip>
             </div>

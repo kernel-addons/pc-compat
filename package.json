@@ -7,27 +7,28 @@
     "build-renderer": "rollup -c --mode=renderer",
     "build-main": "rollup -c --mode=main",
     "build-preload": "rollup -c --mode=preload",
-    "dist": "npm run build-renderer && npm run build-main && npm run build-preload"
+    "dist": "pnpm run build-renderer && pnpm run build-main && pnpm run build-preload",
+    "initialize": "pnpm install --production"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@types/lodash": "^4.14.176"
-  },
-  "dependencies": {
     "@rollup/plugin-alias": "^3.1.8",
     "@rollup/plugin-json": "^4.1.0",
     "@rollup/plugin-node-resolve": "^13.0.6",
-    "@swc/core": "^1.2.111",
-    "@types/react": "^17.0.34",
+    "@swc/core": "^1.2.124",
+    "@types/lodash": "^4.14.176",
+    "@types/react": "^17.0.37",
     "@types/react-dom": "^17.0.11",
-    "esformatter-quotes": "^1.1.0",
-    "node-watch": "^0.7.2",
-    "rollup": "^2.59.0",
-    "rollup-plugin-esformatter": "^2.0.1",
-    "rollup-plugin-sourcemaps": "^0.6.3",
+    "rollup": "^2.61.0",
     "rollup-plugin-swc": "^0.2.0",
+    "rollup-plugin-uglify": "^6.0.4"
+  },
+  "dependencies": {
+    "@electron/remote": "^2.0.1",
+    "@types/electron": "^1.6.10",
+    "buffer": "^6.0.3",
     "sass": "^1.43.4",
     "sucrase": "^3.20.3"
   }

@@ -1,5 +1,4 @@
 export {default as Webpack} from "./webpack";
-
 export {default as ComponentPatcher} from "./componentpatcher";
 export {default as DiscordModules} from "./discord";
 export {default as DataStore} from "./datastore";

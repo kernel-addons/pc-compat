@@ -1,27 +1,32 @@
-import {DiscordModules, Webpack} from "../../../modules";
-import Logger from "../../../modules/logger";
+import Webpack from "@modules/webpack";
+import DiscordModules from "@modules/discord";
+import LoggerModule from "@modules/logger";
 import {findInReactTree} from "../../util";
 import {fromPromise} from "../asynccomponent";
 import ErrorBoundary from "../errorboundary";
-import FormItem from "./formitem"
+import FormItem from "./formitem";
 
 const ColorPicker = fromPromise(Webpack.whenReady.then(() => {
-    try {
-        const GuildFolderSettingsModal = Webpack.findByDisplayName("GuildFolderSettingsModal");
-        if (!GuildFolderSettingsModal) throw "GuildFolderSettingsModal was not found!";
-        const rendered = GuildFolderSettingsModal.prototype.render.call({state: {}, props: {}});
-        const ColorPicker = findInReactTree(rendered, e => e?.props?.defaultColor != null).type;
-        if (typeof(ColorPicker) !== "function") throw "ColorPicker could not be found!";
+    const LazyColorPicker = Webpack.findByDisplayName("ColorPicker") ?? (() => {
+        try {
+            const GuildFolderSettingsModal = Webpack.findByDisplayName("GuildFolderSettingsModal");
+            if (!GuildFolderSettingsModal) throw "GuildFolderSettingsModal was not found!";
+            const rendered = GuildFolderSettingsModal.prototype.render.call({state: {}, props: {}});
+            const ColorPicker = findInReactTree(rendered, e => e?.props?.defaultColor != null).type;
+            if (typeof (ColorPicker) !== "function") throw "ColorPicker could not be found!";
+    
+            return ColorPicker;
+        } catch (error) {
+            LoggerModule.getLogger("Components")?.error("Failed to get ColorPicker component!", error);
+            return () => null;
+        }
+    })();
 
-        return (props) => (
-            <ErrorBoundary>
-                <ColorPicker {...props} />
-            </ErrorBoundary>
-        );
-    } catch (error) {
-        Logger.error("Failed to get ColorPicker component!", error);
-        return () => null;
-    }
+    return (props) => (
+        <ErrorBoundary>
+            <LazyColorPicker {...props} />
+        </ErrorBoundary>
+    );
 }));
 
 export function ColorPickerInput(props) {

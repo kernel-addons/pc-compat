@@ -1,5 +1,7 @@
 /// <reference path="../../../types.d.ts" />
 
+import memoize from "@modules/memoize";
+
 export default class fs {
     static readFileSync(path: string, options = "utf8") {
         return PCCompatNative.executeJS(`require("fs").readFileSync(${JSON.stringify(path)}, ${JSON.stringify(options)});`);
@@ -63,5 +65,31 @@ export default class fs {
                 PCCompatNative.IPC.dispatch(${JSON.stringify(eventId)}, event, filename);
             });
         `);
+    }
+
+    static get promises() {
+        const metas = PCCompatNative.executeJS(`
+            const fs = require("fs");
+            const keys = Object.keys(fs.promises);
+
+            keys.map(key => [
+                key,
+                fs.promises[key].toString(),
+                (...args) => fs.promises[key](...args)
+            ]);
+        `);
+
+        const proxy = metas.reduce((final, [key, toString, pointer]) => {
+            Object.defineProperty(final, key, {
+                configurable: true,
+                get() {
+                    return memoize(this, key, Object.assign(pointer, {toString: () => toString}));
+                }
+            });
+
+            return final;
+        }, {});
+
+        return memoize(this, "promises", proxy);
     }
 }

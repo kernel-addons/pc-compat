@@ -1,9 +1,11 @@
+import { path } from '@node';
+
 const constants = {
 	WEBSITE: 'https://github.com/strencher-kernel/pc-compat',
 	I18N_WEBSITE: 'https://example.com',
 	REPO_URL: 'strencher-kernel/pc-compat',
 
-	SETTINGS_FOLDER: null,
+	SETTINGS_FOLDER: path.resolve(PCCompatNative.getBasePath(), 'config'),
 	CACHE_FOLDER: null,
 	LOGS_FOLDER: null,
 
@@ -14,7 +16,7 @@ const constants = {
 		SUPPORT_INSTALLATION: '891053581136982056',
 		SUPPORT_PLUGINS:      '891053581136982056',
 		SUPPORT_MISC:         '891053581136982056',
-		
+
 		STORE_PLUGINS:        '649571600764633088', //TODO: find Kernel equivalent
 		STORE_THEMES:         '649571547350302741', //TODO: find Kernel equivalent
 		CSS_SNIPPETS:         '755005803303403570', //TODO: find Kernel equivalent

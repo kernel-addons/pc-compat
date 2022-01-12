@@ -1,37 +1,23 @@
 {
     "name": "PCCompat",
     "author": "Strencher",
-    "id": "pc-compat",
+    "id": "strencher.pc-compat",
     "description": "Allows you to load powerCord plugins within Kernel.",
-    "version": "1.1.0-dev",
+    "version": "1.3.0-dev",
     "changelog": [
         {
-            "type": "PROGRESS",
-            "title": "Changelogs",
-            "items": [
-                "We try to keep changelogs updated now."
-            ]
-        },
-        {
-            "type": "IMPROVED",
-            "title": "Improved settings",
-            "items": [
-                "We improved how settings panels are handled so you won't have 10000 tabs and instead you have them now accessible via the settings button on plugin cards!"
-            ]
-        },
-        {
-            "type": "PROGRESS",
-            "title": "More API's",
-            "items": [
-                "A lot of powercord's api's have been rewritten and ready to use for plugins now!",
-                "In case you experience bugs, please let us know inside the #package-support channel or via github issue."
-            ]
-        },
-        {
             "type": "ADDED",
-            "title": "QuickCSS",
+            "title": "Added",
             "items": [
-                "A lot people have been asking for it, PCCompat has a QuickCSS editor now! Go check it out in the settings"
+                "Added splash screen theming.",
+                "Added plugin reloading."
+            ]
+        },
+        {
+            "type": "FIXED",
+            "title": "Fixes",
+            "items": [
+                "Fixed commands entirely, should now work fine again."
             ]
         }
     ]
