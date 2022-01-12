@@ -1,20 +1,16 @@
-import {promise} from "@modules/discord";
 import {DiscordModules, Webpack} from "../../../modules";
-import LoggerModule from "../../../modules/logger";
-import {findInReactTree, wrapInHooks} from "../../util";
+import Logger from "../../../modules/logger";
+import {findInReactTree} from "../../util";
 import {fromPromise} from "../asynccomponent";
 import ErrorBoundary from "../errorboundary";
 import FormItem from "./formitem"
 
-const Logger = LoggerModule.create("ColorPicker")
-
-const ColorPicker = fromPromise(promise.then(() => {
+const ColorPicker = fromPromise(Webpack.whenReady.then(() => {
     try {
-        const GuildSettingsRolesEditDisplay = Webpack.findByDisplayName("GuildSettingsRolesEditDisplay");
-        if (!GuildSettingsRolesEditDisplay) throw "GuildSettingsRolesEditDisplay was not found!";
-        const rendered = wrapInHooks(() => new GuildSettingsRolesEditDisplay({ guild: { id: '' }, role: { id: '' } }))();
-        const FormItem = findInReactTree(rendered, r => r.type?.displayName === "ColorPickerFormItem").type({ role: { id: "" } });
-        const ColorPicker = findInReactTree(FormItem, r => r.props?.defaultColor).type;
+        const GuildFolderSettingsModal = Webpack.findByDisplayName("GuildFolderSettingsModal");
+        if (!GuildFolderSettingsModal) throw "GuildFolderSettingsModal was not found!";
+        const rendered = GuildFolderSettingsModal.prototype.render.call({state: {}, props: {}});
+        const ColorPicker = findInReactTree(rendered, e => e?.props?.defaultColor != null).type;
         if (typeof(ColorPicker) !== "function") throw "ColorPicker could not be found!";
 
         return (props) => (

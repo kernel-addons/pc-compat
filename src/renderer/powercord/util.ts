@@ -60,39 +60,6 @@ export function getReactInstance(node: any) {
     return node["__reactFiber$"];
 };
 
-export function wrapInHooks (method) {
-    return (...args) => {
-        const Internals = React.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED.ReactCurrentDispatcher.current;
-        const useMemo = Internals.useMemo;
-        const useState = Internals.useState;
-        const useReducer = Internals.useReducer;
-        const useEffect = Internals.useEffect;
-        const useLayoutEffect = Internals.useLayoutEffect;
-        const useRef = Internals.useRef;
-        const useCallback = Internals.useCallback;
-
-        Internals.useMemo = (fn) => fn();
-        Internals.useState = (value) => [ value, () => void 0 ];
-        Internals.useReducer = (value) => [ value, () => void 0 ];
-        Internals.useEffect = () => null;
-        Internals.useLayoutEffect = () => null;
-        Internals.useRef = () => ({});
-        Internals.useCallback = (cb) => cb;
-
-        const res = method(...args);
-
-        Internals.useMemo = useMemo;
-        Internals.useState = useState;
-        Internals.useReducer = useReducer;
-        Internals.useEffect = useEffect;
-        Internals.useLayoutEffect = useLayoutEffect;
-        Internals.useRef = useRef;
-        Internals.useCallback = useCallback;
-
-        return res;
-    }
-};
-
 export function getOwnerInstance(node, filter = _ => true) {
     if (!node) return null;
     const fiber = getReactInstance(node);
