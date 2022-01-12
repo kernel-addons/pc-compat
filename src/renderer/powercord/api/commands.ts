@@ -72,7 +72,7 @@ export async function handleCommand(options, args) {
             const options: {
                 content?: string
                 embeds?: object[];
-            } = {};
+            } = { embeds: [] };
 
             if (typeof res.result === "string") {
                 options.content = res.result;
