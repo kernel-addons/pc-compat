@@ -12,7 +12,7 @@ if (!window.process) {
     }
 }
 
-const require = createRequire(path.resolve(PCCompatNative.getBasePath(), "plugins"), null);
+const require = !window.process || process.contextIsolated ? createRequire(path.resolve(PCCompatNative.getBasePath(), "plugins"), null) : window.require;
 const modulesToInitialize = [
     ["@electron/remote", setRemote],
     ["buffer/", setBuffer]
