@@ -89,9 +89,10 @@ export default class PluginManager extends Emitter {
     static clearCache(plugin: string) {
         if (!path.isAbsolute(plugin)) plugin = path.resolve(this.folder, plugin)
 
-        let current;
-        while (current = Require.resolve(plugin)) {
-            delete Module.cache[current];
+        const object = !window.process || process.contextIsolated ? Module : require
+        const cache = Object.keys(object.cache).filter(c => ~c.indexOf(plugin));
+        for(const item of cache) {
+            delete object.cache[item];
         }
     }
 

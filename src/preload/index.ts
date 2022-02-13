@@ -35,29 +35,27 @@ const API = {
 handleSplash(API);
 
 // Expose Native bindings and cloned process global.
-Object.defineProperties(window, {
-    PCCompatNative: {
-        value: Object.assign({}, API, {cloneObject, getKeys}),
-        configurable: false,
-        writable: false
-    },
-    PCCompatEvents: {
-        value: events,
-        configurable: false,
-        writable: false
-    }
-});
-
 contextBridge.exposeInMainWorld("PCCompatNative", API);
+contextBridge.exposeInMainWorld("PCCompatEvents", events);
+
+if (process.contextIsolated) {
+    Object.defineProperties(window, {
+        PCCompatNative: {
+            value: API,
+            configurable: false,
+            writable: false
+        },
+        PCCompatEvents: {
+            value: events,
+            configurable: false,
+            writable: false
+        }
+    });
+}
 
 IPC.on(IPCEvents.EXPOSE_PROCESS_GLOBAL, () => {
     try {
-        if (!process.contextIsolated) {
-            Object.defineProperty(window, "process", {
-                value: Process,
-                configurable: true
-            });
-        } else {
+        if (process.contextIsolated) {
             contextBridge.exposeInMainWorld("process", Process);
         }
     } catch (error) {

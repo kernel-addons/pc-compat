@@ -265,4 +265,24 @@ export function load(_path: string, mod: string, req = null) {
 // TODO: Add globalPaths support
 const NodeModule = {_extensions: extensions, cache, _load: load, globalPaths: globalPaths};
 
-export default NodeModule;
+if (window.process && !window.process.contextIsolated) {
+    const Module = require("module");
+    const oldLoad = Module._load;
+
+    Module._load = function (mod) {
+        if (mod === "powercord") {
+            return powercord;
+        } else if (~mod.indexOf("pc-settings/components/ErrorBoundary")) {
+            return errorboundary;
+        } else if (mod.startsWith("powercord/")) {
+            const value = mod.split("/").slice(1).filter(Boolean).reduce((value, key) => value[key], powercord);
+            if (value) return value;
+        }
+
+        return Reflect.apply(oldLoad, this, arguments);
+    }
+
+    Module.globalPaths.push(path.resolve(PCCompatNative.getBasePath(), "node_modules"))
+}
+
+export default !window.process || process.contextIsolated ? NodeModule : require("module");

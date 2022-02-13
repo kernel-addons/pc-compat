@@ -84,9 +84,10 @@ export default class StyleManager extends Emitter {
     static clearCache(theme: string) {
         if (!path.isAbsolute(theme)) theme = path.resolve(this.folder, theme)
 
-        let current;
-        while (current = Require.resolve(theme)) {
-            delete Module.cache[current];
+        const object = !window.process || process.contextIsolated ? Module : require
+        const cache = Object.keys(object.cache).filter(c => ~c.indexOf(theme));
+        for(const item of cache) {
+            delete object.cache[item];
         }
     }
 
