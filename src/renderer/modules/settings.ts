@@ -61,9 +61,9 @@ export default class SettingsRenderer {
         return a.order - b.order;
     }
 
-    static patchSettingsView() {
-        const SettingsView = Webpack.findByDisplayName("SettingsView");
-
+    static async patchSettingsView() {
+        const SettingsView = await Webpack.findLazy(Webpack.Filters.byDisplayName("SettingsView"));
+        
         Patcher.after("PCSettings", SettingsView.prototype, "getPredicateSections", (_, __, res) => {
             if (!Array.isArray(res) || !res.some(e => e?.section?.toLowerCase() === "changelog") || res.some(s => s?.id === "pc-settings")) return;
 

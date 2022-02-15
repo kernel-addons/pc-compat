@@ -103,22 +103,24 @@ const overrides = {
 const keys = Object.keys(overrides);
 
 export function wrapInHooks(functionalComponent: Function) {
-    const ReactDispatcher = (React as any).__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED.ReactCurrentDispatcher.current;
-    const originals = keys.map(e => [e, ReactDispatcher[e]]);
+    return (...args: any) => {
+        const ReactDispatcher = (React as any).__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED.ReactCurrentDispatcher.current;
+        const originals = keys.map(e => [e, ReactDispatcher[e]]);
 
-    Object.assign(ReactDispatcher, overrides);
+        Object.assign(ReactDispatcher, overrides);
 
-    let returnValue = null, error = null;
-    try {
-        returnValue = functionalComponent();
-    } catch (err) {
-        error = err;
-    }
+        let returnValue = null, error = null;
+        try {
+            returnValue = functionalComponent();
+        } catch (err) {
+            error = err;
+        }
 
-    Object.assign(ReactDispatcher, Object.fromEntries(originals));
+        Object.assign(ReactDispatcher, Object.fromEntries(originals));
 
-    // Throw it after react we re-assigned react's dispatcher stuff so it won't break discord entirely.
-    if (error) throw error;
+        // Throw it after react we re-assigned react's dispatcher stuff so it won't break discord entirely.
+        if (error) throw error;
 
-    return returnValue;
+        return returnValue;
+    };
 };

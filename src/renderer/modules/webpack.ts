@@ -1,7 +1,5 @@
 // @ts-nocheck
 
-import Frozen from "@decorators/frozen";
-
 if (typeof (Array.prototype.at) !== "function") {
     Array.prototype.at = function (index) {
         return index < 0 ? this[this.length - Math.abs(index)] : this[index];
@@ -28,30 +26,113 @@ export class Filters {
 
 export type ModuleFilter = (module: any, index: number) => boolean;
 
-@Frozen
 class WebpackModule {
     whenReady: Promise<void>;
     cache = null;
+    #listeners = new Set();
     get Filters() {return Filters;}
     get chunkName() {return "webpackChunkdiscord_app";}
-    get id() {return "kernel-req" + Math.random().toString().slice(2, 5);}
+    get id() {return Symbol("pc-compat");}
 
     constructor() {
+        this.waitForGlobal.then(() => {
+            let originalPush = window[this.chunkName].push;
+
+            const handlePush = (chunk: any[]) => {
+                const [, modules] = chunk;
+
+                for (const moduleId in modules) {
+                    const originalModule = modules[moduleId];
+
+                    modules[moduleId] = (module, exports, require) => {
+                        originalModule.call(originalModule, module, exports, require);
+
+                        const listeners = [...this.#listeners];
+                        for (let i = 0; i < listeners.length; i++) {
+                            try {listeners[i](exports);}
+                            catch (error) {
+                                console.error("[Webpack]", "Could not fire callback listener:", error);
+                            }
+                        }
+                    };
+
+                    Object.assign(modules[moduleId], originalModule, {
+                        toString: originalModule.toString.bind(originalModule),
+                        __original: originalModule
+                    });
+                }
+
+                return originalPush.apply(window[this.chunkName], [chunk]);
+            };
+
+            Object.defineProperty(window[this.chunkName], "push", {
+                configurable: true,
+                get: () => handlePush,
+                set: (newPush) => {
+                    originalPush = newPush;
+
+                    Object.defineProperty(window[this.chunkName], "push", {
+                        value: handlePush,
+                        configurable: true,
+                        writable: true
+                    });
+                }
+            });
+        });
+
         this.whenReady = this.waitForGlobal.then(() => new Promise(async onReady => {
-            const [Dispatcher, {ActionTypes} = {}] = await this.findByProps(
-                ["dirtyDispatch"], ["API_HOST", "ActionTypes"],
+            const [Dispatcher, {ActionTypes} = {}, UserStore] = await this.findByProps(
+                ["dirtyDispatch"], ["API_HOST", "ActionTypes"], ["getCurrentUser", "_dispatchToken"],
                 {cache: false, bulk: true, wait: true, forever: true}
             );
 
+            if (UserStore.getCurrentUser()) return onReady();
+            
             const listener = function () {
                 Dispatcher.unsubscribe(ActionTypes.START_SESSION, listener);
+                Dispatcher.unsubscribe(ActionTypes.CONNECTION_OPEN, listener);
                 onReady();
             };
 
             Dispatcher.subscribe(ActionTypes.START_SESSION, listener);
+            Dispatcher.subscribe(ActionTypes.CONNECTION_OPEN, listener);
         }));
+    }
 
-        window.PCWebpack = this;
+    addListener(listener: Function) {
+        this.#listeners.add(listener);
+
+        return () => {
+            this.#listeners.delete(listener);
+        };
+    }
+
+    removeListener(listener: Function) {
+        return this.#listeners.delete(listener);
+    }
+
+    findLazy(filter: Function): Promise<any> {
+        const fromCache = this.findModule(filter);
+        if (fromCache) return Promise.resolve(fromCache);
+
+        return new Promise(resolve => {
+            const listener = (m: any) => {
+                const directMatch = filter(m);
+                if (directMatch) {
+                    resolve(m);
+                    return void remove();
+                }
+                
+                if (!m.default) return;
+                const defaultMatch = filter(m.default);
+                if (!defaultMatch) return;
+
+                resolve(m.default);
+                remove();
+            };
+
+            const remove = this.addListener(listener);
+        });
     }
 
     async waitFor(filter: ModuleFilter, {retries = 100, all = false, forever = false, delay = 50} = {}) {
@@ -76,7 +157,6 @@ class WebpackModule {
             webpackChunkdiscord_app.splice(webpackChunkdiscord_app.indexOf(chunk), 1);
         }
 
-        if (!req) console.warn("[Webpack] Got empty cache.");
         if (cache) this.cache = req;
 
         return req;

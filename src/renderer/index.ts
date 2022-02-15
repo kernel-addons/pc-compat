@@ -68,11 +68,11 @@ export default new class PCCompat {
         }
     }
 
-    patchSettingsHeader() {
+    async patchSettingsHeader() {
         const {Webpack, DiscordModules: {Button, Tooltips}} = Internals;
-        const SettingsComponents = Webpack.findByProps("Header", "Panel");
-
-        Internals.Patcher.after("SettingsHeade", SettingsComponents.default, "Header", (_, [props], ret) => {
+        const SettingsComponents = await Webpack.findLazy(Webpack.Filters.byProps("Header", "Panel"));
+        
+        Internals.Patcher.after("SettingsHeader", SettingsComponents.default, "Header", (_, [props], ret) => {
             if (props.children !== "Powercord") return ret;
 
             ret.props.children = [
@@ -92,8 +92,8 @@ export default new class PCCompat {
         });
     }
 
-    patchVersionTag(): void {
-        const ClientDebugInfo = Internals.Webpack.findByDisplayName("ClientDebugInfo", {default: true});
+    async patchVersionTag(): Promise<void> {
+        const ClientDebugInfo = await Internals.Webpack.findLazy(Internals.Webpack.Filters.byDisplayName("ClientDebugInfo", true));
 
         Internals.Patcher.after("DebugInfo", ClientDebugInfo, "default", (_, [props], res) => {  
             const childs = res.props.children;

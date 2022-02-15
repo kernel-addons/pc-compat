@@ -46,7 +46,7 @@ export default function VersionTag({kernel}) {
     return (
         <React.Fragment>
             {renderElement(`Powercord ${currentBranch} (${currentCommit})`)}
-            {kernel && renderElement(`Kernel ${kernelBranch} (${kernelCommit})`)}
+            {kernel && kernelBranch != null && kernelCommit != null && renderElement(`Kernel ${kernelBranch} (${kernelCommit})`)}
         </React.Fragment>
     )
 };

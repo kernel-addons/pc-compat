@@ -51,7 +51,7 @@ export default class PluginManager extends Emitter {
             if (!fs.statSync(location).isDirectory()) continue;
             if (!fs.existsSync(path.join(location, "manifest.json"))) continue;
             if (!fs.statSync(path.join(location, "manifest.json")).isFile()) continue;
-            if (!this.mainFiles.some(f => fs.existsSync(path.join(location, f)))) continue;
+            // if (!this.mainFiles.some(f => fs.existsSync(path.join(location, f)))) continue;
             if (fs.existsSync(path.join(location, "node_modules"))) globalPaths.push(path.join(location, "node_modules"));
 
             try {
@@ -114,14 +114,14 @@ export default class PluginManager extends Emitter {
     }
 
     static loadPlugin(location: string, log = true) {
-        const _path = path.resolve(location, this.mainFiles.find(f => fs.existsSync(path.resolve(location, f))));
+        // const _path = path.resolve(location, this.mainFiles.find(f => fs.existsSync(path.resolve(location, f))));
         const manifest = Object.freeze(Require(path.resolve(location, "manifest.json")));
         if (this.plugins.get(manifest.name)) throw new Error(`Plugin with name ${manifest.name} already exists!`);
 
         let exports = {};
         try {
             this.clearCache(location);
-            const data = Require(_path);
+            const data = Require(location);
 
             Object.defineProperties(data.prototype, {
                 entityID: {

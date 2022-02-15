@@ -218,8 +218,8 @@ export default function AddonPanel({manager, type}) {
                         key={addon.manifest.name}
                         openSettings={() => {}}
                     />)
-                    : <div className='pc-settings-empty'>
-                        <div className={PlaceholderClasses.emptyStateImage} />
+                    : <div className="pc-settings-empty">
+                        <div className={PlaceholderClasses?.emptyStateImage} />
                         <p>{Messages.GIFT_CONFIRMATION_HEADER_FAIL}</p>
                         <p>{Messages.SEARCH_NO_RESULTS}</p>
                     </div>
