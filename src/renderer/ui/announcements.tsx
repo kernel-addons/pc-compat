@@ -4,6 +4,7 @@ import LoggerModule from "@modules/logger";
 import {promise} from "@modules/discord";
 import Patcher from "@modules/patcher";
 import Webpack from "@modules/webpack";
+import Events from "@modules/events";
 
 const Logger = LoggerModule.create("Announcements");
 
@@ -12,6 +13,7 @@ const [useAnnouncementsStore, AnnouncementsApi] = AnnouncementsStore;
 const patchClassNames = function () {
     const noticeClasses = Webpack.findByProps("notice", "colorDefault", "buttonMinor");
 
+    if (noticeClasses.notice.indexOf("powercord-announcement")) return;
     noticeClasses.notice += " powercord-announcement";
 };
 
@@ -34,6 +36,10 @@ const patchNoticeContainer = async function () {
 promise.then(() => {
     patchClassNames();
     patchNoticeContainer();
+
+    Events.addEventListener("reload-core", () => {
+        Patcher.unpatchAll("pc-compat-notices");
+    });
 }).catch(error => {
     Logger.error("Failed to initialize:", error);
 });

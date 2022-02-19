@@ -24,7 +24,7 @@ Promise.all([
         kernelCommit,
         kernelBranch
     });
-});
+}).catch(() => {});
 
 Git.getLatestCommit(root).then(args => {
     info.currentCommit = (args as unknown as {short: string}).short; 

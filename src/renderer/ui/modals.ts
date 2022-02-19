@@ -1,4 +1,4 @@
-import memoize from "@modules/memoize.js";
+import memoize from "@modules/memoize";
 import {createUpdateWrapper} from "@modules/utilities";
 import TextInput from "@powercord/components/settings/textinput";
 import DiscordModules from "../modules/discord";

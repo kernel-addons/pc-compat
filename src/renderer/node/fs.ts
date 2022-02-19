@@ -2,7 +2,7 @@
 
 import memoize from "@modules/memoize";
 
-export default class fs {
+export default (window.process?.contextIsolated ?? true) ? class fs {
     static readFileSync(path: string, options = "utf8") {
         return PCCompatNative.executeJS(`require("fs").readFileSync(${JSON.stringify(path)}, ${JSON.stringify(options)});`);
     }
@@ -92,4 +92,4 @@ export default class fs {
 
         return memoize(this, "promises", proxy);
     }
-}
+} : window.require("fs");

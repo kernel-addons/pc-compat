@@ -59,6 +59,8 @@ export default class QuickCSS {
     }
 
     static async loadMonaco(): Promise<void> {
+        if (Reflect.has(window, "MonacoEnvironment")) return;
+
         // Based off https://github.com/BetterDiscord/BetterDiscord/blob/main/renderer/src/modules/editor.js
         Object.defineProperty(window, "MonacoEnvironment", {
             value: {

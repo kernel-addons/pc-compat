@@ -14,16 +14,18 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@rollup/plugin-alias": "^3.1.8",
-    "@rollup/plugin-json": "^4.1.0",
-    "@rollup/plugin-node-resolve": "^13.0.6",
     "@swc/core": "^1.2.124",
     "@types/lodash": "^4.14.176",
     "@types/react": "^17.0.37",
     "@types/react-dom": "^17.0.11",
-    "rollup": "^2.61.0",
-    "rollup-plugin-swc": "^0.2.0",
-    "rollup-plugin-uglify": "^6.0.4"
+    "circular-dependency-plugin": "^5.2.2",
+    "css-loader": "^6.6.0",
+    "mini-css-extract-plugin": "^2.5.3",
+    "sass-loader": "^12.6.0",
+    "swc-loader": "^0.1.15",
+    "webpack": "^5.69.0",
+    "webpack-cli": "^4.9.2",
+    "ws": "^8.5.0"
   },
   "dependencies": {
     "@electron/remote": "^2.0.1",

@@ -38,17 +38,19 @@ handleSplash(API);
 Object.defineProperties(window, {
     PCCompatNative: {
         value: Object.assign({}, API, {cloneObject, getKeys}),
-        configurable: false,
-        writable: false
+        configurable: true,
+        writable: true
     },
     PCCompatEvents: {
         value: events,
-        configurable: false,
-        writable: false
+        configurable: true,
+        writable: true
     }
 });
 
-contextBridge.exposeInMainWorld("PCCompatNative", API);
+if (process.contextIsolated) {
+    contextBridge.exposeInMainWorld("PCCompatNative", API);
+}
 
 IPC.on(IPCEvents.EXPOSE_PROCESS_GLOBAL, () => {
     try {

@@ -3,6 +3,7 @@ import LoggerModule from "@modules/logger";
 import Patcher from "@modules/patcher";
 import Clyde from "@modules/clyde";
 import DiscordModules from "@modules/discord";
+import Events from "@modules/events";
 
 const Logger = LoggerModule.create("Commands");
 
@@ -55,6 +56,10 @@ export function initialize() {
 
             if (section.data.length == 0) res.discoverySections.splice(index, 1);
         }
+    });
+
+    Events.addEventListener("reload-core", () => {
+        Patcher.unpatchAll("PowercordCommands");
     });
 };
 

@@ -35,7 +35,25 @@ class WebpackModule {
     get id() {return Symbol("pc-compat");}
 
     constructor() {
-        this.waitForGlobal.then(() => {
+        this.whenReady = this.waitForGlobal.then(() => new Promise(async onReady => {
+            const [Dispatcher, {ActionTypes} = {}, UserStore] = await this.findByProps(
+                ["dirtyDispatch"], ["API_HOST", "ActionTypes"], ["getCurrentUser", "_dispatchToken"],
+                {cache: false, bulk: true, wait: true, forever: true}
+            );
+
+            if (UserStore.getCurrentUser()) return onReady();
+            
+            const listener = function () {
+                Dispatcher.unsubscribe(ActionTypes.START_SESSION, listener);
+                Dispatcher.unsubscribe(ActionTypes.CONNECTION_OPEN, listener);
+                onReady();
+            };
+
+            Dispatcher.subscribe(ActionTypes.START_SESSION, listener);
+            Dispatcher.subscribe(ActionTypes.CONNECTION_OPEN, listener);
+        }));
+
+        this.whenReady.then(() => {
             let originalPush = window[this.chunkName].push;
 
             const handlePush = (chunk: any[]) => {
@@ -44,8 +62,9 @@ class WebpackModule {
                 for (const moduleId in modules) {
                     const originalModule = modules[moduleId];
 
-                    modules[moduleId] = (module, exports, require) => {
-                        originalModule.call(originalModule, module, exports, require);
+                    modules[moduleId] = (...args) => {
+                        const [, exports] = args;
+                        originalModule.apply(originalModule, args);
 
                         const listeners = [...this.#listeners];
                         for (let i = 0; i < listeners.length; i++) {
@@ -71,32 +90,14 @@ class WebpackModule {
                 set: (newPush) => {
                     originalPush = newPush;
 
-                    Object.defineProperty(window[this.chunkName], "push", {
-                        value: handlePush,
-                        configurable: true,
-                        writable: true
-                    });
+                    // Object.defineProperty(window[this.chunkName], "push", {
+                    //     value: handlePush,
+                    //     configurable: true,
+                    //     writable: true
+                    // });
                 }
             });
         });
-
-        this.whenReady = this.waitForGlobal.then(() => new Promise(async onReady => {
-            const [Dispatcher, {ActionTypes} = {}, UserStore] = await this.findByProps(
-                ["dirtyDispatch"], ["API_HOST", "ActionTypes"], ["getCurrentUser", "_dispatchToken"],
-                {cache: false, bulk: true, wait: true, forever: true}
-            );
-
-            if (UserStore.getCurrentUser()) return onReady();
-            
-            const listener = function () {
-                Dispatcher.unsubscribe(ActionTypes.START_SESSION, listener);
-                Dispatcher.unsubscribe(ActionTypes.CONNECTION_OPEN, listener);
-                onReady();
-            };
-
-            Dispatcher.subscribe(ActionTypes.START_SESSION, listener);
-            Dispatcher.subscribe(ActionTypes.CONNECTION_OPEN, listener);
-        }));
     }
 
     addListener(listener: Function) {
@@ -148,18 +149,15 @@ class WebpackModule {
     }
 
     request(cache = true) {
-        if (cache && this.cache) return this.cache;
-        let req = undefined;
+        if (this.cache) return this.cache;
 
         if (Array.isArray(window[this.chunkName])) {
-            const chunk = [[this.id], {}, __webpack_require__ => req = __webpack_require__];
-            webpackChunkdiscord_app.push(chunk);
-            webpackChunkdiscord_app.splice(webpackChunkdiscord_app.indexOf(chunk), 1);
+            const chunk = [[this.id], {}, __webpack_require__ => __webpack_require__];
+            this.cache = window[this.chunkName].push(chunk);
+            window[this.chunkName].splice(window[this.chunkName].indexOf(chunk), 1);
         }
 
-        if (cache) this.cache = req;
-
-        return req;
+        return this.cache;
     }
 
     findModule(filter: ModuleFilter, {all = false, cache = true, force = false, default: defaultExports = false} = {}) {

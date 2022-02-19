@@ -1,15 +1,3 @@
-export const ipcRenderer: Electron.IpcRenderer = PCCompatNative.executeJS(`PCCompatNative.cloneObject(require("electron").ipcRenderer)`);
-
-export const shell: Electron.Shell = PCCompatNative.executeJS(`require("electron").shell`);
-export const clipboard: Electron.Clipboard = PCCompatNative.executeJS(`require("electron").clipboard`);
-export const contextBridge: Electron.ContextBridge = {
-    exposeInMainWorld(name: string, value: any) {
-        window[name] = value;
-    }
-};
-
-export let remote: typeof import("@electron/remote/renderer") = null;
-
 // @ts-ignore
 export const electron: {
     ipcRenderer: Electron.IpcRenderer,
@@ -17,16 +5,20 @@ export const electron: {
     clipboard: Electron.Clipboard,
     contextBridge: Electron.ContextBridge,
     remote: typeof import("@electron/remote/renderer")
-} = {
-    ipcRenderer,
-    shell,
-    contextBridge,
-    clipboard,
-    get remote() {return remote;}
-};
+} = (window.process?.contextIsolated ?? true) ? {
+    ipcRenderer: PCCompatNative.executeJS(`PCCompatNative.cloneObject(require("electron").ipcRenderer)`),
+    shell: PCCompatNative.executeJS(`require("electron").shell`),
+    clipboard: PCCompatNative.executeJS(`require("electron").clipboard`),
+    contextBridge: {
+        exposeInMainWorld(name: string, value: any) {
+            window[name] = value;
+        }
+    },
+    remote: null
+} : window.require("electron");
 
 export function setRemote(module: any) {
-    remote = module;
+    electron.remote = module;
 };
 
 export default electron;

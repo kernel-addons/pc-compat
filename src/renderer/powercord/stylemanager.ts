@@ -5,6 +5,7 @@ import LoggerModule from "@modules/logger";
 import {fs, Module, path, require as Require} from "@node";
 import Emitter from "../classes/staticemitter";
 import Theme from "@powercord/classes/theme";
+import Events from "@modules/events";
 
 const Logger = LoggerModule.create("StyleManager");
 
@@ -13,7 +14,7 @@ export default class StyleManager extends Emitter {
 
     static mainFiles = ["powercord_manifest.json", "manifest.json"];
 
-    static themes = new Map();
+    static themes = new Map<string, Theme>((window as any).__PC_THEMES__ ?? []);
 
     static states: object;
 
@@ -28,7 +29,11 @@ export default class StyleManager extends Emitter {
 
         this.states = DataStore.tryLoadData("themes");
 
-        this.loadAll();
+        if (!(window as any).__PC_THEMES__) this.loadAll();
+
+        Events.addEventListener("reload-core", () => {
+            (window as any).__PC_PLUGINS__ = Array.from(this.themes);
+        });
     }
 
     static loadAll(missing = false) {
@@ -84,9 +89,10 @@ export default class StyleManager extends Emitter {
     static clearCache(theme: string) {
         if (!path.isAbsolute(theme)) theme = path.resolve(this.folder, theme)
 
-        let current;
-        while (current = Require.resolve(theme)) {
-            delete Module.cache[current];
+        const object = !window.process || process.contextIsolated ? Module : window.require
+        const cache = Object.keys(object.cache).filter(c => ~c.indexOf(theme));
+        for(const item of cache) {
+            delete object.cache[item];
         }
     }
 

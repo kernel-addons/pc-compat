@@ -6,6 +6,7 @@ import {joinClassNames, uuid} from "@modules/utilities";
 import DiscordIcon from "./discordicon";
 import createDispatcher from "@flux/dispatcher";
 import {FontAwesome} from "@powercord/components/icons";
+import Events from "@modules/events";
 
 const [useNoticesStore, NoticesApi] = createStore({notices: {}});
 const Dispatcher = createDispatcher();
@@ -158,6 +159,11 @@ export default class Notices {
         ReactDOM.render(<NoticesContainer />, this.container);
 
         document.body.appendChild(this.container);
+
+        Events.addEventListener("reload-core", () => {
+            ReactDOM.unmountComponentAtNode(this.container);
+            this.container.remove();
+        });
     }
 
     static show(options: any) {

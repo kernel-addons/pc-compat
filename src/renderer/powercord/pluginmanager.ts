@@ -7,6 +7,7 @@ import Plugin from "./classes/plugin";
 import Emitter from "../classes/staticemitter";
 import {globalPaths} from "@node/module";
 import {getSettings} from "./classes/settings";
+import Events from "@modules/events";
 
 const Logger = LoggerModule.create("PluginManager");
 
@@ -15,7 +16,7 @@ export default class PluginManager extends Emitter {
 
     static mainFiles = ["index.js", "index.jsx"];
 
-    static plugins = new Map();
+    static plugins = new Map<string, Plugin>((window as any).__PC_PLUGINS__ ?? []);
 
     static states: object;
 
@@ -30,7 +31,11 @@ export default class PluginManager extends Emitter {
 
         this.states = DataStore.tryLoadData("plugins");
 
-        this.loadAll();
+        if (!(window as any).__PC_PLUGINS__) this.loadAll();
+
+        Events.addEventListener("reload-core", () => {
+            (window as any).__PC_PLUGINS__ = Array.from(this.plugins);
+        });
     }
 
     static loadAll(missing = false) {
@@ -89,9 +94,10 @@ export default class PluginManager extends Emitter {
     static clearCache(plugin: string) {
         if (!path.isAbsolute(plugin)) plugin = path.resolve(this.folder, plugin)
 
-        let current;
-        while (current = Require.resolve(plugin)) {
-            delete Module.cache[current];
+        const object = !window.process || process.contextIsolated ? Module : window.require
+        const cache = Object.keys(object.cache).filter(c => ~c.indexOf(plugin));
+        for(const item of cache) {
+            delete object.cache[item];
         }
     }
 
@@ -118,7 +124,7 @@ export default class PluginManager extends Emitter {
         const manifest = Object.freeze(Require(path.resolve(location, "manifest.json")));
         if (this.plugins.get(manifest.name)) throw new Error(`Plugin with name ${manifest.name} already exists!`);
 
-        let exports = {};
+        let exports: Plugin = {} as any;
         try {
             this.clearCache(location);
             const data = Require(location);

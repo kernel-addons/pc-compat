@@ -1,18 +1,25 @@
 import DiscordModules, {promise} from "@modules/discord";
+import Events from "@modules/events";
 
 promise.then(() => {
     const {LocaleManager, LocaleStore} = DiscordModules;
 
     locale = LocaleManager.getLocale();
 
-    LocaleStore.addChangeListener(() => {
+    const listener = () => {
         if (LocaleStore.locale !== locale) {
             locale = LocaleStore.locale;
             LocaleManager.loadPromise.then(injectStrings);
         }
-    });
+    };
+
+    LocaleStore.addChangeListener(listener);
 
     injectStrings();
+
+    Events.addEventListener("reload-core", () => {
+        LocaleStore.removeChangeListener(listener);
+    });
 });
 
 export let messages = {};

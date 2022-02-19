@@ -5,21 +5,27 @@ import SettingsPanel from "@ui/components/settingspanel";
 import {getSettings} from "@powercord/classes/settings";
 import memoize from "./memoize";
 import {getOwnerInstance} from "@powercord/util";
+import Events from "./events";
 
-export default class SettingsRenderer {
-    static get sidebarClass() {return memoize(this, "sidebarClass", Webpack.findByProps("standardSidebarView"));}
+const SettingsRenderer = new class SettingsRenderer {
+    get sidebarClass() {return memoize(this, "sidebarClass", Webpack.findByProps("standardSidebarView"));}
 
-    static defaultPanels = [
+    panels: any[] = [];
+
+    promises = {
+        cancelled: false,
+        cancel() {this.cancelled = true;}
+    };
+
+    defaultPanels = [
         {section: "DIVIDER"},
         {
             section: "HEADER",
             label: "Powercord",
         },
-    ]
+    ];
 
-    static panels: any[] = [];
-
-    static registerPanel(id: string, options: {label: string, render: () => import("react").ReactElement, header?: import("react").ReactElement, order: number, predicate?(): boolean}) {
+    registerPanel(id: string, options: {label: string, render: () => import("react").ReactElement, header?: import("react").ReactElement, order: number, predicate?(): boolean}) {
         const {label, render, order} = options;
         const tab = this.panels.find(e => e.id === id)
 
@@ -49,7 +55,7 @@ export default class SettingsRenderer {
         };
     }
 
-    static unregisterPanel(id: string) {
+    unregisterPanel(id: string) {
         const panel = this.panels.findIndex(e => e.id === id);
         if (panel < 0) return;
 
@@ -57,19 +63,20 @@ export default class SettingsRenderer {
         this.forceUpdate();
     }
 
-    static sortPanels(a, b) {
+    sortPanels(a, b) {
         return a.order - b.order;
     }
 
-    static async patchSettingsView() {
+    async patchSettingsView() {
         const SettingsView = await Webpack.findLazy(Webpack.Filters.byDisplayName("SettingsView"));
-        
+        if (this.promises.cancelled) return;
+
         Patcher.after("PCSettings", SettingsView.prototype, "getPredicateSections", (_, __, res) => {
             if (!Array.isArray(res) || !res.some(e => e?.section?.toLowerCase() === "changelog") || res.some(s => s?.id === "pc-settings")) return;
 
             const index = res.findIndex(s => s?.section?.toLowerCase() === "changelog") - 1;
             if (index < 0) return;
-            const panels: any[] = [...SettingsRenderer.defaultPanels];
+            const panels: any[] = [...this.defaultPanels];
 
             for (let i = 0; i < this.panels.length; i++) {
                 if (this.panels[i].predicate && !this.panels[i].predicate()) continue;
@@ -79,9 +86,14 @@ export default class SettingsRenderer {
 
             res.splice(index, 0, ...panels);
         });
+
+        Events.addEventListener("reload-core", () => {
+            Patcher.unpatchAll("PCSettings");
+            this.promises.cancel();
+        });
     }
 
-    static forceUpdate() {
+    forceUpdate() {
         const [node] = document.getElementsByName(this.sidebarClass.standardSidebarView);
         if (!node) return;
 
@@ -89,3 +101,5 @@ export default class SettingsRenderer {
         if (instance) instance.forceUpdate();
     }
 }
+
+export default SettingsRenderer;

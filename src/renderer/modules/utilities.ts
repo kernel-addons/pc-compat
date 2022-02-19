@@ -93,4 +93,12 @@ export function uuid(length = 30) {
     } while (uuid.length < length);
 
     return uuid;
-}
+};
+
+export const testJSON = function<T>(json: string): T | false {
+    try {
+        return JSON.parse(json);
+    } catch (error) {
+        return false;
+    }
+};

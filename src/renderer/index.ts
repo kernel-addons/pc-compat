@@ -14,10 +14,18 @@ import {Modals} from "./ui";
 import DiscordIcon from "@ui/discordicon";
 import Updater from "@ui/updater";
 import VersionTag from "@ui/components/versiontag";
+import "./styles/index";
+import Events from "@modules/events";
+import DevServer from "@modules/devserver";
 
 const Logger = Internals.Logger.create("Core");
 
 export default new class PCCompat {
+    promises = {
+        cancelled: false,
+        cancel() {this.cancelled = true;}
+    }
+
     start() {
         Logger.log("Loading");
         promise.then(this.onStart.bind(this));
@@ -37,7 +45,7 @@ export default new class PCCompat {
             writable: false
         });
 
-        DOM.injectCSS("core", Require(path.resolve(PCCompatNative.getBasePath(), "src/renderer/styles", "index.scss")));
+        DOM.injectCSS("core", Require(path.resolve(PCCompatNative.getBasePath(), "dist", "style.css")));
         DOM.injectCSS("font-awesome", Constants.FONTAWESOME_BASEURL, {type: "URL", documentHead: true});
 
         SettingsRenderer.patchSettingsView();
@@ -45,9 +53,16 @@ export default new class PCCompat {
         Updater.initialize();
         PluginManager.initialize();
 
+        if (__NODE_ENV__ === "DEVELOPMENT") DevServer.initialize();
+
         this.checkForChangelog();
         this.patchSettingsHeader();
         this.patchVersionTag();
+
+        Events.addEventListener("reload-core", () => {
+            DOM.clearCSS("core");
+            DOM.clearCSS("font-awesome");
+        });
     }
 
     expose(name: string, namespace: any) {
@@ -71,8 +86,9 @@ export default new class PCCompat {
     async patchSettingsHeader() {
         const {Webpack, DiscordModules: {Button, Tooltips}} = Internals;
         const SettingsComponents = await Webpack.findLazy(Webpack.Filters.byProps("Header", "Panel"));
+        if (this.promises.cancelled) return;
         
-        Internals.Patcher.after("SettingsHeader", SettingsComponents.default, "Header", (_, [props], ret) => {
+        const cancel = Internals.Patcher.after("SettingsHeader", SettingsComponents.default, "Header", (_, [props], ret) => {
             if (props.children !== "Powercord") return ret;
 
             ret.props.children = [
@@ -90,17 +106,25 @@ export default new class PCCompat {
                 }))
             ];
         });
+
+        Events.addEventListener("reload-core", () => {
+            cancel();
+        });
     }
 
     async patchVersionTag(): Promise<void> {
         const ClientDebugInfo = await Internals.Webpack.findLazy(Internals.Webpack.Filters.byDisplayName("ClientDebugInfo", true));
 
-        Internals.Patcher.after("DebugInfo", ClientDebugInfo, "default", (_, [props], res) => {  
+        const cancel = Internals.Patcher.after("DebugInfo", ClientDebugInfo, "default", (_, [props], res) => {  
             const childs = res.props.children;
             if (!Array.isArray(childs)) return res;
 
             childs.push(React.createElement(VersionTag, {kernel: !props.hasKernelTag}));
             props.hasKernelTag ??= true;
+        });
+
+        Events.addEventListener("reload-core", () => {
+            cancel();
         });
     }
 
