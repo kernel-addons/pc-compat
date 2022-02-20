@@ -3,6 +3,7 @@ import LoggerModule from "@modules/logger";
 import Patcher from "@modules/patcher";
 import Clyde from "@modules/clyde";
 import DiscordModules from "@modules/discord";
+import {findInReactTree} from "@powercord/util";
 
 const Logger = LoggerModule.create("Commands");
 
@@ -11,7 +12,8 @@ export const commands = new Map();
 export const section = {
     id: "powercord",
     type: 1,
-    name: "Powercord"
+    name: "Powercord",
+    icon: "https://cdn.discordapp.com/attachments/891039688352219198/908403940738093106/46755359.png"
 };
 
 export function initialize() {
@@ -22,16 +24,24 @@ export function initialize() {
         {bulk: true}
     );
 
+    const Icon = Webpack.findByDisplayName("ApplicationCommandDiscoveryApplicationIcon", { default: true });
+    Patcher.after("PowercordCommands", Icon, "default", (_, [props], res) => {
+        if (props.section.id === "powercord") {
+            const img = findInReactTree(res, r => r.props.src);
+            img.props.src = section.icon;
+        }
+    })
+
     Patcher.after("PowercordCommands", AssetUtils, "getApplicationIconURL", (_, [props]) => {
         if (props.id === "powercord") {
-            return "https://cdn.discordapp.com/attachments/891039688352219198/908403940738093106/46755359.png";
+            return section.icon;
         }
     });
 
     Patcher.after("PowercordCommands", Commands, "queryCommands", (_, [,, query], res) => {
         const cmds = [...commands.values()].filter(e => e.name.includes(query));
 
-        if (cmds) res.push(...cmds);
+        res.push(...cmds);
     })
 
     Patcher.after("PowercordCommands", Commands, "getApplicationCommandSectionName", (_, [section], res) => {
