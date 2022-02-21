@@ -18,8 +18,8 @@ export function formatTime(time) {
 
     return [ hours, minutes, seconds ]
       .map(v => v < 10 ? `0${v}` : v)
-      .filter((v, i) => v !== '00' || i > 0)
-      .join(':');
+      .filter((v, i) => v !== "00" || i > 0)
+      .join(":");
 };
 
 export function findInTree(tree = {}, filter = _ => _, {ignore = [], walkable = [], maxProperties = 100} = {}): any {
@@ -137,7 +137,7 @@ promise.then(() => {
             const render = await old(args[0]);
             return (props) => {
                 const res = render(props);
-                const wrapped = typeof res.type === 'object' ? res.props.children : res;
+                const wrapped = typeof res.type === "object" ? res.props.children : res;
 
                 const displayName = wrapped?.type?.displayName;
                 const collection = menuPatches[displayName];
@@ -147,8 +147,8 @@ promise.then(() => {
                     const Menu = Webpack.findModule(m => m.default?.displayName === displayName);
 
                     for (const patch of patches) {
-                        const Patch = Patcher[patch.before ? 'before' : 'after'];
-                        Patch(patch.id, Menu, 'default', (_, ...args) => {
+                        const Patch = Patcher[patch.before ? "before" : "after"];
+                        Patch(patch.id, Menu, "default", (_, ...args) => {
                             return patch.func.apply(_, args);
                         })
 
@@ -163,7 +163,7 @@ promise.then(() => {
                     const AnalyticsContext = Webpack.findModule(m => [m.default, m.__powercordOriginal_default].includes(wrapped.type));
 
                     for (const patch of patches ?? []) {
-                        Patcher.after(patch.id, AnalyticsContext, 'default', (_, args, res) => {
+                        Patcher.after(patch.id, AnalyticsContext, "default", (_, args, res) => {
                             const menu = res.props.children.type;
 
                             patch.memo ??= function (...args) {
