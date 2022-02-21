@@ -1,6 +1,9 @@
 import {DiscordModules, Webpack, Patcher} from "@modules";
 import {promise} from "@modules/discord";
 import Events from "@modules/events";
+import LoggerModule from "@modules/logger";
+
+const Logger = LoggerModule.create("Utilities");
 
 export const sleep = (time) => new Promise(f => setTimeout(f, time));
 
@@ -154,6 +157,8 @@ promise.then(() => {
 
                         patch.applied = true;
                     }
+
+                    delete menuPatches[displayName];
                 } else if (!displayName) {
                     const rendered = wrapInHooks(wrapped.type)(wrapped.props);
                     const displayName = rendered?.props?.children?.type?.displayName;
@@ -172,7 +177,12 @@ promise.then(() => {
                                 }
 
                                 const res = menu.apply(this, args);
-                                return patch.func.apply(this, [args, res]) ?? res;
+                                try {
+                                    return patch.func.apply(this, [args, res]);
+                                } catch(e) {
+                                    Logger.error(`Failed to run context menu injection with id ${patch.id}`, e)
+                                    return res;
+                                }
                             }
 
                             res.props.children.type = patch.memo
@@ -182,6 +192,8 @@ promise.then(() => {
 
                         patch.applied = true;
                     }
+
+                    delete menuPatches[displayName]
 
                     wrapped.type = AnalyticsContext.default;
                 }
