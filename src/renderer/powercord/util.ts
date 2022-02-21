@@ -150,7 +150,7 @@ promise.then(() => {
                     const Menu = Webpack.findModule(m => m.default?.displayName === displayName);
 
                     for (const patch of patches) {
-                        const Patch = Patcher[patch.before ? "before" : "after"];
+                        const Patch = Patcher[patch.before ? 'before' : 'after'].bind(Patcher);
                         Patch(patch.id, Menu, "default", (_, ...args) => {
                             return patch.func.apply(_, args);
                         })
