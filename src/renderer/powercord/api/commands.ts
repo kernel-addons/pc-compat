@@ -78,6 +78,10 @@ export function initialize() {
             if (section.data.length == 0) res.discoverySections.splice(index, 1);
         }
     });
+    
+    Events.addEventListener("reload-core", () => {
+        Patcher.unpatchAll("PowercordCommands");
+    });
 };
 
 export async function handleCommand(options, args) {
