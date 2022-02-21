@@ -26,14 +26,14 @@ export function initialize() {
 
     const Icon = Webpack.findByDisplayName("ApplicationCommandDiscoveryApplicationIcon", { default: true });
     Patcher.after("PowercordCommands", Icon, "default", (_, [props], res) => {
-        if (props.section.id === "powercord") {
+        if (props.section.id === section.id) {
             const img = findInReactTree(res, r => r.props.src);
             img.props.src = section.icon;
         }
     })
 
     Patcher.after("PowercordCommands", AssetUtils, "getApplicationIconURL", (_, [props]) => {
-        if (props.id === "powercord") {
+        if (props.id === section.id) {
             return section.icon;
         }
     });
@@ -45,7 +45,7 @@ export function initialize() {
     })
 
     Patcher.after("PowercordCommands", Commands, "getApplicationCommandSectionName", (_, [section], res) => {
-        if (section.id === "powercord") return "Powercord";
+        if (section.id === section.id) return section.name;
     });
 
     Patcher.after("PowercordCommands", CommandUtils, "useApplicationCommandsDiscoveryState", (_, [,,, isChat], res: any) => {
