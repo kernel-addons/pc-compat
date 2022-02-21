@@ -1,5 +1,6 @@
+import createForceUpdate from "@flux/forceupdate";
 import Webpack from "@modules/webpack";
-import {DiscordModules} from "../../modules";
+import DiscordModules from "@modules/discord";
 
 export default function AsyncComponent({_provider, _fallback, ...props}) {
     const [Component, setComponent] = DiscordModules.React.useState(() => (_fallback ?? (() => null)));
@@ -14,13 +15,16 @@ export default function AsyncComponent({_provider, _fallback, ...props}) {
 };
 
 export function from(promise: Promise<any>, fallback?: any) {
+    const [forceUpdate, useForceUpdate] = createForceUpdate();
     const value = {resolved: false, component: null};
 
     promise.then((component) => {
         Object.assign(value, {component, resolved: true});
+        forceUpdate();
     });
 
     return props => {
+        useForceUpdate();
         if (value.resolved) return React.createElement(value.component, props);
 
         return DiscordModules.React.createElement(AsyncComponent, {

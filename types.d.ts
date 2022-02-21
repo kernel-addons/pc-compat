@@ -13,4 +13,5 @@ declare const PCCompatNative: {
 
 declare const React: typeof import("react");
 declare const _: typeof import("lodash");
-declare const powercord: any; // TODO: Add "powercord" global typings.
+declare const powercord: typeof import("@powercord"); // TODO: Add "powercord" global typings.
+declare const __NODE_ENV__: "DEVELOPMENT" | "PRODUCTION";

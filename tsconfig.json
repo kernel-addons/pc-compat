@@ -12,6 +12,8 @@
         "paths": {
             "@powercord/*": ["src/renderer/powercord/*"],
             "@powercord": ["src/renderer/powercord/index"],
+            "powercord/*": ["src/renderer/powercord/*"],
+            "powercord": ["src/renderer/powercord/index"],
             "@data/*": ["src/renderer/data/*"],
             "@data": ["src/renderer/data/index"],
             "@modules/*": ["src/renderer/modules/*"],
