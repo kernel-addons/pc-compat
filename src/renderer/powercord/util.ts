@@ -1,4 +1,6 @@
-import {DiscordModules} from "@modules";
+import {DiscordModules, Webpack, Patcher} from "@modules";
+import {promise} from "@modules/discord";
+import Events from "@modules/events";
 
 export const sleep = (time) => new Promise(f => setTimeout(f, time));
 
@@ -124,3 +126,83 @@ export function wrapInHooks(functionalComponent: Function) {
         return returnValue;
     };
 };
+
+const menuPatches = {};
+promise.then(() => {
+    const ContextMenu = Webpack.findByProps("openContextMenuLazy");
+    Patcher.before("pc-context-menu-opener", ContextMenu, "openContextMenuLazy", (_, args, res) => {
+        const old = args[1];
+
+        args[1] = async () => {
+            const render = await old(args[0]);
+            return (props) => {
+                const res = render(props);
+                const wrapped = typeof res.type === 'object' ? res.props.children : res;
+
+                const displayName = wrapped?.type?.displayName;
+                const collection = menuPatches[displayName];
+                const patches = collection?.filter(p => !p.applied);
+
+                if (displayName && patches?.length) {
+                    const Menu = Webpack.findModule(m => m.default?.displayName === displayName);
+
+                    for (const patch of patches) {
+                        const Patch = Patcher[patch.before ? 'before' : 'after'];
+                        Patch(patch.id, Menu, 'default', (_, ...args) => {
+                            return patch.func.apply(_, args);
+                        })
+
+                        patch.applied = true;
+                    }
+                } else if (!displayName) {
+                    const rendered = wrapInHooks(wrapped.type)(wrapped.props);
+                    const displayName = rendered?.props?.children?.type?.displayName;
+                    const collection = menuPatches[displayName];
+                    const patches = collection?.filter(p => !p.applied);
+
+                    const AnalyticsContext = Webpack.findModule(m => [m.default, m.__powercordOriginal_default].includes(wrapped.type));
+
+                    for (const patch of patches ?? []) {
+                        Patcher.after(patch.id, AnalyticsContext, 'default', (_, args, res) => {
+                            const menu = res.props.children.type;
+
+                            if (!patch.memo) patch.memo = function (...args) {
+                                if (patch.before) {
+                                    return menu.apply(this, [patch.func.apply(this, [args])]);
+                                }
+
+                                const res = menu.apply(this, args);
+                                return patch.func.apply(this, [args, res]) ?? res;
+                            }
+
+                            res.props.children.type = patch.memo
+
+                            return res;
+                        })
+
+                        patch.applied = true;
+                    }
+
+                    wrapped.type = AnalyticsContext.default;
+                }
+
+                return res
+            }
+        }
+
+        return args
+    })
+
+    Events.addEventListener("reload-core", () => {
+        Patcher.unpatchAll("pc-context-menu-opener")
+        for (const menu of Object.keys(menuPatches)) {
+            const items = menuPatches[menu];
+            items.map(e => Patcher.unpatchAll(e.id))
+        }
+    })
+})
+
+export function injectContextMenu(id, name, func, before = false) {
+    menuPatches[name] ??= [];
+    menuPatches[name].push({id, name, func, before});
+}
