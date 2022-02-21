@@ -166,7 +166,7 @@ promise.then(() => {
                         Patcher.after(patch.id, AnalyticsContext, 'default', (_, args, res) => {
                             const menu = res.props.children.type;
 
-                            if (!patch.memo) patch.memo = function (...args) {
+                            patch.memo ??= function (...args) {
                                 if (patch.before) {
                                     return menu.apply(this, [patch.func.apply(this, [args])]);
                                 }
