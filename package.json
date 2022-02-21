@@ -1,18 +1,18 @@
 {
   "name": "pc-compat",
   "version": "1.0.0",
-  "description": "",
+  "description": "A Kernel compatibility layer for powercord plugins and themes.",
   "main": "index.js",
   "scripts": {
-    "build-renderer": "rollup -c --mode=renderer",
-    "build-main": "rollup -c --mode=main",
-    "build-preload": "rollup -c --mode=preload",
+    "build-renderer": "webpack --progress --env=mode=renderer --env=minify=true",
+    "build-main": "webpack --progress --env=mode=main --env=minify=true",
+    "build-preload": "webpack --progress --env=mode=preload --env=minify=true",
     "dist": "pnpm run build-renderer && pnpm run build-main && pnpm run build-preload",
     "initialize": "pnpm install --production"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Strencher & eternal",
+  "license": "Unlicensed",
   "devDependencies": {
     "@swc/core": "^1.2.124",
     "@types/lodash": "^4.14.176",

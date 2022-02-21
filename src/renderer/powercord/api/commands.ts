@@ -3,7 +3,8 @@ import LoggerModule from "@modules/logger";
 import Patcher from "@modules/patcher";
 import Clyde from "@modules/clyde";
 import DiscordModules from "@modules/discord";
-import Events from "@modules/events";
+import {findInReactTree} from "@powercord/util";
+import Events from '@modules/events';
 
 const Logger = LoggerModule.create("Commands");
 
@@ -13,30 +14,47 @@ export const section = {
     id: "powercord",
     type: 1,
     name: "Powercord",
-    icon: "__POWERCORD__"
+    icon: "https://cdn.discordapp.com/attachments/891039688352219198/908403940738093106/46755359.png"
 };
 
 export function initialize() {
-    const [AssetUtils, CommandUtils, Commands] = Webpack.findByProps(["getApplicationIconURL"], ["useApplicationCommandsDiscoveryState"], ["getBuiltInCommands"], {bulk: true});
+    const [AssetUtils, CommandUtils, Commands] = Webpack.findByProps(
+        ["getApplicationIconURL"],
+        ["useApplicationCommandsDiscoveryState"],
+        ["queryCommands"],
+        {bulk: true}
+    );
+
+    const Icon = Webpack.findByDisplayName("ApplicationCommandDiscoveryApplicationIcon", { default: true });
+    Patcher.after("PowercordCommands", Icon, "default", (_, [props], res) => {
+        if (props.section.id === section.id) {
+            const img = findInReactTree(res, r => r.props.src);
+            img.props.src = section.icon;
+        }
+    })
 
     Patcher.after("PowercordCommands", AssetUtils, "getApplicationIconURL", (_, [props]) => {
-        if (props.icon === "__POWERCORD__") return "https://cdn.discordapp.com/attachments/891039688352219198/908403940738093106/46755359.png";
+        if (props.id === section.id) {
+            return section.icon;
+        }
     });
 
-    Patcher.after("PowercordCommands", Commands, "getBuiltInCommands", (_, [,, isChat], res) => {
-        if (isChat !== false) return res;
+    Patcher.after("PowercordCommands", Commands, "queryCommands", (_, [,, query], res) => {
+        const cmds = [...commands.values()].filter(e => e.name.includes(query));
 
-        return [...res, ...commands.values()]
+        res.push(...cmds);
     })
+
+    Patcher.after("PowercordCommands", Commands, "getApplicationCommandSectionName", (_, [section], res) => {
+        if (section.id === section.id) return section.name;
+    });
 
     Patcher.after("PowercordCommands", CommandUtils, "useApplicationCommandsDiscoveryState", (_, [,,, isChat], res: any) => {
         if (isChat !== false) return res;
 
-
-        if (!res.discoverySections.find(d => d.key == section.id)) {
+        if (!res.discoverySections.find(d => d.key == section.id) && commands.size) {
             const cmds = [...commands.values()];
 
-            res.applicationCommandSections.push(section);
             res.discoveryCommands.push(...cmds);
             res.commands.push(...cmds.filter(cmd => !res.commands.some(e => e.name === cmd.name)));
 
@@ -47,6 +65,10 @@ export function initialize() {
             });
 
             res.sectionsOffset.push(commands.size);
+        }
+
+        if (!res.applicationCommandSections.find(s => s.id == section.id) && commands.size) {
+            res.applicationCommandSections.push(section);
         }
 
         const index = res.discoverySections.findIndex(e => e.key === "-2");
