@@ -30,6 +30,7 @@ module.exports = args => {
             ...Object.fromEntries(
                 Object.keys(pkg.dependencies).map(e => [e, e])
             ),
+            child_process: "child_process",
             inspector: "inspector",
             path: "path",
             fs: "fs",
