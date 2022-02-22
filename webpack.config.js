@@ -2,6 +2,7 @@ const path = require("path");
 const CircularDependencyPlugin = require("circular-dependency-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const {DefinePlugin} = require("webpack");
+const pkg = require("./package.json");
 
 module.exports = args => {
     const {mode = "renderer", minify = false} = args;
@@ -25,13 +26,15 @@ module.exports = args => {
             __dirname: false
         },
         externals: {
-            sass: "sass",
+            // Automatically add all dependencies as externals.
+            ...Object.fromEntries(
+                Object.keys(pkg.dependencies).map(e => [e, e])
+            ),
             inspector: "inspector",
             path: "path",
             fs: "fs",
             module: "module",
             electron: "electron",
-            "@electron/remote": "@electron/remote"
         },
         module: {
             rules: [
