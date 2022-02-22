@@ -8,6 +8,7 @@ import TextInput from "./settings/textinput";
 import RadioGroup from "./settings/radiogroup";
 import SelectInput from "./settings/selectinput";
 import Category from './settings/category';
+import TextAreaInput from './settings/textareainput';
 import Divider from "./divider"
 import ColorPicker, {ColorPickerInput} from "./settings/colorpicker";
 import SliderInput from "./settings/slider";
@@ -30,7 +31,8 @@ let Components = {
         SliderInput,
         FormItem,
         SelectInput,
-        Checkbox
+        Checkbox,
+        TextAreaInput
     },
     Icon,
     AsyncComponent,

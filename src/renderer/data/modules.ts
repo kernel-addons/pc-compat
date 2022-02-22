@@ -73,6 +73,9 @@ export default {
     TextInput: {
         name: "TextInput"
     },
+    TextArea: {
+        name: "TextArea"
+    },
     SelectInput: {
         name: "SelectTempWrapper"
     },
