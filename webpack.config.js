@@ -9,7 +9,7 @@ module.exports = args => {
     
     /**@type {import("webpack").Configuration} */
     const config = {
-        devtool: "eval-source-map",
+        devtool: !!minify ? false : "eval-source-map",
         mode: !!minify ? "production" : "development",
         entry: `./src/${mode}/index`,
         output: {
