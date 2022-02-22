@@ -3,7 +3,7 @@ const Buffer = {};
 export const setBuffer = function (buffer: any) {
     Object.assign(Buffer, buffer);
 
-    window.Buffer = buffer.Buffer;
+    Object.assign(window, {Buffer: buffer.Buffer});
 };
 
 export default Buffer;
