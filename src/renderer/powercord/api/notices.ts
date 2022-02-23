@@ -1,5 +1,8 @@
 import Notices from "@ui/notices";
 
+export const toasts = {};
+export const announcements = {};
+
 export function sendToast(id: string, options: any) {
     return Notices.show(Object.assign(options, {id}));
 }
