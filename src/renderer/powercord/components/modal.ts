@@ -11,22 +11,16 @@ Webpack.whenReady.then(() => {
         keys.map(key => [key === "ModalSize" ? "Sizes" : key.slice("Modal".length), ModalComponents[key]])
     );
 
-    const BindProps = (ModalComponent) => (props) => {
-        const modalProps = React.useContext(ModalActions.ModalContext);
-            
-        return React.createElement(ModalComponent, Object.assign({}, modalProps, props));
+    const ModalRoot = (props) => {
+        return React.createElement(ModalComponents.ModalRoot, {
+            transitionState: 1,
+            ...props
+        });
     };
 
-    Object.assign(Modal,props,{
-        Confirm: Object.assign(
-            BindProps(Webpack.findByDisplayName("ConfirmModal")),
-            {displayName: "PowercordModal"}
-        ),
-        Modal: Object.assign(
-            BindProps(ModalComponents.ModalRoot),
-            {displayName: "PowercordModal"},
-            props
-        )
+    Object.assign(Modal, props, {
+        Confirm: Webpack.findByDisplayName("ConfirmModal"),
+        Modal: Object.assign(ModalRoot, props)
     });
 });
 

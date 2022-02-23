@@ -1,12 +1,6 @@
 import DiscordModules, {promise} from "../modules/discord";
 import Modal from "@powercord/components/modal";
 
-export let ModalContext = null;
-
-promise.then(() => {
-    ModalContext = DiscordModules.React.createContext(null);
-});
-
 export function open(Component: any) {
     return DiscordModules.ModalsApi.openModal((props) => {
         return React.createElement(Modal.Modal, { ...props, className: 'pc-modal-container' },
