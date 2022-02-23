@@ -41,6 +41,10 @@
 
     .pc-settings-card-desc {
         padding-bottom: 5px;
+
+        & div[class*="paragraph"] {
+            margin: 0px !important;
+        }
     }
 }
 
