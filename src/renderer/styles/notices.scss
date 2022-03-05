@@ -46,6 +46,10 @@
             padding: 15px;
             padding-bottom: 10px;
             padding-top: 0;
+
+            div[class*="paragraph"] {
+                margin-bottom: 0 !important;
+            }
         }
 
         .pc-notice-progress {
