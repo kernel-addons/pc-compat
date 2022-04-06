@@ -1,3 +1,5 @@
+/// <reference path="./types/electron.d.ts" />
+
 declare const PCCompatNative: {
     executeJS(js: string): any;
     getAppPath(): string;
@@ -10,6 +12,12 @@ declare const PCCompatNative: {
         dispatch(event: string, ...args: any[]): void;
     }
 };
+
+declare namespace NodeJS {
+    interface Process {
+        contextIsolated: boolean;
+    }
+}
 
 declare const React: typeof import("react");
 declare const _: typeof import("lodash");
