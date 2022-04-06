@@ -1,6 +1,5 @@
 import {createRequire} from "./module";
 import path from "./path";
-import {setRemote} from "./electron";
 import {setBuffer} from "./buffer";
 import * as IPCEvents from "@common/ipcevents";
 
@@ -15,7 +14,6 @@ if (!window.process) {
 const require: any = process.contextIsolated ? createRequire(path.resolve(PCCompatNative.getBasePath(), "plugins"), null) : window.require;
 
 const modulesToInitialize = [
-    // false && ["@electron/remote/renderer", setRemote],
     process.contextIsolated && ["buffer/", setBuffer]
 ].filter(Boolean);
 
@@ -23,7 +21,6 @@ for (let i = 0; i < modulesToInitialize.length; i++) {
     const [namespace, load] = modulesToInitialize[i] as any;
 
     try {
-        console.log("Require.", [...require("module").globalPaths]);
         load(require(namespace));
     } catch (error) {
         console.error(`Failed to require "${namespace}":`, error);

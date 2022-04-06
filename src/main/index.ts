@@ -21,4 +21,3 @@ Module.globalPaths.push(node_modules);
 
 import "./debug";
 import "./events";
-import "./initRemote";

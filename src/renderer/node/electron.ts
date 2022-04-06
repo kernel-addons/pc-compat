@@ -4,7 +4,6 @@ export const electron: {
     shell: Electron.Shell,
     clipboard: Electron.Clipboard,
     contextBridge: Electron.ContextBridge,
-    remote: typeof import("@electron/remote/renderer")
 } = (window.process?.contextIsolated ?? true) ? {
     ipcRenderer: PCCompatNative.executeJS(`PCCompatNative.cloneObject(require("electron").ipcRenderer)`),
     shell: PCCompatNative.executeJS(`require("electron").shell`),
@@ -14,11 +13,6 @@ export const electron: {
             window[name] = value;
         }
     },
-    remote: null
 } : window.require("electron");
-
-export function setRemote(module: any) {
-    electron.remote = module;
-};
 
 export default electron;
