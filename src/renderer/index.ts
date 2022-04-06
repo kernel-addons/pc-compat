@@ -17,6 +17,7 @@ import VersionTag from "@ui/components/versiontag";
 import "./styles/index";
 import Events from "@modules/events";
 import DevServer from "@modules/devserver";
+import JSXCompiler from "@powercord/compilers/jsx";
 
 const Logger = Internals.Logger.create("Core");
 
@@ -32,6 +33,7 @@ export default new class PCCompat {
     }
 
     async onStart() {
+        await JSXCompiler.initialize();
         StyleManager.initialize();
         this.expose("powercord", Require("powercord"));
         this.expose("PCInternals", Internals);
