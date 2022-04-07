@@ -12,20 +12,23 @@ const info = {
     kernelBranch: "HEAD"
 };
 
-Promise.all([Git.getBranchName(root), Git.getBranchName(kernelPath)]).then(([pcBranch, kernelBranch]) => {
-   Promise.all([
-        Git.getLatestCommit(root, pcBranch),
-        Git.getLatestCommit(kernelPath, kernelBranch),
-   ] as unknown as any[]).then(([{short: pcCommit}, {short: kernelCommit}]) => {
-        info.currentCommit = pcCommit;
-        Object.assign(info, {
-            currentCommit: pcCommit,
-            currentBranch: pcBranch,
-            kernelCommit,
-            kernelBranch
-        });
-   }).catch(() => {});
-})
+Promise.all([
+    Git.getLatestCommit(root),
+    Git.getBranchName(root),
+    Git.getLatestCommit(kernelPath),
+    Git.getBranchName(kernelPath)
+] as unknown as any[]).then(([{short: pcCommit}, pcBranch, {short: kernelCommit}, kernelBranch]) => {
+    Object.assign(info, {
+        currentCommit: pcCommit,
+        currentBranch: pcBranch,
+        kernelCommit,
+        kernelBranch
+    });
+}).catch(() => {});
+
+Git.getLatestCommit(root).then(args => {
+    info.currentCommit = (args as unknown as {short: string}).short; 
+});
 
 export const renderElement = function (contents: string) {
     const {Text} = DiscordModules;

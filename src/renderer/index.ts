@@ -7,6 +7,7 @@ import PluginManager from "@powercord/pluginmanager";
 import StyleManager from "@powercord/stylemanager";
 import SettingsRenderer from "@modules/settings";
 import {promise} from "@modules/discord";
+import QuickCSS from "@ui/quickcss";
 import * as Internals from "./modules";
 import manifest from "../../index.json";
 import {Modals} from "./ui";
@@ -50,6 +51,7 @@ export default new class PCCompat {
         DOM.injectCSS("font-awesome", Constants.FONTAWESOME_BASEURL, {type: "URL", documentHead: true});
 
         SettingsRenderer.patchSettingsView();
+        QuickCSS.initialize();
         Updater.initialize();
         PluginManager.initialize();
 
@@ -87,7 +89,7 @@ export default new class PCCompat {
         const {Webpack, DiscordModules: {Button, Tooltips}} = Internals;
         const SettingsComponents = await Webpack.findLazy(Webpack.Filters.byProps("Header", "Panel"));
         if (this.promises.cancelled) return;
-
+        
         const cancel = Internals.Patcher.after("SettingsHeader", SettingsComponents.default, "Header", (_, [props], ret) => {
             if (props.children !== "Powercord") return ret;
 
@@ -115,7 +117,7 @@ export default new class PCCompat {
     async patchVersionTag(): Promise<void> {
         const ClientDebugInfo = await Internals.Webpack.findLazy(Internals.Webpack.Filters.byDisplayName("ClientDebugInfo", true));
 
-        const cancel = Internals.Patcher.after("DebugInfo", ClientDebugInfo, "default", (_, [props], res) => {
+        const cancel = Internals.Patcher.after("DebugInfo", ClientDebugInfo, "default", (_, [props], res) => {  
             const childs = res.props.children;
             if (!Array.isArray(childs)) return res;
 
