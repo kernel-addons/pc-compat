@@ -215,7 +215,7 @@ export default class PluginManager extends Emitter {
         if (!plugin) return;
 
         try {
-            if (typeof (plugin.pluginWillUnload) === "function") plugin.pluginWillUnload();
+            plugin._unload();
             if (log) {
                 Logger.log(`${plugin.displayName} has been stopped!`);
             }
