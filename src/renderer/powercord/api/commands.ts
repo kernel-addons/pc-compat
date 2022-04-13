@@ -39,7 +39,7 @@ export function initialize() {
         }
     });
 
-    Patcher.after("PowercordCommands", Commands, "queryCommands", (_, [,, query], res) => {
+    Patcher.after("PowercordCommands", Commands, "queryCommands", (_, [{ query }], res) => {
         const cmds = [...commands.values()].filter(e => e.name.includes(query));
 
         res.push(...cmds);
