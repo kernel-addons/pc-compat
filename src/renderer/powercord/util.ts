@@ -166,7 +166,8 @@ promise.then(() => {
                     const patches = collection?.filter(p => !p.applied);
 
                     const AnalyticsContext = Webpack.findModule(m => [m.default, m.__powercordOriginal_default].includes(wrapped.type));
-
+                    if (!AnalyticsContext) return res;
+                    
                     for (const patch of patches ?? []) {
                         Patcher.after(patch.id, AnalyticsContext, "default", (_, args, res) => {
                             const menu = res.props.children.type;
