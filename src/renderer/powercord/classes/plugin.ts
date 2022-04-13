@@ -13,7 +13,7 @@ export type PluginManifest = {
 };
 
 export default class Plugin {
-    path: string;   
+    path: string;
 
     stylesheets: {[id: string]: HTMLElement} = {};
 
@@ -38,14 +38,14 @@ export default class Plugin {
 
             this.stylesheets[id] = DOM.injectCSS(id, content);
         } catch (error) {
-            console.error(`Could not load stylesheet:`, error);            
+            console.error(`Could not load stylesheet:`, error);
         }
     }
 
     log(...messages: any[]): void {
         console.log(`%c[Powercord:Plugin:${this.constructor.name}]`, `color: ${this.color};`, ...messages);
     }
-    
+
     debug(...messages: any[]): void {
         console.debug(`%c[Powercord:Plugin:${this.constructor.name}]`, `color: ${this.color};`, ...messages);
     }
@@ -64,7 +64,10 @@ export default class Plugin {
     }
 
     _unload() {
-        PluginManager.stopPlugin(this);
+        this.pluginWillUnload?.();
+        for (const stylesheet in this.stylesheets) {
+            DOM.clearCSS(stylesheet);
+        }
     }
 
     // Getters
