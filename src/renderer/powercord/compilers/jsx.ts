@@ -10,7 +10,7 @@ const loaderReplace = `const path = require('path').join(__dirname, 'wasm_bg.was
 
 const loaderReplacement = `
 module.exports.__promise__ = (async () => {
-    const binary = require("fs").readFileSync(require("path").join(PCCompatNative.getBasePath(), "lib/swc.wasm"));
+    const binary = require("fs").readFileSync(require("path").join(PCCompatNative.getBasePath(), "lib/swc.wasm"), {encoding: null});
     const wasmModule = await WebAssembly.instantiate(binary, imports);
     module.exports.__wasm = wasm = wasmModule.instance.exports;
 })();
