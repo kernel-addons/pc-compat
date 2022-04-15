@@ -1,9 +1,10 @@
 # Ignore those
-plugins
-lib
-types
-themes
-config
+/plugins
+/lib
+/types
+/themes
+/config
+/cache
 node_modules
 pnpm-lock.yaml
 # Add to whitelist

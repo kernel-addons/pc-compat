@@ -17,7 +17,6 @@ import VersionTag from "@ui/components/versiontag";
 import "./styles/index";
 import Events from "@modules/events";
 import DevServer from "@modules/devserver";
-import JSXCompiler from "@powercord/compilers/jsx";
 
 const Logger = Internals.Logger.create("Core");
 
@@ -33,7 +32,6 @@ export default new class PCCompat {
     }
 
     async onStart() {
-        await JSXCompiler.initialize();
         StyleManager.initialize();
         this.expose("powercord", Require("powercord"));
         this.expose("PCInternals", Internals);
@@ -89,7 +87,7 @@ export default new class PCCompat {
         const {Webpack, DiscordModules: {Button, Tooltips}} = Internals;
         const SettingsComponents = await Webpack.findLazy(Webpack.Filters.byProps("Header", "Panel"));
         if (this.promises.cancelled) return;
-        
+
         const cancel = Internals.Patcher.after("SettingsHeader", SettingsComponents.default, "Header", (_, [props], ret) => {
             if (props.children !== "Powercord") return ret;
 
@@ -117,7 +115,7 @@ export default new class PCCompat {
     async patchVersionTag(): Promise<void> {
         const ClientDebugInfo = await Internals.Webpack.findLazy(Internals.Webpack.Filters.byDisplayName("ClientDebugInfo", true));
 
-        const cancel = Internals.Patcher.after("DebugInfo", ClientDebugInfo, "default", (_, [props], res) => {  
+        const cancel = Internals.Patcher.after("DebugInfo", ClientDebugInfo, "default", (_, [props], res) => {
             const childs = res.props.children;
             if (!Array.isArray(childs)) return res;
 
