@@ -1,3 +1,4 @@
+import * as sucrase from "sucrase";
 import * as sass from "sass";
 import {ipcMain, app, BrowserWindow} from "electron";
 import * as IPCEvents from "../common/ipcevents";
@@ -33,6 +34,21 @@ ipcMain.on(IPCEvents.COMPILE_SASS, (event, file) => {
     }
 
     event.returnValue = result;
+});
+
+ipcMain.on(IPCEvents.COMPILE_JSX, (event, file) => {
+    if (!fs.existsSync(file)) {
+        event.returnValue = "";
+        return;
+    }
+
+    const filecontent = fs.readFileSync(file, "utf8");
+    const {code} = sucrase.transform(filecontent, {
+        transforms: ["jsx", "imports", "typescript"],
+        filePath: file
+    });
+
+    event.returnValue = code;
 });
 
 ipcMain.handle(IPCEvents.SET_DEV_TOOLS, (event, value: boolean) => {
