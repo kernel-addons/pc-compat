@@ -1,0 +1,27 @@
+{
+    "autoFetch": {
+        "type": "switch",
+        "name": "Automatically Fetch",
+        "note": "Automatically fetch for updates in a defined period.",
+        "value": true
+    },
+    "fetchPeriod": {
+        "type": "text",
+        "name": "Update Fetch Period",
+        "note": "Period between automatically fetches for updates. (in minutes)",
+        "requires": ["autoFetch"],
+        "value": 30
+    },
+    "updateCountOnSettingsGear": {
+        "type": "switch",
+        "name": "Show Update Count on Settings Gear",
+        "note": "Shows an unread badge of pending updates on the settings gear.",
+        "value": true
+    },
+    "updateCountOnSettingsTab": {
+        "type": "switch",
+        "name": "Show Update Count on Settings Tab",
+        "note": "Shows an unread badge of pending updates on the settings tab.",
+        "value": true
+    }
+}

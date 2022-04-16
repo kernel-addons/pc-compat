@@ -10,7 +10,7 @@ import Events from "@modules/events";
 const Logger = LoggerModule.create("StyleManager");
 
 export default class StyleManager extends Emitter {
-    static get folder() {return path.resolve(DataStore.baseDir, "themes")};
+    static get folder() {return path.resolve(DataStore.baseDir, "powercord", "themes")};
 
     static mainFiles = ["powercord_manifest.json", "manifest.json"];
 
@@ -39,7 +39,7 @@ export default class StyleManager extends Emitter {
     static loadAll(missing = false) {
         if (!fs.existsSync(this.folder)) {
             try {
-                fs.mkdirSync(this.folder);
+                fs.mkdirSync(this.folder, {recursive: true});
             } catch (error) {
                 return void Logger.error("StyleManager", `Failed to create themes folder:`, error);
             }

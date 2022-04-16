@@ -11,19 +11,19 @@ const Logger = LoggerModule.create("DataStore");
 const DataStore = new class DataStore extends Store<"misc" | "data-update"> {
     constructor() {
         super();
-
+        
         if (!fs.existsSync(this.configFolder)) {
             try {
-                fs.mkdirSync(this.configFolder);
+                fs.mkdirSync(this.configFolder, {recursive: true});
             } catch (error) {
                 Logger.error("Failed to create config folder:", error);
             }
         }
     }
 
-    baseDir: string = path.resolve(PCCompatNative.getBasePath());
+    baseDir: string = path.resolve(PCCompatNative.getBasePath(), "..", "..");
 
-    configFolder = path.resolve(this.baseDir, "config");
+    configFolder = path.resolve(this.baseDir, "storage", "strencher.pc-compat");
 
     cache = new Map();
 

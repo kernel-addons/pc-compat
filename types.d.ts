@@ -1,6 +1,7 @@
 /// <reference path="./types/electron.d.ts" />
 
 declare const PCCompatNative: {
+    isPacked: boolean;
     executeJS(js: string): any;
     getAppPath(): string;
     getBasePath(): string;

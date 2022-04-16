@@ -12,7 +12,7 @@ import Events from "@modules/events";
 const Logger = LoggerModule.create("PluginManager");
 
 export default class PluginManager extends Emitter {
-    static get folder() {return path.resolve(DataStore.baseDir, "plugins")};
+    static get folder() {return path.resolve(DataStore.baseDir, "powercord", "plugins")};
 
     static mainFiles = ["index.js", "index.jsx"];
 
@@ -41,7 +41,7 @@ export default class PluginManager extends Emitter {
     static loadAll(missing = false) {
         if (!fs.existsSync(this.folder)) {
             try {
-                fs.mkdirSync(this.folder);
+                fs.mkdirSync(this.folder, {recursive: true});
             } catch (error) {
                 return void Logger.error("PluginsManager", `Failed to create plugins folder:`, error);
             }

@@ -7,13 +7,11 @@ import PluginManager from "@powercord/pluginmanager";
 import StyleManager from "@powercord/stylemanager";
 import SettingsRenderer from "@modules/settings";
 import {promise} from "@modules/discord";
-import QuickCSS from "@ui/quickcss";
 import * as Internals from "./modules";
 import manifest from "../../index.json";
 import {Modals} from "./ui";
 import DiscordIcon from "@ui/discordicon";
 import Updater from "@ui/updater";
-import VersionTag from "@ui/components/versiontag";
 import "./styles/index";
 import Events from "@modules/events";
 import DevServer from "@modules/devserver";
@@ -45,19 +43,20 @@ export default new class PCCompat {
             writable: false
         });
 
-        DOM.injectCSS("core", Require(path.resolve(PCCompatNative.getBasePath(), "dist", "style.css")));
-        DOM.injectCSS("font-awesome", Constants.FONTAWESOME_BASEURL, {type: "URL", documentHead: true});
+        {
+            const stylePath = path.resolve(PCCompatNative.getBasePath(), ...(PCCompatNative.isPacked ? ["style.css"] : ["dist", "style.css"]));
+            DOM.injectCSS("core", Require(stylePath));
+            DOM.injectCSS("font-awesome", Constants.FONTAWESOME_BASEURL, {type: "URL", documentHead: true});
+        }
 
         SettingsRenderer.patchSettingsView();
-        QuickCSS.initialize();
-        Updater.initialize();
         PluginManager.initialize();
+        Updater.initialize();
 
         if (__NODE_ENV__ === "DEVELOPMENT") DevServer.initialize();
 
         this.checkForChangelog();
         this.patchSettingsHeader();
-        this.patchVersionTag();
 
         Events.addEventListener("reload-core", () => {
             DOM.clearCSS("core");
@@ -105,22 +104,6 @@ export default new class PCCompat {
                     children: React.createElement(DiscordIcon, {name: "Info"})
                 }))
             ];
-        });
-
-        Events.addEventListener("reload-core", () => {
-            cancel();
-        });
-    }
-
-    async patchVersionTag(): Promise<void> {
-        const ClientDebugInfo = await Internals.Webpack.findLazy(Internals.Webpack.Filters.byDisplayName("ClientDebugInfo", true));
-
-        const cancel = Internals.Patcher.after("DebugInfo", ClientDebugInfo, "default", (_, [props], res) => {
-            const childs = res.props.children;
-            if (!Array.isArray(childs)) return res;
-
-            childs.push(React.createElement(VersionTag, {kernel: !props.hasKernelTag}));
-            props.hasKernelTag ??= true;
         });
 
         Events.addEventListener("reload-core", () => {
