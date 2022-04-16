@@ -1,18 +1,17 @@
-import DataStore from "@modules/datastore";
-import DiscordModules from "@modules/discord";
-import makeLazy from "@modules/makelazy";
-import {memoizeValue} from "@modules/memoize";
-import Git from "@modules/simplegit";
-import {joinClassNames} from "@modules/utilities";
+import { SettingsContext } from "@ui/components/settingspanel";
 import Divider from "@powercord/components/divider";
+import { joinClassNames } from "@modules/utilities";
+import { memoizeValue } from "@modules/memoize";
+import DiscordModules from "@modules/discord";
 import DiscordIcon from "@ui/discordicon";
-import Icon from "@ui/icons";
-import UpdatesStore, {AddonUpdate, CoreUpdate, DEFAULT_CONFIG} from "../store";
-import fs from "@node/fs";
-import path from "@node/path";
-import Updater from "../updater";
-import {SettingsContext} from "@ui/components/settingspanel";
+import makeLazy from "@modules/makelazy";
 import SettingsPanel from "./settings";
+import Git from "@modules/simplegit";
+import UpdatesStore from "../store";
+import Updater from "../updater";
+import Icon from "@ui/icons";
+import path from "@node/path";
+import fs from "@node/fs";
 
 const basePath = PCCompatNative.getBasePath();
 
@@ -57,7 +56,7 @@ export const CurrentCommitHash = makeLazy(async () => {
 export default function UpdaterCard({hasPendingUpdates, onUpdate}) {
     const ViewAPI = React.useContext<any>(SettingsContext);
     const {Flex, Text, Moment, Button, Tooltips} = DiscordModules;
-    
+
     const isFetching = UpdatesStore.useState(() => UpdatesStore.isFetching());
     const isUpdatingAll = UpdatesStore.useState(() => UpdatesStore.isUpdatingAll());
     const lastCheckedUpdate = UpdatesStore.useState(() => UpdatesStore.getLastCheckedUpdate());
@@ -66,7 +65,7 @@ export default function UpdaterCard({hasPendingUpdates, onUpdate}) {
         if (isFetching) return "Fetching updates...";
         if (hasPendingUpdates) return "Something needs to be updated!";
         if (isUpdatingAll) return "Updating...";
-        
+
         return "Everything is up to date.";
     }, [isFetching, isUpdatingAll, hasPendingUpdates]);
 
@@ -83,7 +82,7 @@ export default function UpdaterCard({hasPendingUpdates, onUpdate}) {
             />
         );
     }, [isFetching, hasPendingUpdates]);
-    
+
     return (
         <Flex className="pcu-card" direction={Flex.Direction.VERTICAL}>
             <Flex justify={Flex.Justify.BETWEEN} align={Flex.Align.CENTER}>
@@ -134,7 +133,7 @@ export default function UpdaterCard({hasPendingUpdates, onUpdate}) {
                                 });
                             }}
                         >
-                            <DiscordIcon name="Gear" width="26" height="26" />
+                            <DiscordIcon name="Gear" width="20" height="20" />
                         </Button>
                     )}
                 </Tooltips.Tooltip>

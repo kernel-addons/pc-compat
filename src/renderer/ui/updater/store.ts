@@ -14,7 +14,7 @@ export type AddonUpdate = {
     name: string;
     repoUrl: string;
     path: string;
-    branch: string; 
+    branch: string;
     entityId: string;
     currentCommit: {
         full: string;
@@ -56,7 +56,7 @@ const UpdatesStore = new class UpdatesStore extends Store<string> {
         isUpdatingAll: false,
         ignoredUpdates: new Set()
     };
-    
+
     loadData() {return DataStore.tryLoadData("updater", DEFAULT_CONFIG);}
 
     initialize() {
@@ -93,7 +93,7 @@ const UpdatesStore = new class UpdatesStore extends Store<string> {
 
     updateLastCheckedUpdate() {
         this.#state.lastCheckedUpdate = new Date().toJSON();
-        
+
         DataStore.trySaveData("updater", {
             ...DataStore.tryLoadData("updater", DEFAULT_CONFIG),
             lastCheckedUpdate: this.#state.lastCheckedUpdate
@@ -115,7 +115,7 @@ const UpdatesStore = new class UpdatesStore extends Store<string> {
         this.#state.isUpdatingAll = false;
         this.emitChange();
     }
-    
+
     isFetching() {return this.#state.isFetching;}
 
     startFetching() {

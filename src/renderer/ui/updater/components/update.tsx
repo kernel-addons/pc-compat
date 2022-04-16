@@ -22,7 +22,7 @@ export function CoreUpdate(props: UpdateType & CoreUpdateType) {
             console.error(error);
             const update = UpdatesStore.getUpdate(props.id);
             if (!update) return;
-    
+
             update.failed = true;
             UpdatesStore.emit("update");
             setInstalling(false);
@@ -193,32 +193,10 @@ export function AddonUpdate(props: AddonUpdateType & UpdateType) {
                             size={Button.Sizes.TINY}
                             onClick={() => isIgnored ? UpdatesStore.acknowledge(props.entityId) : UpdatesStore.ignore(props.entityId)}
                         >
-                            <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24">
+                            <svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 0 24 24" width="20">
                                 <path d="M0 0h24v24H0z" fill="none" />
                                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM4 12c0-4.42 3.58-8 8-8 1.85 0 3.55.63 4.9 1.69L5.69 16.9C4.63 15.55 4 13.85 4 12zm8 8c-1.85 0-3.55-.63-4.9-1.69L18.31 7.1C19.37 8.45 20 10.15 20 12c0 4.42-3.58 8-8 8z" fill="currentColor" />
                             </svg>
-                        </Button>
-                    )}
-                </Tooltips.Tooltip>
-                <Tooltips.Tooltip text={failed ? "Force Update" : "Install Update"}>
-                    {tooltipProps => (
-                        <Button
-                            {...tooltipProps}
-                            disabled={isInstalling}
-                            color={failed ? Button.Colors.RED : Button.Colors.GREEN} size={Button.Sizes.TINY}
-                            onClick={() => handleClick(failed)}
-                        >
-                            {isInstalling ?
-                                <Spinner className="pc-update-spinner" type={Spinner.Type.SPINNING_CIRCLE} />
-                                : failed
-                                    ? <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24">
-                                        <path d="M0 0h24v24H0z" fill="none" />
-                                        <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z" fill="currentColor" />
-                                    </svg>
-                                    : <svg x="0" y="0" className="pc-icon" width="24" height="24" viewBox="0 0 24 24">
-                                    <path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M16.293 9.293L17.707 10.707L12 16.414L6.29297 10.707L7.70697 9.293L11 12.586V2H13V12.586L16.293 9.293ZM18 20V18H20V20C20 21.102 19.104 22 18 22H6C4.896 22 4 21.102 4 20V18H6V20H18Z" />
-                                </svg>
-                            }
                         </Button>
                     )}
                 </Tooltips.Tooltip>
@@ -230,7 +208,7 @@ export function AddonUpdate(props: AddonUpdateType & UpdateType) {
                             size={Button.Sizes.TINY}
                             onClick={() => window.open(props.repoUrl, "_blank")}
                         >
-                            <svg className="pc-icon" width="24" height="24" viewBox="0 0 24 24">
+                            <svg className="pc-icon" width="20" height="20" viewBox="0 0 24 24">
                                 <g fill="none" fill-rule="evenodd">
                                     <path fill="currentColor" d="M10.59 13.41c.41.39.41 1.03 0 1.42-.39.39-1.03.39-1.42 0a5.003 5.003 0 0 1 0-7.07l3.54-3.54a5.003 5.003 0 0 1 7.07 0 5.003 5.003 0 0 1 0 7.07l-1.49 1.49c.01-.82-.12-1.64-.4-2.42l.47-.48a2.982 2.982 0 0 0 0-4.24 2.982 2.982 0 0 0-4.24 0l-3.53 3.53a2.982 2.982 0 0 0 0 4.24zm2.82-4.24c.39-.39 1.03-.39 1.42 0a5.003 5.003 0 0 1 0 7.07l-3.54 3.54a5.003 5.003 0 0 1-7.07 0 5.003 5.003 0 0 1 0-7.07l1.49-1.49c-.01.82.12 1.64.4 2.43l-.47.47a2.982 2.982 0 0 0 0 4.24 2.982 2.982 0 0 0 4.24 0l3.53-3.53a2.982 2.982 0 0 0 0-4.24.973.973 0 0 1 0-1.42z" />
                                     <rect width="24" height="24" />
@@ -246,10 +224,10 @@ export function AddonUpdate(props: AddonUpdateType & UpdateType) {
                             color={Button.Colors.BRAND}
                             size={Button.Sizes.TINY}
                             onClick={() => {
-                                window.open(`${props.repoUrl}/compare/${props.currentCommit.full}...${props.commits[0].hash}`, "_blank")
+                                window.open(`${props.repoUrl.replace('.git', '')}/compare/${props.currentCommit.full}...${props.commits[0].hash}`, "_blank")
                             }}
                         >
-                            <svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="24" viewBox="0 0 24 24" width="24">
+                            <svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="20" viewBox="0 0 24 24" width="20">
                                 <g>
                                     <rect fill="none" height="24" width="24" />
                                 </g>
@@ -257,6 +235,29 @@ export function AddonUpdate(props: AddonUpdateType & UpdateType) {
                                     <path d="M14,2H6C4.9,2,4,2.9,4,4v16c0,1.1,0.89,2,1.99,2H15v-8h5V8L14,2z M13,9V3.5L18.5,9H13z M17,21.66V16h5.66v2h-2.24 l2.95,2.95l-1.41,1.41L19,19.41l0,2.24H17z" fill="currentColor" />
                                 </g>
                             </svg>
+                        </Button>
+                    )}
+                </Tooltips.Tooltip>
+                <Tooltips.Tooltip text={failed ? "Force Update" : "Install Update"}>
+                    {tooltipProps => (
+                        <Button
+                            {...tooltipProps}
+                            disabled={isInstalling}
+                            style={{marginLeft: 'auto'}}
+                            color={failed ? Button.Colors.RED : Button.Colors.GREEN} size={Button.Sizes.TINY}
+                            onClick={() => handleClick(failed)}
+                        >
+                            {isInstalling ?
+                                <Spinner className="pc-update-spinner" type={Spinner.Type.SPINNING_CIRCLE} />
+                                : failed
+                                    ? <svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 0 24 24" width="20">
+                                        <path d="M0 0h24v24H0z" fill="none" />
+                                        <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z" fill="currentColor" />
+                                    </svg>
+                                    : <svg x="0" y="0" className="pc-icon" width="20" height="20" viewBox="0 0 24 24">
+                                    <path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M16.293 9.293L17.707 10.707L12 16.414L6.29297 10.707L7.70697 9.293L11 12.586V2H13V12.586L16.293 9.293ZM18 20V18H20V20C20 21.102 19.104 22 18 22H6C4.896 22 4 21.102 4 20V18H6V20H18Z" />
+                                </svg>
+                            }
                         </Button>
                     )}
                 </Tooltips.Tooltip>
