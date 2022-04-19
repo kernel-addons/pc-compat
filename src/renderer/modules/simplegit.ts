@@ -4,15 +4,7 @@ const hashFields = ["short", "full"];
 
 export default class Git {
     static async executeCmd(cmd: string, cwd?: string) {
-        return PCCompatNative.executeJS(`new Promise((resolve, reject) => {
-            require("child_process").exec(${JSON.stringify(cmd)}, {
-                cwd: ${JSON.stringify(cwd)}
-            }, (error, res) => {
-                if (error) return reject(error);
-                
-                resolve(res);
-            });
-        });`);
+        return PCCompatNative.runCommand(cmd, cwd);
     }
 
     static async hasGitInstalled() {

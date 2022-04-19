@@ -60,6 +60,7 @@
 }
 
 .pc-update {
+    font-variant-ligatures: no-contextual;
     margin-top: 20px;
     padding: 15px;
     background: var(--background-secondary);
@@ -125,7 +126,7 @@
         margin-top: 10px;
         border-top: 1px solid var(--background-modifier-accent);
         display: flex;
-        justify-content: end;
+        justify-content: flex-end;
     
         button, > span {
             min-height: 0;
@@ -137,8 +138,8 @@
         }
 
         button {
-            height: auto;
-            width: auto;
+            height: 30px;
+            width: 30px;
             padding: 5px;
             display: flex;
             align-items: center;
@@ -147,6 +148,11 @@
             & > div {
                 display: inline-flex;
             }
+        }
+
+        .pc-updater-install-button {
+            margin-left: auto;
+            padding-left: 6px; // Fix the icon having weird bounds
         }
     }
 

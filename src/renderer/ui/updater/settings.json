@@ -5,6 +5,12 @@
         "note": "Automatically fetch for updates in a defined period.",
         "value": true
     },
+    "useQueue": {
+        "type": "switch",
+        "name": "Potato Mode",
+        "note": "Runs updates in a queue, making update checks on low-end PCs less heavy.",
+        "value": false
+    },
     "fetchPeriod": {
         "type": "text",
         "name": "Update Fetch Period",

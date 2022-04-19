@@ -3,7 +3,7 @@ import DiscordModules from "@modules/discord";
 
 export type ValidateListener = (...args: any[]) => boolean;
 
-export default class Store<events extends string> {
+export default class Store<events = string> {
     logger = new LoggerModule("Store");
 
     events: {[event: string]: Set<Function>} = {};
@@ -49,5 +49,5 @@ export default class Store<events extends string> {
         return this.useEvent("update" as unknown as events, factory, validate);
     }
 
-    emitChange() {this.emit("update" as string);}
+    emitChange() {this.emit("update" as unknown as events);}
 }

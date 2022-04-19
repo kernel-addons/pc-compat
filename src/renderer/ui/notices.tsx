@@ -184,6 +184,10 @@ export default class Notices {
         });
     }
 
+    static isShown(id: string): boolean {
+        return !!NoticesApi.getState().notices[id];
+    }
+
     static close(id: string) {
         const state = NoticesApi.getState();
 

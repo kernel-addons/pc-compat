@@ -2,6 +2,7 @@
 
 declare const PCCompatNative: {
     isPacked: boolean;
+    runCommand(command: string, cwd?: string): Promise<string>;
     executeJS(js: string): any;
     getAppPath(): string;
     getBasePath(): string;
@@ -16,7 +17,7 @@ declare const PCCompatNative: {
 
 declare namespace NodeJS {
     interface Process {
-        contextIsolated: boolean;
+        readonly contextIsolated: boolean;
     }
 }
 

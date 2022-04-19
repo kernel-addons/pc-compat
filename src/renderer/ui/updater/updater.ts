@@ -1,8 +1,9 @@
+import DataStore from "@modules/datastore";
 import Github from "@modules/github";
 import Git from "@modules/simplegit";
 import PluginManager from "@powercord/pluginmanager";
 import StyleManager from "@powercord/stylemanager";
-import UpdatesStore, {AddonUpdate, CoreUpdate} from "./store";
+import UpdatesStore, {AddonUpdate, CoreUpdate, DEFAULT_CONFIG} from "./store";
 
 const getId = (() => {
     let id = 0;
@@ -12,6 +13,10 @@ const getId = (() => {
 
 export default class Updater {
     static async installCoreUpdate(url: string, encoding: string) {
+        if (PCCompatNative.isPacked) {
+            return Git.executeCmd("git pull", PCCompatNative.getBasePath());
+        }
+
         const installUpdate = PCCompatNative.executeJS(`async (url, path, encoding) => {
             const fs = require("original-fs");
             const buffer = await new Promise(resolve => {
@@ -48,66 +53,112 @@ export default class Updater {
         await Git.executeCmd("git pull", path);
     }
 
-    static async fetchPendingUpdates() {
-        const updates = [];
+    static async processUpdateCheck(addon: ReturnType<typeof PluginManager.get> | ReturnType<typeof StyleManager.get>) {
+        if (!(await Git.isGitRepo(addon.path))) return null;
+        const branch = await Git.getBranchName(addon.path);
+        const diff = await Git.getDiff(addon.path, branch);
+        if (!diff.length) return null;
 
-        return Promise.allSettled([
-            // Github.fetchRelease().then(release => {
-            //     if ((release as any).message?.indexOf("API rate limit exceeded") > -1) return;
-            //     if (Github.hasUpdateAvailable(release)) {
-            //         updates.push({
-            //             type: "core",
-            //             from: Github.currentRelease,
-            //             to: release.name,
-            //             api: "github",
-            //             release: release,
-            //             id: getId(),
-            //             failed: false
-            //         });
-            //     }
-            // }),
-            ...[...PluginManager.addons, ...StyleManager.addons].map(async addon => {
-                if (!(await Git.isGitRepo(addon.path))) return null;
-                const branch = await Git.getBranchName(addon.path);
-                const diff = await Git.getDiff(addon.path, branch);
-                if (!diff.length) return null;
+        return {
+            type: "addon",
+            api: "git",
+            commits: diff,
+            name: addon.displayName,
+            path: addon.path,
+            branch,
+            currentCommit: await Git.getLatestCommit(addon.path, branch),
+            repoUrl: await Git.getRemoteURL(addon.path),
+            id: getId(),
+            failed: false,
+            entityId: addon.entityID
+        };
+    }
 
-                updates.push({
-                    type: "addon",
-                    api: "git",
-                    commits: diff,
-                    name: addon.displayName,
-                    path: addon.path,
-                    branch,
-                    currentCommit: await Git.getLatestCommit(addon.path, branch),
-                    repoUrl: await Git.getRemoteURL(addon.path),
+    static async processCoreUpdateCheck() {
+        if (!PCCompatNative.isPacked) {
+            const path = PCCompatNative.getBasePath();
+            const branch = await Git.getBranchName(path);
+            const changes = await Git.getDiff(path, branch);
+            if (!changes.length) return null;
+
+            return {
+                type: "core",
+                api: "git",
+                commits: changes,
+                id: getId(),
+                failed: false,
+                repoUrl: await Git.getRemoteURL(path),
+                currentCommit: await Git.getLatestCommit(path, branch),
+                branch
+            };
+        }
+
+        return Github.fetchRelease().then(release => {
+            if ((release as any).message?.indexOf("API rate limit exceeded") > -1) return null;
+            if (Github.hasUpdateAvailable(release)) {
+                return {
+                    type: "core",
+                    from: Github.currentRelease,
+                    to: release.name,
+                    api: "github",
+                    release: release,
                     id: getId(),
-                    failed: false,
-                    entityId: addon.entityID
-                });
-            })
-        ]).then(() => updates);
+                    failed: false
+                };
+            }
+        });
+    }
+
+    static async fetchPendingUpdates () {
+        type Update = Awaited<ReturnType<typeof this.processUpdateCheck>>;
+
+        const updates: Update[] = [];
+        const checks = []
+            .concat(PluginManager.addons, StyleManager.addons)
+            .map(addon => () => this.processUpdateCheck(addon));
+
+        checks.unshift(() => this.processCoreUpdateCheck() as unknown as any);
+        
+        if (this.getSetting("useQueue", false)) {
+            await checks.reduce((prev, check) => prev.then(async () => {
+                const result = await check();
+                if (result) updates.push(result);
+            }), Promise.resolve());
+        } 
+        else {
+            await Promise.allSettled(checks.map(async check => {
+                const result = await check();
+                if (result) updates.push(result);
+            }));
+        }
+
+        return updates;
     }
 
     static async fetchAllUpdates() {
+        if (!await Git.hasGitInstalled()) return;
+
         UpdatesStore.startFetching();
 
         return this.fetchPendingUpdates().then((updates) => {
             UpdatesStore.stopFetching();
-            UpdatesStore.setUpdates(updates);
+            UpdatesStore.setUpdates(updates as unknown as any);
             UpdatesStore.updateLastCheckedUpdate();
         });
     }
 
     static async updateAll() {
+        if (!await Git.hasGitInstalled()) return;
+
         UpdatesStore.startUpdatingAll();
 
         for (const update of UpdatesStore.getUpdates()) {
+            if (UpdatesStore.isIgnored((update as AddonUpdate).entityId ?? update.type)) continue;
+
             switch (update.type) {
                 case "addon": {
                     try {
                         await Updater.installAddonUpdate((update as AddonUpdate).path, false);
-                        UpdatesStore.removeUpdate(update.id);
                     } catch (error) {
                         console.error(error);
                         update.failed = true;
@@ -124,9 +175,15 @@ export default class Updater {
                     }
                 } break;
             }
+
+            UpdatesStore.removeUpdate(update.id);
         }
 
         UpdatesStore.stopUpdatingAll();
-        UpdatesStore.emit("update");
+        UpdatesStore.emitChange();
+    }
+
+    static getSetting<T>(id: string, def: T): T {
+        return DataStore.tryLoadData("updater", DEFAULT_CONFIG)[id] ?? def;
     }
 }

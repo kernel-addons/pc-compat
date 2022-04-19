@@ -27,6 +27,7 @@ const API = {
     setDevtools(opened: boolean) {
         return ipcRenderer.invoke(IPCEvents.SET_DEV_TOOLS, opened);
     },
+    runCommand: (cmd: string, cwd?: string) => ipcRenderer.invoke(IPCEvents.RUN_COMMAND, cmd, cwd),
     IPC: IPC,
     cloneObject,
     getKeys

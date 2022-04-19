@@ -4,6 +4,7 @@ import {ipcMain, app, BrowserWindow} from "electron";
 import * as IPCEvents from "../common/ipcevents";
 import path from "path";
 import fs from "fs";
+import CP from "child_process";
 
 const cache = (() => {
   if (path.basename(__dirname) === "dist") {
@@ -28,6 +29,16 @@ const serializeError = function (error: Error) {
       name: ${JSON.stringify(error.name)}
     }));`.trim();
 };
+
+ipcMain.handle(IPCEvents.RUN_COMMAND, (_, cmd: string, cwd: string) => {
+    return new Promise((resolve, reject) => {
+        CP.exec(cmd, {cwd}, (error, stdout) => {
+            if (error) return reject(error);
+
+            resolve(stdout);
+        });
+    });
+});
 
 ipcMain.on(IPCEvents.GET_APP_PATH, (event) => {
     event.returnValue = app.getAppPath();

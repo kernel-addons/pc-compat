@@ -53,10 +53,21 @@ export const CurrentCommitHash = makeLazy(async () => {
     );
 }, LoadingSpinner);
 
+export function usePromise<T>(promise: Promise<T>): null | T {
+    const [state, setState] = React.useState(null);
+
+    React.useEffect(() => {
+        promise.then(value => setState(value));
+    }, []);
+
+    return state;
+}
+
 export default function UpdaterCard({hasPendingUpdates, onUpdate}) {
     const ViewAPI = React.useContext<any>(SettingsContext);
     const {Flex, Text, Moment, Button, Tooltips} = DiscordModules;
 
+    const hasGit = usePromise(Git.hasGitInstalled());
     const isFetching = UpdatesStore.useState(() => UpdatesStore.isFetching());
     const isUpdatingAll = UpdatesStore.useState(() => UpdatesStore.isUpdatingAll());
     const lastCheckedUpdate = UpdatesStore.useState(() => UpdatesStore.getLastCheckedUpdate());
@@ -114,7 +125,7 @@ export default function UpdaterCard({hasPendingUpdates, onUpdate}) {
                     onClick={() => Updater.updateAll()}
                 >Update All</Button>}
                 <Button
-                    disabled={isFetching}
+                    disabled={!hasGit || isFetching}
                     color={Button.Colors.BRAND}
                     size={Button.Sizes.SMALL}
                     onClick={onUpdate}

@@ -1,5 +1,4 @@
 import Webpack from "@modules/webpack";
-import DataStore from "@modules/datastore";
 
 export {default as components} from "./components/index";
 export {default as webpack} from "./webpack";
@@ -30,10 +29,4 @@ export function once(event: string, callback: Function) {
             return Webpack.whenReady.then(callback as unknown as any);
         }
     }
-}
-
-export function toggleDeveloper() {
-    const devMode = DataStore.getMisc("developerMode", false);
-
-    DataStore.setMisc(void 0, "developerMode", !devMode);
 }

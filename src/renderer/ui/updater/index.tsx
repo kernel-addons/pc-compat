@@ -23,13 +23,9 @@ export default class Updater {
 
     static getName() {return this.constructor.name;}
 
-    static getPeriod() {
-        return this.config.fetchPeriod * 6e4;
-    }
+    static getPeriod() {return this.config.fetchPeriod * 6e4;}
 
-    static get shouldAutomaticallyFetch() {
-        return this.config.autoFetch;
-    }
+    static get shouldAutomaticallyFetch() {return this.config.autoFetch;}
 
     static loadData() {return DataStore.tryLoadData("updater", DEFAULT_CONFIG);}
 
@@ -40,9 +36,6 @@ export default class Updater {
             label: "Updater",
             order: 3,
             icon: <UpdatesBadge type="sidebar" />,
-            predicate() {
-                return DataStore.getMisc("developerMode", false);
-            },
             render: () => (
                 <UpdaterPanel />
             )
@@ -125,6 +118,7 @@ export default class Updater {
 
             UpdaterModule.fetchAllUpdates().then(() => {
                 if (!UpdatesStore.getPendingUpdateCount()) return;
+                if (Notices.isShown("update-notice")) return;
 
                 Notices.show({
                     timeout: 0,
