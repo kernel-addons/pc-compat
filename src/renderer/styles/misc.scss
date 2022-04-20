@@ -57,3 +57,11 @@
     max-width: initial !important;
     min-height: initial !important;
 }
+
+.pc-modal-title {
+    flex-grow: 1;
+}
+
+.pc-radio-dot {
+    color: var(--brand-experiment);
+}

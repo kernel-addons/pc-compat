@@ -33,6 +33,17 @@ export default class Git {
         }
     } 
 
+    static async getBranches(cwd: string) {
+        try {
+            const raw = (await this.executeCmd("git branch -r", cwd)).replaceAll(" ", "").replaceAll("origin/", "").trimEnd();
+
+            return raw.split("\n");
+        } catch (error) {
+            console.error(error);
+            return null;
+        }
+    }
+
     static async getBranchName(cwd: string) {
         try {
             const result = await this.executeCmd("git branch -a", cwd);

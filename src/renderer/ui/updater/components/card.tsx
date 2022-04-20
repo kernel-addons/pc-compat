@@ -12,6 +12,7 @@ import Updater from "../updater";
 import Icon from "@ui/icons";
 import path from "@node/path";
 import fs from "@node/fs";
+import BranchModal from "./branch";
 
 const basePath = PCCompatNative.getBasePath();
 
@@ -31,11 +32,17 @@ export const LoadingSpinner = () => {
 
 export const CurrentBranch = makeLazy(async () => {
     const {Link} = DiscordModules;
-
     const branch = PCCompatNative.isPacked ? localGitInfo().branchName : (await Git.getBranchName(basePath));
 
+    const handleClick = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        BranchModal.open();
+    };
+
     return (
-        <Link href={`https://github.com/strencher-kernel/pc-compat/tree/${branch}`}>{branch}</Link>
+        <Link href={`https://github.com/strencher-kernel/pc-compat/tree/${branch}`} onClick={handleClick}>{branch}</Link>
     );
 }, LoadingSpinner);
 

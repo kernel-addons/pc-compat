@@ -222,3 +222,39 @@
     top: 1px;
     left: 15px;
 }
+
+.pc-branch-modal-inner {
+    padding-bottom: 25px;
+
+    .pc-branch-item {
+        color: #ddd;
+        padding: 20px;
+        flex-grow: 1;
+        background: var(--background-secondary);
+        margin-bottom: 1px;
+    }
+    
+    .pc-branch-item {
+        cursor: pointer;
+
+        &:hover {
+            background: var(--background-secondary-alt);
+        }
+
+        svg {
+            width: 24px;
+            height: 24px;
+        }
+    }
+    
+    .pc-branch-item:nth-last-of-type(2) {
+        border-bottom-left-radius: 20px;
+        border-bottom-right-radius: 20px;
+        margin-bottom: 0;
+    }
+    
+    .pc-branch-item:first-child {
+        border-top-left-radius: 20px;
+        border-top-right-radius: 20px;
+    }
+}

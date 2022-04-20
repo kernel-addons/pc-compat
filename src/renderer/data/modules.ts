@@ -61,6 +61,10 @@ export default {
         props: ["_dispatchToken", "getChannelId", "getLastSelectedChannelId"]
     },
     // Components
+    Header: {
+        name: "Header",
+        props: ["Tags", "Sizes"]
+    },
     ModalComponents: {
         props: ["ModalRoot", "ModalHeader"]
     },
