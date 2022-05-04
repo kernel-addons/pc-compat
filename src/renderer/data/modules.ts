@@ -106,7 +106,7 @@ export default {
         name: "ConfirmModal"
     },
     Text: {
-        name: "Text"
+        name: ["Text", "LegacyText"]
     },
     Markdown: {
         name: "Markdown",

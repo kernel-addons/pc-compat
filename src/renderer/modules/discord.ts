@@ -52,7 +52,11 @@ const filters = new Promise<any[]>(resolve => {
 
         if (module.name) {
             const current = filter;
-            filter = (mod: any) => (mod.displayName === module.name) && current(mod);
+            filter = (mod: any) => (
+                Array.isArray(module.name)
+                    ? module.name.some((name: string) => mod.displayName === name)
+                    : mod.displayName === module.name
+            ) && current(mod);
         }
 
         if (typeof(module.ensure) === "function") {
