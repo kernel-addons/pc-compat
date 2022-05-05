@@ -46,7 +46,7 @@ export default {
     },
     Text: {
         updater: false,
-        filter: "Text",
+        filter: "LegacyText",
         settings: false
     },
     Flex: {
