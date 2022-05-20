@@ -23,6 +23,44 @@ export default class PluginManager extends Emitter {
     static get addons() {return Array.from(this.plugins, e => e[1]);}
 
     static initialize() {
+        const basePath = PCCompatNative.getBasePath();
+        const previous = path.join(basePath, "plugins");
+
+        if (!fs.existsSync(this.folder)) {
+            try {
+                fs.mkdirSync(this.folder, {recursive: true});
+            } catch (error) {
+                return void Logger.error("PluginsManager", `Failed to create plugins folder:`, error);
+            }
+        }
+
+        if (fs.existsSync(previous) && !DataStore.getMisc("migratedPlugins", false)) {
+            Logger.log(`Old addon folder detected, migrating ${path.basename(previous)}.`)
+            const files = fs.readdirSync(previous);
+
+            for (const file of files) {
+                // Prepare the paths for moving the old items to the new directory
+                const current = path.join(previous, file);
+                const to = path.join(this.folder, file);
+
+                // Make sure we don't overwrite any themes.
+                if (fs.existsSync(to)) {
+                    try {
+                        fs.unlinkSync(current)
+                    } catch {}
+
+                    continue;
+                }
+
+                // Move the file
+                Logger.log(`Migrating ${path.basename(basePath)}/${path.basename(previous)}/${file}`);
+                fs.renameSync(current, to);
+            }
+
+            DataStore.setMisc(void 0, "migratedPlugins", true);
+            Logger.log("Migration completed.");
+        }
+
         SettingsRenderer.registerPanel("pc-moduleManager-plugins", {
             label: "Plugins",
             order: 1,
@@ -39,14 +77,6 @@ export default class PluginManager extends Emitter {
     }
 
     static loadAll(missing = false) {
-        if (!fs.existsSync(this.folder)) {
-            try {
-                fs.mkdirSync(this.folder, {recursive: true});
-            } catch (error) {
-                return void Logger.error("PluginsManager", `Failed to create plugins folder:`, error);
-            }
-        }
-
         if (!fs.statSync(this.folder).isDirectory()) return void Logger.error("PluginsManager", `Plugins dir isn't a folder.`);
         if (!missing) Logger.log("PluginsManager", "Loading plugins...");
 
