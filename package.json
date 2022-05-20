@@ -7,7 +7,7 @@
     "build-renderer": "webpack --progress --env=mode=renderer --env=minify=true",
     "build-main": "webpack --progress --env=mode=main --env=minify=true",
     "build-preload": "webpack --progress --env=mode=preload --env=minify=true",
-    "dist": "pnpm run build-renderer && pnpm run build-main && pnpm run build-preload",
+    "build": "pnpm run build-renderer && pnpm run build-main && pnpm run build-preload",
     "initialize": "pnpm install --production",
     "start-server": "node scripts/devserver.mjs"
   },
