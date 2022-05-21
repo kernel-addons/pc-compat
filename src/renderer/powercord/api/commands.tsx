@@ -26,13 +26,29 @@ export function initialize() {
         SearchStore,
         Classes,
         SectionIcon,
+        ApplicationCommandItem,
+        ChannelApplicationIcon
     ] = Webpack.bulk(
         Filters.byProps("getBuiltInCommands"),
         Filters.byProps("getApplicationIconURL"),
         Filters.byProps("useSearchManager"),
         Filters.byProps("icon", "selectable", "wrapper"),
         Filters.byDisplayName("ApplicationCommandDiscoverySectionIcon", true),
+        Filters.byDisplayName("ApplicationCommandItem", true),
+        m => m.type.displayName === "ChannelApplicationIcon"
     );
+
+    Patcher.before("PowercordCommands", ChannelApplicationIcon, 'type', (_, [props]) => {
+        if (!props.section && props.command.__powercord) {
+           props.section = section;
+        }
+     });
+
+     Patcher.before("PowercordCommands", ApplicationCommandItem, 'default', (_, [props]) => {
+        if (!props.section && props.command.__powercord) {
+           props.section = section;
+        }
+     });
 
     Patcher.instead("PowercordCommands", SectionIcon, "default", (self, args, orig) => {
         const [props] = args;
