@@ -44,4 +44,10 @@ export default class Store<events = string> {
 
         return state;
     }
+
+    useState<T>(factory: () => T, validate: ValidateListener = () => true): T {
+        return this.useEvent("update" as unknown as events, factory, validate);
+    }
+
+    emitChange() {this.emit("update" as unknown as events);}
 }

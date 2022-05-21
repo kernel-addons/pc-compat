@@ -7,7 +7,7 @@
     "build-renderer": "webpack --progress --env=mode=renderer --env=minify=true",
     "build-main": "webpack --progress --env=mode=main --env=minify=true",
     "build-preload": "webpack --progress --env=mode=preload --env=minify=true",
-    "dist": "pnpm run build-renderer && pnpm run build-main && pnpm run build-preload",
+    "build": "pnpm run build-renderer && pnpm run build-main && pnpm run build-preload",
     "initialize": "pnpm install --production",
     "start-server": "node scripts/devserver.mjs"
   },
@@ -27,12 +27,12 @@
     "webpack": "^5.69.0",
     "webpack-cli": "^4.9.2",
     "ws": "^8.5.0",
-    "@types/electron": "^1.6.10"
+    "asar": "^3.1.0"
   },
   "dependencies": {
-    "@electron/remote": "^2.0.1",
     "buffer": "^6.0.3",
+    "chokidar": "^3.5.3",
     "sass": "^1.43.4",
-    "sucrase": "^3.20.3"
+    "sucrase": "^3.21.0"
   }
 }

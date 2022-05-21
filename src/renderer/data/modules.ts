@@ -3,6 +3,9 @@ export default {
     Constants: {
         props: ["API_HOST", "ActionTypes"]
     },
+    UserSettingsWindow: {
+        props: ["open", "updateAccount"]
+    },
     React: {
         props: ["createElement", "isValidElement"]
     },
@@ -58,6 +61,10 @@ export default {
         props: ["_dispatchToken", "getChannelId", "getLastSelectedChannelId"]
     },
     // Components
+    Header: {
+        name: "Header",
+        props: ["Tags", "Sizes"]
+    },
     ModalComponents: {
         props: ["ModalRoot", "ModalHeader"]
     },
@@ -125,6 +132,15 @@ export default {
     },
     Popout: {
         name: "Popout"
+    },
+    Badges: {
+        props: ["NumberBadge", "TextBadge"],
+        rename: [
+            {from: "NumberBadge", to: "Number"},
+            {from: "TextBadge", to: "Text"},
+            {from: "IconBadge", to: "Icon"},
+            {from: "BadgeShapes", to: "Shapes"}
+        ]
     },
     // Classes
     Margins: {

@@ -288,7 +288,6 @@ if (window.process && !window.process.contextIsolated) {
         Module._extensions[ext] = extensions[ext];
     }
     Module.globalPaths.push(path.resolve(PCCompatNative.getBasePath(), "node_modules"))
-    console.log("Pushed.");
 }
 
 export default !window.process || process.contextIsolated ? NodeModule : window.require("module");

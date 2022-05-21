@@ -25,13 +25,14 @@ const SettingsRenderer = new class SettingsRenderer {
         },
     ];
 
-    registerPanel(id: string, options: {label: string, render: () => import("react").ReactElement, header?: import("react").ReactElement, order: number, predicate?(): boolean}) {
-        const {label, render, order} = options;
+    registerPanel(id: string, options: {icon?: React.ReactElement, badgeCount?: number, label: string, render: () => import("react").ReactElement, header?: import("react").ReactElement, order: number, predicate?(): boolean}) {
+        const {label, render, order, ...rest} = options;
         const tab = this.panels.find(e => e.id === id)
 
         if (tab) throw new Error(`Settings tab ${id} is already registered!`);
 
         const panel = {
+            ...rest,
             section: id,
             label: label,
             order: order,

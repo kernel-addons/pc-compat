@@ -1,5 +1,5 @@
-import electron from "../../node/electron";
-import * as IPCEvents from "../../../common/ipcevents";
+import electron from "@node/electron";
+import * as IPCEvents from "@common/ipcevents";
 
 export default class JSXCompiler {
     static compile(file: string): string {

@@ -14,11 +14,12 @@ const nodeModulesPath = path.resolve(process.cwd(), "resources", "app-original.a
 if (!Module.globalPaths.includes(nodeModulesPath)) Module.globalPaths.push(nodeModulesPath);
 
 const API = {
+    isPacked: path.basename(__dirname) !== "dist",
     getAppPath() {
         return ipcRenderer.sendSync(IPCEvents.GET_APP_PATH);
     },
     getBasePath() {
-        return path.resolve(__dirname, "..");
+        return !API.isPacked ? path.resolve(__dirname, "..") : __dirname;
     },
     executeJS(js: string) {
         return eval(js);
@@ -26,6 +27,7 @@ const API = {
     setDevtools(opened: boolean) {
         return ipcRenderer.invoke(IPCEvents.SET_DEV_TOOLS, opened);
     },
+    runCommand: (cmd: string, cwd?: string) => ipcRenderer.invoke(IPCEvents.RUN_COMMAND, cmd, cwd),
     IPC: IPC,
     cloneObject,
     getKeys

@@ -1,4 +1,8 @@
+/// <reference path="./types/electron.d.ts" />
+
 declare const PCCompatNative: {
+    isPacked: boolean;
+    runCommand(command: string, cwd?: string): Promise<string>;
     executeJS(js: string): any;
     getAppPath(): string;
     getBasePath(): string;
@@ -10,6 +14,12 @@ declare const PCCompatNative: {
         dispatch(event: string, ...args: any[]): void;
     }
 };
+
+declare namespace NodeJS {
+    interface Process {
+        readonly contextIsolated: boolean;
+    }
+}
 
 declare const React: typeof import("react");
 declare const _: typeof import("lodash");

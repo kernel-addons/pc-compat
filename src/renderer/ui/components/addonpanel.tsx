@@ -113,8 +113,7 @@ export function OverflowContextMenu({type: addonType}) {
 };
 
 export default function AddonPanel({manager, type}) {
-    const {React, Button, Tooltips, SearchBar, PlaceholderClasses, Popout} = DiscordModules;
-    const {i18n: {Messages}} = powercord.webpack;
+    const {React, Button, Tooltips, SearchBar, PlaceholderClasses, Popout, LocaleManager: {Messages}} = DiscordModules;
 
     const [query, setQuery] = React.useState("");
     const [addons, setAddons] = React.useState(null);

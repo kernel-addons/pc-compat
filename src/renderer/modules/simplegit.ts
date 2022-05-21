@@ -4,20 +4,7 @@ const hashFields = ["short", "full"];
 
 export default class Git {
     static async executeCmd(cmd: string, cwd?: string) {
-        return new Promise<string>((resolve, reject) => {
-            const id = "GIT_CMD_" + Math.random().toString(36).slice(2);
-            PCCompatNative.IPC.on(id, (error, res) => {
-                if (error) reject(error);
-                else resolve(res);
-            });
-
-            PCCompatNative.executeJS(`void require("child_process").exec(${JSON.stringify(cmd)}, {
-                cwd: ${JSON.stringify(cwd)}
-            }, (error, res) => {
-                PCCompatNative.IPC.dispatch(${JSON.stringify(id)}, error, res);
-                delete PCCompatEvents[${JSON.stringify(id)}];
-            })`);
-        });
+        return PCCompatNative.runCommand(cmd, cwd);
     }
 
     static async hasGitInstalled() {
@@ -31,9 +18,29 @@ export default class Git {
         try {
             const result = await this.executeCmd("git rev-parse --is-inside-work-tree", cwd);
             
-            return result === "true";
+            return result.trim() === "true";
         } catch {
             return false;
+        }
+    }
+
+    static async getRemoteURL(cwd: string): Promise<string> {
+        try {
+            return (await this.executeCmd("git config --get remote.origin.url", cwd)).trim();
+        } catch (error) {
+            console.error(error);
+            return null;
+        }
+    } 
+
+    static async getBranches(cwd: string) {
+        try {
+            const raw = (await this.executeCmd("git branch -r", cwd)).replaceAll(" ", "").replaceAll("origin/", "").trimEnd();
+
+            return raw.split("\n");
+        } catch (error) {
+            console.error(error);
+            return null;
         }
     }
 
@@ -60,6 +67,7 @@ export default class Git {
 
     static async getDiff(cwd: string, target: string = "master") {
         try {
+            await this.executeCmd("git fetch", cwd);
             const result = await this.executeCmd(`git log ${target}..origin/${target} --pretty=format:"%H${period}%h${period}%an${period}%ar${period}%s"`, cwd);
             if (!result) return [];
             return result.split("\n").map(p => this.parsePeriods(commitFields, p));

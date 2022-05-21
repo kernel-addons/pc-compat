@@ -10,7 +10,7 @@ import Events from "@modules/events";
 const Logger = LoggerModule.create("StyleManager");
 
 export default class StyleManager extends Emitter {
-    static get folder() {return path.resolve(DataStore.baseDir, "themes")};
+    static get folder() {return path.resolve(DataStore.baseDir, "powercord", "themes")};
 
     static mainFiles = ["powercord_manifest.json", "manifest.json"];
 
@@ -21,6 +21,38 @@ export default class StyleManager extends Emitter {
     static get addons() {return Array.from(this.themes, e => e[1]);}
 
     static initialize() {
+        const basePath = PCCompatNative.getBasePath();
+        const previous = path.join(basePath, "themes");
+
+        if (!fs.existsSync(this.folder)) {
+            try {
+                fs.mkdirSync(this.folder, {recursive: true});
+            } catch (error) {
+                return void Logger.error("StyleManager", `Failed to create themes folder:`, error);
+            }
+        }
+
+        if (fs.existsSync(previous) && !DataStore.getMisc("migratedThemes", false)) {
+            Logger.log(`Old addon folder detected, migrating ${path.basename(previous)}.`)
+            const files = fs.readdirSync(previous);
+
+            for (const file of files) {
+                // Prepare the paths for moving the old items to the new directory
+                const current = path.join(previous, file);
+                const to = path.join(this.folder, file);
+
+                // Make sure we don't overwrite any themes.
+                if (fs.existsSync(to)) continue;
+
+                // Move the file
+                Logger.log(`Migrating ${path.basename(basePath)}/${path.basename(previous)}/${file}`);
+                fs.renameSync(current, to);
+            }
+
+            DataStore.setMisc(void 0, "migratedThemes", true);
+            Logger.log("Migration completed.");
+        }
+
         SettingsRenderer.registerPanel("pc-moduleManager-themes", {
             label: "Themes",
             order: 2,
@@ -37,14 +69,6 @@ export default class StyleManager extends Emitter {
     }
 
     static loadAll(missing = false) {
-        if (!fs.existsSync(this.folder)) {
-            try {
-                fs.mkdirSync(this.folder);
-            } catch (error) {
-                return void Logger.error("StyleManager", `Failed to create themes folder:`, error);
-            }
-        }
-
         if (!fs.statSync(this.folder).isDirectory()) return void Logger.error("StyleManager", `Plugins dir isn't a folder.`);
         if  (!missing) Logger.log("StyleManager", "Loading themes...");
 

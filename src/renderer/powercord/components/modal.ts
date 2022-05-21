@@ -1,8 +1,7 @@
 import {omit} from "../../modules/utilities";
 import Webpack from "../../modules/webpack";
-import * as ModalActions from "../modal";
 
-const Modal = {};
+const Modal: any = {};
 
 Webpack.whenReady.then(() => {
     const ModalComponents = Webpack.findByProps("ModalRoot");

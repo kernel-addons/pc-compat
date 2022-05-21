@@ -1,16 +1,27 @@
-import DataStore from "@modules/datastore";
-import DiscordModules from "@modules/discord";
-import makeLazy from "@modules/makelazy";
-import Git from "@modules/simplegit";
-import {joinClassNames} from "@modules/utilities";
+import { SettingsContext } from "@ui/components/settingspanel";
 import Divider from "@powercord/components/divider";
+import { joinClassNames } from "@modules/utilities";
+import { memoizeValue } from "@modules/memoize";
+import DiscordModules from "@modules/discord";
 import DiscordIcon from "@ui/discordicon";
+import makeLazy from "@modules/makelazy";
+import SettingsPanel from "./settings";
+import Git from "@modules/simplegit";
+import UpdatesStore from "../store";
+import Updater from "../updater";
 import Icon from "@ui/icons";
-import {UpdatesStore} from "../store";
-
-const [useUpdatesStore] = UpdatesStore;
+import path from "@node/path";
+import fs from "@node/fs";
+import BranchModal from "./branch";
 
 const basePath = PCCompatNative.getBasePath();
+
+const localGitInfo = memoizeValue(() => {
+    const gitInfoPath = path.resolve(basePath, "git.json");
+    if (!fs.existsSync(gitInfoPath)) return null;
+
+    return JSON.parse(fs.readFileSync(gitInfoPath, "utf8"));
+});
 
 export const LoadingSpinner = () => {
     return React.createElement(DiscordModules.Spinner, {
@@ -21,18 +32,24 @@ export const LoadingSpinner = () => {
 
 export const CurrentBranch = makeLazy(async () => {
     const {Link} = DiscordModules;
+    const branch = PCCompatNative.isPacked ? localGitInfo().branchName : (await Git.getBranchName(basePath));
 
-    const branch = await Git.getBranchName(basePath);
+    const handleClick = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        BranchModal.open();
+    };
 
     return (
-        <Link href={`https://github.com/strencher-kernel/pc-compat/tree/${branch}`}>{branch}</Link>
+        <Link href={`https://github.com/strencher-kernel/pc-compat/tree/${branch}`} onClick={handleClick}>{branch}</Link>
     );
 }, LoadingSpinner);
 
 export const CurrentCommitHash = makeLazy(async () => {
     const {Text, Link} = DiscordModules;
 
-    const hash: any = await Git.getLatestCommit(basePath, await Git.getBranchName(basePath));
+    const hash: any = PCCompatNative.isPacked ? localGitInfo().latestCommit : (await Git.getLatestCommit(basePath, await Git.getBranchName(basePath)));
 
     if (hash.hasError) return (
         <Text color={Text.Colors.RED}>error</Text>
@@ -43,25 +60,35 @@ export const CurrentCommitHash = makeLazy(async () => {
     );
 }, LoadingSpinner);
 
-export const defaultInfo = {latestUsedVersion: "0.0.0", lastCheckedUpdate: "---"};
+export function usePromise<T>(promise: Promise<T>): null | T {
+    const [state, setState] = React.useState(null);
+
+    React.useEffect(() => {
+        promise.then(value => setState(value));
+    }, []);
+
+    return state;
+}
 
 export default function UpdaterCard({hasPendingUpdates, onUpdate}) {
-    const {Flex, Text, Moment, Button} = DiscordModules;
-    
-    const updaterInfo = DataStore.useEvent("updates" as any, () => {
-        return DataStore.tryLoadData("info", defaultInfo);
-    }, (name) => name === "info");
-    const isFetching = useUpdatesStore(u => u.isFetching);
+    const ViewAPI = React.useContext<any>(SettingsContext);
+    const {Flex, Text, Moment, Button, Tooltips} = DiscordModules;
+
+    const hasGit = usePromise(Git.hasGitInstalled());
+    const isFetching = UpdatesStore.useState(() => UpdatesStore.isFetching());
+    const isUpdatingAll = UpdatesStore.useState(() => UpdatesStore.isUpdatingAll());
+    const lastCheckedUpdate = UpdatesStore.useState(() => UpdatesStore.getLastCheckedUpdate());
 
     const headerText = React.useMemo(() => {
         if (isFetching) return "Fetching updates...";
         if (hasPendingUpdates) return "Something needs to be updated!";
-        
+        if (isUpdatingAll) return "Updating...";
+
         return "Everything is up to date.";
-    }, [isFetching, updaterInfo, hasPendingUpdates]);
+    }, [isFetching, isUpdatingAll, hasPendingUpdates]);
 
     const headerIcon = React.useMemo(() => {
-        if (isFetching) return (
+        if (isFetching || isUpdatingAll) return (
             <DiscordIcon name="UpdateAvailable" width="70" height="70" className="pcu-shield" />
         );
 
@@ -72,8 +99,8 @@ export default function UpdaterCard({hasPendingUpdates, onUpdate}) {
                 className={joinClassNames("pcu-shield", hasPendingUpdates ? "pcu-shield-warn" : "pcu-shield-ok")}
             />
         );
-    }, [isFetching, updaterInfo, hasPendingUpdates]);
-    
+    }, [isFetching, hasPendingUpdates]);
+
     return (
         <Flex className="pcu-card" direction={Flex.Direction.VERTICAL}>
             <Flex justify={Flex.Justify.BETWEEN} align={Flex.Align.CENTER}>
@@ -85,9 +112,9 @@ export default function UpdaterCard({hasPendingUpdates, onUpdate}) {
                         </Text>
                         <Text size={Text.Sizes.SIZE_14} color={Text.Colors.HEADER_SECONDARY}>
                             Last Checked:
-                            {updaterInfo.lastCheckedUpdate !== "---" && updaterInfo.lastCheckedUpdate != null
-                                ? " " + Moment(updaterInfo.lastCheckedUpdate).calendar()
-                                : " " + updaterInfo.lastCheckedUpdate
+                            {lastCheckedUpdate !== "---" && lastCheckedUpdate != null
+                                ? " " + Moment(lastCheckedUpdate).calendar()
+                                : " " + lastCheckedUpdate
                             }
                         </Text>
                     </Flex.Child>
@@ -98,15 +125,36 @@ export default function UpdaterCard({hasPendingUpdates, onUpdate}) {
                 </div>
             </Flex>
             <Divider />
-            <Flex direction={Flex.Direction.HORIZONTAL}>
+            <Flex direction={Flex.Direction.HORIZONTAL} className="pc-updater-card-actions">
+                {hasPendingUpdates && <Button
+                    color={Button.Colors.GREEN}
+                    size={Button.Sizes.SMALL}
+                    onClick={() => Updater.updateAll()}
+                >Update All</Button>}
                 <Button
-                    disabled={isFetching}
+                    disabled={!hasGit || isFetching}
                     color={Button.Colors.BRAND}
                     size={Button.Sizes.SMALL}
                     onClick={onUpdate}
-                >
-                    Check for Updates
-                </Button>
+                >Check for Updates</Button>
+                <Tooltips.Tooltip text="Settings">
+                    {props => (
+                        <Button
+                            {...props}
+                            size={Button.Sizes.NONE}
+                            look={Button.Looks.BLANK}
+                            className="pc-updater-settings-button"
+                            onClick={() => {
+                                ViewAPI.setPage({
+                                    label: "Settings",
+                                    render: () => <SettingsPanel />
+                                });
+                            }}
+                        >
+                            <DiscordIcon name="Gear" width="20" height="20" />
+                        </Button>
+                    )}
+                </Tooltips.Tooltip>
             </Flex>
         </Flex>
     );

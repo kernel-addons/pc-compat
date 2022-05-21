@@ -40,4 +40,221 @@
             }
         }
     }
+
+    .pc-updater-card-actions {
+        button {
+            & + button {
+                margin-left: 10px;
+            }
+        }
+    }
+
+    .pc-updater-settings-button {
+        margin-left: auto !important;
+    }
+    
+    .pc-updater-settings-button > div {
+        display: inline-flex;
+        align-self: center;
+    }
+}
+
+.pc-update {
+    font-variant-ligatures: no-contextual;
+    margin-top: 20px;
+    padding: 15px;
+    background: var(--background-secondary);
+    border-radius: 4px;
+    border-left: 4px solid var(--border, var(--brand-experiment));
+
+    .pc-release-header {
+        display: flex;
+        align-items: center;
+        padding-bottom: 10px;
+        border-bottom: thin solid var(--background-modifier-accent);
+        margin-bottom: 10px;
+
+        .pc-update-author-img {
+            width: 20px;
+            height: 20px;
+            border-radius: 100px;
+        }
+        
+        .pc-release-author {
+            font-weight: bold;
+            margin: 0 5px 0 5px;
+        }
+
+        .pc-bot-tag {
+            border-radius: 4px;
+            font-size: 12px;
+            background: var(--brand-experiment);
+            padding: 2px 5px;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .pc-release-timestamp {
+            margin-left: auto;
+        }
+    }
+
+    .pc-update-info {
+        display: flex;
+        align-items: center;
+    
+        b {
+            margin-right: 5px;
+        }
+    
+        .pc-update-version-arrow {
+            margin: 0 5px 0 5px;
+            display: inline-flex;
+        
+            svg {
+                transform: rotate(90deg);
+            }
+        }
+
+        & + .pc-update-info {
+            margin-top: 5px;
+        }
+    }
+
+    .pc-update-actions {
+        padding-top: 10px;
+        margin-top: 10px;
+        border-top: 1px solid var(--background-modifier-accent);
+        display: flex;
+        justify-content: flex-end;
+    
+        button, > span {
+            min-height: 0;
+            min-width: 0;
+
+            & + button {
+                margin-left: 10px;
+            }
+        }
+
+        button {
+            height: 30px;
+            width: 30px;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        
+            & > div {
+                display: inline-flex;
+            }
+        }
+
+        .pc-updater-install-button {
+            margin-left: auto;
+            padding-left: 6px; // Fix the icon having weird bounds
+        }
+    }
+
+    .pc-update-commit {
+        display: flex;
+        align-items: center;
+    }
+    
+    li {
+        list-style: circle;
+        margin-left: 20px;
+        margin-top: 2px;
+        margin-bottom: 2px;
+    }
+    
+    .pc-commit-hash {
+        background: var(--background-tertiary);
+        padding: 3px;
+        border-radius: 4px;
+        margin-right: 5px;
+        font-size: 80%;
+    }
+    
+    .pc-commit-author {
+        color: var(--header-secondary);
+        white-space: nowrap;
+    }
+    
+    .pc-commit-message {
+        margin-right: 5px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+    }
+    
+    .pc-commit-author-username {
+        margin-right: 5px;
+    }
+    
+    .pc-commit-timestamp {
+        margin-left: 5px;
+    }
+
+    .pc-update-error {
+        display: inline-flex;
+        float: right;
+        position: relative;
+        top: -25px;
+        color: #ed4245;
+    }
+
+    .pc-update-spinner {
+        width: 24px;
+        height: 24px;
+    }
+}
+
+.buildOverrideButton-1cRvTc .pc-settings-update-badge {
+    top: -5px;
+    right: -5px;
+    left: unset;
+}
+
+.pc-settings-update-badge {
+    transform: scale(0.7);
+    position: absolute;
+    top: 1px;
+    left: 15px;
+}
+
+.pc-branch-modal-inner {
+    padding-bottom: 25px;
+
+    .pc-branch-item {
+        color: #ddd;
+        padding: 20px;
+        flex-grow: 1;
+        background: var(--background-secondary);
+        margin-bottom: 1px;
+    }
+    
+    .pc-branch-item {
+        cursor: pointer;
+
+        &:hover {
+            background: var(--background-secondary-alt);
+        }
+
+        svg {
+            width: 24px;
+            height: 24px;
+        }
+    }
+    
+    .pc-branch-item:nth-last-of-type(2) {
+        border-bottom-left-radius: 20px;
+        border-bottom-right-radius: 20px;
+        margin-bottom: 0;
+    }
+    
+    .pc-branch-item:first-child {
+        border-top-left-radius: 20px;
+        border-top-right-radius: 20px;
+    }
 }
