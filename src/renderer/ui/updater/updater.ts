@@ -13,7 +13,7 @@ const getId = (() => {
 
 export default class Updater {
     static async installCoreUpdate(url: string, encoding: string) {
-        if (PCCompatNative.isPacked) {
+        if (!PCCompatNative.isPacked) {
             return Git.executeCmd("git pull", PCCompatNative.getBasePath());
         }
 
