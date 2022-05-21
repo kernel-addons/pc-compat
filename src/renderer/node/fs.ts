@@ -48,6 +48,10 @@ export default (window.process?.contextIsolated ?? true) ? class fs {
         `);
     }
 
+    static renameSync(old: string, newName?: string): void {
+        return PCCompatNative.executeJS(`require("fs").renameSync(${JSON.stringify(old)}, ${JSON.stringify(newName)});`);
+    }
+
     static watch(path: string, options: any, callback?: Function) {
         if (typeof (options) === "function") {
             callback = options;

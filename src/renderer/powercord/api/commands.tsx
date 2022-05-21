@@ -42,13 +42,13 @@ export function initialize() {
         if (!props.section && props.command.__powercord) {
            props.section = section;
         }
-     });
+    });
 
      Patcher.before("PowercordCommands", ApplicationCommandItem, 'default', (_, [props]) => {
         if (!props.section && props.command.__powercord) {
            props.section = section;
         }
-     });
+    });
 
     Patcher.instead("PowercordCommands", SectionIcon, "default", (self, args, orig) => {
         const [props] = args;
