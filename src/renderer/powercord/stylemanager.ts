@@ -100,7 +100,7 @@ export default class StyleManager extends Emitter {
                 type: "success"
             });
 
-            this.emit("entityChange");
+            this.emit("changed");
         } else if (missing && !missingEntities.length) {
             powercord.api.notices.sendToast(null, {
                 content: "Couldn't find any themes that aren't already loaded.",
@@ -278,7 +278,7 @@ export default class StyleManager extends Emitter {
         this.unloadAddon(theme);
         this.themes.delete(theme.entityID);
         PCCompatNative.executeJS(`require("electron").shell.trashItem(${JSON.stringify(theme.path)})`);
-        this.emit("delete", theme)
+        this.emit("changed", theme)
     }
 
     static toggle(addon: any) {

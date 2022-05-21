@@ -128,7 +128,7 @@ export default function AddonPanel({manager, type}) {
             setAddons(manager.addons);
         });
 
-        manager.on("entityChange", () => {
+        manager.on("changed", () => {
             setAddons(manager.addons);
         })
     }, [manager]);

@@ -111,7 +111,7 @@ export default class PluginManager extends Emitter {
                 type: "success"
             });
 
-            this.emit("entityChange");
+            this.emit("changed");
         } else if (missing && !missingEntities.length) {
             powercord.api.notices.sendToast(null, {
                 content: "Couldn't find any plugins that aren't already loaded.",
@@ -291,7 +291,7 @@ export default class PluginManager extends Emitter {
 
         this.unloadAddon(plugin);
         PCCompatNative.executeJS(`require("electron").shell.trashItem(${JSON.stringify(plugin.path)})`);
-        this.emit("delete", plugin)
+        this.emit("updated", plugin)
     }
 
     static toggle(addon: any) {
