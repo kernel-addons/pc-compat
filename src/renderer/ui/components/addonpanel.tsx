@@ -128,7 +128,7 @@ export default function AddonPanel({manager, type}) {
             setAddons(manager.addons);
         });
 
-        manager.on("changed", () => {
+        manager.on("updated", () => {
             setAddons(manager.addons);
         })
     }, [manager]);

@@ -100,7 +100,7 @@ export default class StyleManager extends Emitter {
                 type: "success"
             });
 
-            this.emit("changed");
+            this.emit("updated");
         } else if (missing && !missingEntities.length) {
             powercord.api.notices.sendToast(null, {
                 content: "Couldn't find any themes that aren't already loaded.",
@@ -182,6 +182,8 @@ export default class StyleManager extends Emitter {
         if (this.isEnabled(path.basename(location))) {
             this.startTheme(data);
         }
+
+        this.emit("updated", data);
     }
 
     static unloadAddon(addon: any, log = true) {
@@ -194,6 +196,8 @@ export default class StyleManager extends Emitter {
         if (log) {
             Logger.log(`${theme.displayName} was unloaded!`);
         }
+
+        this.emit("updated", theme);
 
         return success;
     }
@@ -278,7 +282,7 @@ export default class StyleManager extends Emitter {
         this.unloadAddon(theme);
         this.themes.delete(theme.entityID);
         PCCompatNative.executeJS(`require("electron").shell.trashItem(${JSON.stringify(theme.path)})`);
-        this.emit("changed", theme)
+        this.emit("updated", theme);
     }
 
     static toggle(addon: any) {

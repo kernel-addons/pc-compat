@@ -111,7 +111,7 @@ export default class PluginManager extends Emitter {
                 type: "success"
             });
 
-            this.emit("changed");
+            this.emit("updated");
         } else if (missing && !missingEntities.length) {
             powercord.api.notices.sendToast(null, {
                 content: "Couldn't find any plugins that aren't already loaded.",
@@ -195,6 +195,8 @@ export default class PluginManager extends Emitter {
         if (this.isEnabled(path.basename(location))) {
             this.startPlugin(exports);
         }
+
+        this.emit("updated", exports);
     }
 
     static unloadAddon(addon: any, log = true) {
@@ -208,6 +210,8 @@ export default class PluginManager extends Emitter {
         if (log) {
             Logger.log(`${plugin.displayName} was unloaded!`);
         }
+
+        this.emit("updated", plugin);
 
         return success;
     }
@@ -291,7 +295,7 @@ export default class PluginManager extends Emitter {
 
         this.unloadAddon(plugin);
         PCCompatNative.executeJS(`require("electron").shell.trashItem(${JSON.stringify(plugin.path)})`);
-        this.emit("updated", plugin)
+        this.emit("updated", plugin);
     }
 
     static toggle(addon: any) {
