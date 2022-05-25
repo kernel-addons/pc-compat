@@ -25,9 +25,9 @@ export default class Plugin {
 
     settings: any;
 
-    startPlugin?: Function;
+    startPlugin?(): void;
 
-    pluginWillUnload?: Function;
+    pluginWillUnload?(): void;
 
     loadStylesheet(_path: string): void {
         const stylePath = path.isAbsolute(_path) ? _path : path.resolve(this.path, _path);
