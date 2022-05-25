@@ -9,7 +9,10 @@ import Events from "@modules/events";
 
 const Logger = LoggerModule.create("StyleManager");
 
+const reloadTimeouts = {};
+
 export default class StyleManager extends Emitter {
+    static watcher: any;
     static get folder() {return path.resolve(DataStore.baseDir, "powercord", "themes")};
 
     static mainFiles = ["powercord_manifest.json", "manifest.json"];
@@ -21,6 +24,86 @@ export default class StyleManager extends Emitter {
     static get addons() {return Array.from(this.themes, e => e[1]);}
 
     static initialize() {
+        const {watch} = Require("chokidar");
+        const {basename} = path;
+
+        this.watcher = watch(this.folder, {
+            ignored: /((^|[\/\\])\..|.git|node_modules)/,
+            ignoreInitial: true,
+            persistent: true
+        });
+
+        const handler = {
+            previous: null,
+            timer: null,
+            reload: (name) => {
+                clearTimeout(handler.timer);
+                if (handler.previous === name) {
+                    handler.timer = setTimeout(() => reload(name), 1000);
+                    return;
+                }
+
+                handler.previous = name;
+                this.reload(name);
+            }
+        }
+
+        this.watcher.on("change", (path) => {
+            const [, entity] = path.replace(this.folder, "").split(/\\|\//);
+
+            const name = basename(entity);
+            try {
+                this.delayedReload(name);
+                this.emit("changed");
+            } catch (e) {
+                Logger.error(`Failed to handle file change for ${name}.`, e);
+            }
+        });
+
+        this.watcher.on("add", (path) => {
+            const [, entity] = path.replace(this.folder, "").split(/\\|\//);
+
+            const name = basename(entity);
+            try {
+                this.delayedReload(name);
+                this.emit("changed");
+            } catch (e) {
+                Logger.error(`Failed to handle file change for ${name}.`, e);
+            }
+        });
+
+        this.watcher.on("unlink", (path) => {
+            const name = basename(path);
+            try {
+                this.unloadAddon(name);
+                this.emit("changed");
+            } catch (e) {
+                Logger.error(`Failed to handle deleted addon ${name}.`, e);
+            }
+        });
+
+        this.watcher.on("addDir", (path) => {
+            const name = basename(path);
+            try {
+                this.reload(name);
+                this.emit("changed");
+            } catch (e) {
+                Logger.error(`Failed to handle new addon ${name}.`, e);
+            }
+        });
+
+        this.watcher.on("unlinkDir", (path) => {
+            const name = basename(path);
+            try {
+                this.unloadAddon(name);
+                this.emit("changed");
+            } catch (e) {
+                Logger.error(`Failed to handle deleted addon ${name}.`, e);
+            }
+        });
+
+        window.addEventListener("unload", () => this.watcher.close());
+
         const basePath = PCCompatNative.getBasePath();
         const previous = path.join(basePath, "themes");
 
@@ -68,6 +151,16 @@ export default class StyleManager extends Emitter {
         });
     }
 
+    static delayedReload(name) {
+        const later = () => {
+            reloadTimeouts[name] = null;
+            reload.apply(this, [name]);
+        };
+
+        clearTimeout(reloadTimeouts[name]);
+        reloadTimeouts[name] = setTimeout(later, 200);
+    }
+
     static loadAll(missing = false) {
         if (!fs.statSync(this.folder).isDirectory()) return void Logger.error("StyleManager", `Plugins dir isn't a folder.`);
         if  (!missing) Logger.log("StyleManager", "Loading themes...");
@@ -95,7 +188,7 @@ export default class StyleManager extends Emitter {
 
         if (missing && missingEntities.length) {
             powercord.api.notices.sendToast(null, {
-                content: `The following themes were loaded: ${missingEntities.join(', ')}`,
+                content: `The following themes were loaded: ${missingEntities.join(", ")}`,
                 header: "Missing themes found",
                 type: "success"
             });

@@ -11,7 +11,11 @@ import Events from "@modules/events";
 
 const Logger = LoggerModule.create("PluginManager");
 
+const reloadTimeouts = {};
+
 export default class PluginManager extends Emitter {
+    static watcher: any;
+
     static get folder() {return path.resolve(DataStore.baseDir, "powercord", "plugins")};
 
     static mainFiles = ["index.js", "index.jsx"];
@@ -23,6 +27,71 @@ export default class PluginManager extends Emitter {
     static get addons() {return Array.from(this.plugins, e => e[1]);}
 
     static initialize() {
+        const {watch} = Require("chokidar");
+        const {basename} = path;
+
+        this.watcher = watch(this.folder, {
+            ignored: /((^|[\/\\])\..|.git|node_modules)/,
+            ignoreInitial: true,
+            persistent: true
+        });
+
+        this.watcher.on("change", (path) => {
+            const [, entity] = path.replace(this.folder, "").split(/\\|\//);
+
+            const name = basename(entity);
+            try {
+                this.delayedReload(name);
+                this.emit("changed");
+            } catch (e) {
+                Logger.error(`Failed to handle file change for ${name}.`, e);
+            }
+        });
+
+        this.watcher.on("add", (path) => {
+            const [, entity] = path.replace(this.folder, "").split(/\\|\//);
+
+            const name = basename(entity);
+            try {
+                this.delayedReload(name);
+                this.emit("changed");
+            } catch (e) {
+                Logger.error(`Failed to handle file change for ${name}.`, e);
+            }
+        });
+
+        this.watcher.on("unlink", (path) => {
+            const name = basename(path);
+            try {
+                this.unloadAddon(name);
+                this.emit("changed");
+            } catch (e) {
+                Logger.error(`Failed to handle deleted addon ${name}.`, e);
+            }
+        });
+
+        this.watcher.on("addDir", (path) => {
+            const name = basename(path);
+            try {
+                this.reload(name);
+                this.emit("changed");
+            } catch (e) {
+                Logger.error(`Failed to handle new addon ${name}.`, e);
+            }
+        });
+
+        this.watcher.on("unlinkDir", (path) => {
+            const name = basename(path);
+            try {
+                this.unloadAddon(name);
+                this.emit("changed");
+            } catch (e) {
+                Logger.error(`Failed to handle deleted addon ${name}.`, e);
+            }
+        });
+
+        window.addEventListener("unload", () => this.watcher.close());
+
         const basePath = PCCompatNative.getBasePath();
         const previous = path.join(basePath, "plugins");
 
@@ -76,6 +145,16 @@ export default class PluginManager extends Emitter {
         });
     }
 
+    static delayedReload(name) {
+        const later = () => {
+            reloadTimeouts[name] = null;
+            this.reload.apply(this, [name]);
+        };
+
+        clearTimeout(reloadTimeouts[name]);
+        reloadTimeouts[name] = setTimeout(later, 200);
+    }
+
     static loadAll(missing = false) {
         if (!fs.statSync(this.folder).isDirectory()) return void Logger.error("PluginsManager", `Plugins dir isn't a folder.`);
         if (!missing) Logger.log("PluginsManager", "Loading plugins...");
@@ -106,7 +185,7 @@ export default class PluginManager extends Emitter {
 
         if (missing && missingEntities.length) {
             powercord.api.notices.sendToast(null, {
-                content: `The following plugins were loaded: ${missingEntities.join(', ')}`,
+                content: `The following plugins were loaded: ${missingEntities.join(", ")}`,
                 header: "Missing plugins found",
                 type: "success"
             });

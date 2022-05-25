@@ -30,6 +30,7 @@ export default class Updater {
     static loadData() {return DataStore.tryLoadData("updater", DEFAULT_CONFIG);}
 
     static initialize() {
+        if (window.isUnbound) return;
         this.config = this.loadData();
 
         SettingsRenderer.registerPanel("pc-updater", {
