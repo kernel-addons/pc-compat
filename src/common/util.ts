@@ -17,3 +17,9 @@ export function cloneObject(target: any, newObject = {}, keys?: string[]) {
         return clone;
     }, newObject);
 };
+
+export function makeLazy<T>(factory: () => T): () => T {
+    let cache;
+    return () => (cache ??= factory());
+};
+

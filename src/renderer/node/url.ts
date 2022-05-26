@@ -1,5 +1,3 @@
-export default {
-    parse: (...args) => PCCompatNative.executeJS(`
-        PCCompatNative.cloneObject(require("url").parse(${args.map(e => JSON.stringify(e)).join(", ")}));
-    `)
-}
+import {makeLazy} from "@common/util";
+
+export default makeLazy(() => PCCompatNative.getBinding("url"));

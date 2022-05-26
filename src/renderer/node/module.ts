@@ -88,7 +88,7 @@ export class Module {
         if (parent) parent.children.push(this);
     }
 
-    _compile(code: string) {
+    _compile(code: string, filename?: string) {
         const wrapped = window.eval(`(function (${nodeGlobals}) {
             ${code}
             //# sourceURL=${JSON.stringify(this.filename).slice(1, -1)}
@@ -125,15 +125,15 @@ export function createRequire(_path: string, parent: Module): Require {
             case "react": return DiscordModules.React;
             case "react-dom": return DiscordModules.ReactDOM;
             case "events": return EventEmitter;
-            case "os": return os;
-            case "util": return util;
-            case "zlib": return zlib;
-            case "stream": return stream;
-            case "querystring": return querystring;
-            case "url": return url;
-            case "net": return net;
-            case "tls": return tls;
-            case "crypto": return crypto;
+            case "os": return os();
+            case "util": return util();
+            case "zlib": return zlib();
+            case "stream": return stream();
+            case "querystring": return querystring();
+            case "url": return url();
+            case "net": return net();
+            case "tls": return tls();
+            case "crypto": return crypto();
             case "buffer": return Buffer;
 
             default: {
@@ -248,7 +248,7 @@ export function load(_path: string, mod: string, req = null) {
     const file = getFilePath(_path, mod);
     if (!fs.existsSync(file)) throw new Error(`Cannot find module ${mod}\ntree:\n\r-${_path}`);
     if (cache[file]) return cache[file].exports;
-    const stats = fs.statSync(file, "utf8");
+    const stats = fs.statSync(file);
     if (stats.isDirectory()) mod = resolveMain(_path, mod);
     const ext = getExtension(file);
     const loader = extensions[ext];
@@ -270,12 +270,14 @@ if (window.process && !window.process.contextIsolated) {
     const Module = window.require("module");
     const oldLoad = Module._load;
 
-    Module._load = function (mod) {
+    Module._load = function (mod: string) {
         if (mod === "powercord") {
             return powercord;
-        } else if (~mod.indexOf("pc-settings/components/ErrorBoundary")) {
+        }
+        else if (~mod.indexOf("pc-settings/components/ErrorBoundary")) {
             return errorboundary;
-        } else if (mod.startsWith("powercord/")) {
+        }
+        else if (mod.startsWith("powercord/")) {
             const value = mod.split("/").slice(1).filter(Boolean).reduce((value, key) => value[key], powercord);
             if (value) return value;
         }
@@ -287,7 +289,8 @@ if (window.process && !window.process.contextIsolated) {
     for (const ext of _extensions) {
         Module._extensions[ext] = extensions[ext];
     }
-    Module.globalPaths.push(path.resolve(PCCompatNative.getBasePath(), "node_modules"))
+
+    Module.globalPaths.push(path.resolve(PCCompatNative.getBasePath(), "node_modules"));
 }
 
 export default !window.process || process.contextIsolated ? NodeModule : window.require("module");

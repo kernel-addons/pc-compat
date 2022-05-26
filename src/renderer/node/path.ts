@@ -1,3 +1,3 @@
-const path: typeof import("path") = PCCompatNative.executeJS(`require("path")`);
+type PathModule = typeof import("src/preload/bindings").path;
 
-export default path;
+export default PCCompatNative.getBinding("path") as PathModule;

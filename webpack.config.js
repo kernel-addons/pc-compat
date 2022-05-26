@@ -3,6 +3,7 @@ const CircularDependencyPlugin = require("circular-dependency-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const {DefinePlugin} = require("webpack");
 const pkg = require("./package.json");
+const {builtinModules} = require("module");
 
 module.exports = args => {
     const {mode = "renderer", minify = false} = args;
@@ -18,6 +19,7 @@ module.exports = args => {
                 type: mode === "renderer" ? "module" : "commonjs"
             },
             filename: `${mode}.js`,
+            chunkFilename: "[name].js"
         },
         experiments: {
             outputModule: true
@@ -29,13 +31,9 @@ module.exports = args => {
             // Automatically add all dependencies as externals.
             ...Object.fromEntries(
                 Object.keys(pkg.dependencies).map(e => [e, e])
+                .concat(builtinModules.flatMap(mod => [[mod, mod], [`node:${mod}`, mod]]))
             ),
-            child_process: "child_process",
-            inspector: "inspector",
-            path: "path",
-            fs: "fs",
-            module: "module",
-            electron: "electron",
+            electron: "electron"
         },
         module: {
             rules: [

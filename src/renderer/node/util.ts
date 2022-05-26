@@ -1,3 +1,3 @@
-const util: typeof import("util") = PCCompatNative.executeJS(`require("util")`);
+import {makeLazy} from "@common/util";
 
-export default util;
+export default makeLazy(() => PCCompatNative.getBinding("util"));

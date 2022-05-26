@@ -7,3 +7,6 @@ export {default as memoize} from "./memoize";
 export {default as Logger} from "./logger";
 export * as Utilities from "./utilities";
 export {default as DOM} from "./dom";
+export {default as Git} from "./simplegit";
+export {default as GithubAPI} from "./github";
+export {default as makeLazy} from "./makelazy";
