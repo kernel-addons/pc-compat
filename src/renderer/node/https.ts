@@ -14,7 +14,7 @@ export function get(...args: any[]) {
 
     req.on("all", (event: string, ...args: any[]) => {
         if (event === "end") {
-            const data = args.pop();
+            const data = args.shift();
 
             Object.assign(emitter, data);
         }
