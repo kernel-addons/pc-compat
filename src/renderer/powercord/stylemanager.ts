@@ -2,7 +2,7 @@ import AddonPanel from "@ui/components/addonpanel";
 import {DataStore, DiscordModules} from "@modules";
 import SettingsRenderer from "@modules/settings";
 import LoggerModule from "@modules/logger";
-import {fs, Module, path, require as Require} from "@node";
+import {fs, Module, path, require as Require, electron} from "@node";
 import Emitter from "../classes/staticemitter";
 import Theme from "@powercord/classes/theme";
 import Events from "@modules/events";
@@ -281,7 +281,7 @@ export default class StyleManager extends Emitter {
 
         this.unloadAddon(theme);
         this.themes.delete(theme.entityID);
-        PCCompatNative.executeJS(`require("electron").shell.trashItem(${JSON.stringify(theme.path)})`);
+        electron.shell.trashItem(theme.path);
         this.emit("updated", theme);
     }
 

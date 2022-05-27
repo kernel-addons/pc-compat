@@ -2,7 +2,7 @@ import AddonPanel from "@ui/components/addonpanel";
 import {DataStore, DiscordModules} from "@modules";
 import LoggerModule from "@modules/logger";
 import SettingsRenderer from "../modules/settings";
-import {fs, path, require as Require, Module} from "@node";
+import {fs, path, require as Require, Module, electron} from "@node";
 import Plugin from "./classes/plugin";
 import Emitter from "../classes/staticemitter";
 import {globalPaths} from "@node/module";
@@ -294,7 +294,7 @@ export default class PluginManager extends Emitter {
         if (!plugin) return;
 
         this.unloadAddon(plugin);
-        PCCompatNative.executeJS(`require("electron").shell.trashItem(${JSON.stringify(plugin.path)})`);
+        electron.shell.trashItem(plugin.path);
         this.emit("updated", plugin);
     }
 
