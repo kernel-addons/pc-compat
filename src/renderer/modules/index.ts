@@ -10,3 +10,4 @@ export {default as DOM} from "./dom";
 export {default as Git} from "./simplegit";
 export {default as GithubAPI} from "./github";
 export {default as makeLazy} from "./makelazy";
+export {default as SettingsRenderer} from "./settings";

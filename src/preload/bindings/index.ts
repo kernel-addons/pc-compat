@@ -10,6 +10,8 @@ export {default as tls} from "tls";
 export {default as fs} from "./fs";
 export {default as os} from "os";
 
+export * as updater from "./updater";
+export * as native from "./native";
 export * as https from "./https";
 export * as http from "./http";
 export * as url from "./url";

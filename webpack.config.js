@@ -33,6 +33,7 @@ module.exports = args => {
                 Object.keys(pkg.dependencies).map(e => [e, e])
                 .concat(builtinModules.flatMap(mod => [[mod, mod], [`node:${mod}`, mod]]))
             ),
+            "original-fs": "original-fs",
             electron: "electron"
         },
         module: {

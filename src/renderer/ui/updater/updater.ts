@@ -5,6 +5,7 @@ import PluginManager from "@powercord/pluginmanager";
 import StyleManager from "@powercord/stylemanager";
 import UpdatesStore, {AddonUpdate, CoreUpdate, DEFAULT_CONFIG} from "./store";
 
+const UpdaterNative = PCCompatNative.getBinding("updater") as typeof import("src/preload/bindings/updater");
 const getId = (() => {
     let id = 0;
 
@@ -17,35 +18,7 @@ export default class Updater {
             return Git.executeCmd("git pull", PCCompatNative.getBasePath());
         }
 
-        const installUpdate = PCCompatNative.executeJS(`async (url, path, encoding) => {
-            const fs = require("original-fs");
-            const buffer = await new Promise(resolve => {
-                const fetchUrl = function (url) {
-                    require("https").get(url, {
-                        headers: {
-                            "User-Agent": "Kernel-mod pc-compat",
-                            "Accept": encoding
-                        }
-                    }, res => {
-                        if (res.statusCode === 301 || res.statusCode === 302) {
-                            return fetchUrl(res.headers.location);
-                        }
-
-                        const data = [];
-                        res.on("data", chunk => data.push(chunk));
-                        res.on("end", () => {
-                            resolve(Buffer.concat(data));
-                        });
-                    });
-                };
-
-                fetchUrl(url);
-            });
-
-            return fs.promises.writeFile(path, buffer);
-        }`);
-
-        return installUpdate(url, PCCompatNative.getBasePath(), encoding);
+        return UpdaterNative.update(url, PCCompatNative.getBasePath(), encoding);
     }
 
     static async installAddonUpdate(path: string, force: boolean) {

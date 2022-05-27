@@ -20,6 +20,7 @@ import tls from "./tls";
 import Buffer from "./buffer";
 
 export const cache = {};
+const NativeModule = PCCompatNative.getBinding("native") as typeof import("src/preload/bindings/native");
 export const nodeGlobals = ["require", "module", "exports", "__filename", "__dirname", "global"].join(", ");
 export const globalPaths = [
     path.resolve(PCCompatNative.getBasePath(), "node_modules")
@@ -58,10 +59,9 @@ export const extensions = {
     // I haven't tested this - I assume it works.
     // TODO: Make this not shitty
     ".node": (module: Module, filename: string) => {
-        const thing = PCCompatNative.executeJS(`require(${JSON.stringify(filename)})`);
-        module.exports = thing;
+        module.exports = NativeModule.loadLibrary(filename);
 
-        return thing;
+        return module.exports;
     }
 };
 
