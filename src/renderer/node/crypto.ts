@@ -1,10 +1,3 @@
-const methods: String[] = PCCompatNative.executeJS(`Object.keys(require("crypto"))`);
+import {makeLazy} from "@common/util";
 
-// @ts-ignore
-const crypto: typeof import("crypto") = {}
-for(const key of methods) {
-   // @ts-ignore
-   crypto[key] = PCCompatNative.executeJS(`require("crypto").${key}`)
-}
-
-export default crypto;
+export default makeLazy(() => PCCompatNative.getBinding("crypto"));

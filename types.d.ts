@@ -1,19 +1,6 @@
 /// <reference path="./types/electron.d.ts" />
 
-declare const PCCompatNative: {
-    isPacked: boolean;
-    runCommand(command: string, cwd?: string): Promise<string>;
-    executeJS(js: string): any;
-    getAppPath(): string;
-    getBasePath(): string;
-    setDevtools(opened: boolean): void;
-    IPC: {
-        on(event: string, callback: Function): () => void;
-        off(event: string, callback: Function): void;
-        once(event: string, callback: Function): void;
-        dispatch(event: string, ...args: any[]): void;
-    }
-};
+declare const PCCompatNative: import("./src/preload/index").API;
 
 declare namespace NodeJS {
     interface Process {

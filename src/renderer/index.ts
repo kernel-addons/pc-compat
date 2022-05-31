@@ -15,6 +15,7 @@ import Updater from "@ui/updater";
 import "./styles/index";
 import Events from "@modules/events";
 import DevServer from "@modules/devserver";
+import {setBuffer} from "@node/buffer";
 
 const Logger = Internals.Logger.create("Core");
 
@@ -31,6 +32,7 @@ export default new class PCCompat {
 
     async onStart() {
         StyleManager.initialize();
+        setBuffer(Internals.Webpack.findByProps("Buffer"));
         this.expose("powercord", Require("powercord"));
         this.expose("PCInternals", Internals);
         await initializeWebpack();
@@ -53,7 +55,7 @@ export default new class PCCompat {
         PluginManager.initialize();
         Updater.initialize();
 
-        if (__NODE_ENV__ === "DEVELOPMENT") DevServer.initialize();
+        // if (__NODE_ENV__ === "DEVELOPMENT") DevServer.initialize();
 
         this.checkForChangelog();
         this.patchSettingsHeader();

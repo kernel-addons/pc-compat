@@ -6,6 +6,8 @@ import path from "path";
 import * as IPCEvents from "../common/ipcevents";
 import handleSplash from './splash';
 import Process from "./process";
+import {basePath, isPacked} from "./util";
+import * as bindings from "./bindings";
 
 const {IPC, events} = createIPC();
 
@@ -14,12 +16,12 @@ const nodeModulesPath = path.resolve(process.cwd(), "resources", "app-original.a
 if (!Module.globalPaths.includes(nodeModulesPath)) Module.globalPaths.push(nodeModulesPath);
 
 const API = {
-    isPacked: path.basename(__dirname) !== "dist",
+    isPacked,
     getAppPath() {
         return ipcRenderer.sendSync(IPCEvents.GET_APP_PATH);
     },
     getBasePath() {
-        return !API.isPacked ? path.resolve(__dirname, "..") : __dirname;
+        return basePath;
     },
     executeJS(js: string) {
         return eval(js);
@@ -28,10 +30,13 @@ const API = {
         return ipcRenderer.invoke(IPCEvents.SET_DEV_TOOLS, opened);
     },
     runCommand: (cmd: string, cwd?: string) => ipcRenderer.invoke(IPCEvents.RUN_COMMAND, cmd, cwd),
+    getBinding(id: keyof typeof bindings) {return bindings[id];},
     IPC: IPC,
     cloneObject,
-    getKeys
+    getKeys,
 };
+
+export type API = typeof API;
 
 // Splash screen
 handleSplash(API);

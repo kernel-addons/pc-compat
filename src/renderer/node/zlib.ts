@@ -1,3 +1,3 @@
-const zlib: typeof import("zlib") = PCCompatNative.executeJS(`require("zlib")`);
+import {makeLazy} from "@common/util";
 
-export default zlib;
+export default makeLazy(() => PCCompatNative.getBinding("zlib"));

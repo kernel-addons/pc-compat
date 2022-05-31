@@ -1,7 +1,7 @@
 import {DataStore, DiscordModules} from "@modules";
 import DiscordIcon from "@ui/discordicon";
 import AddonCard from "./addoncard";
-import path from "@node/path";
+import {electron} from "@node";
 
 export type SearchOptions = {
     description: boolean;
@@ -175,7 +175,7 @@ export default function AddonPanel({manager, type}) {
                             size={Button.Sizes.NONE}
                             look={Button.Looks.BLANK}
                             className="pc-settings-open-folder"
-                            onClick={() => PCCompatNative.executeJS(`require("electron").shell.openPath('${JSON.stringify(manager.folder)}')`)}
+                            onClick={() => electron.shell.openPath(manager.folder)}
                         >
                             <DiscordIcon name="Folder" width={20} height={20} />
                         </Button>

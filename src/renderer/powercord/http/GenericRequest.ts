@@ -1,10 +1,12 @@
 import LoggerModule from "@modules/logger";
 import * as https from "@node/https";
 import * as http from "@node/http";
-import querystring from "@node/querystring";
-import url from "@node/url";
 
 const Logger = LoggerModule.create("HTTP");
+
+const serializeQuery = (query: {[s: string]: string}) =>
+    Object.entries<string>(query)
+        .reduce((acc, [key, value]) => acc.concat(`${key}=${encodeURIComponent(value)}`), []).join("&");
 
 class HTTPError extends Error {
     constructor(message, res) {
@@ -16,17 +18,31 @@ class HTTPError extends Error {
 
 interface GenericRequest {
     opts: {
-        method: String,
-        uri: String,
-        query: Object,
-        headers: Object,
+        method: string,
+        uri: string,
+        query: {[s: string]: string},
+        headers: object,
         data?: any;
     },
     _res: any;
 }
 
+class EnumerableURL extends URL {
+    toJS() {
+        const out = {};
+
+        for (const name of Object.getOwnPropertyNames(this.constructor.prototype.__proto__)) {
+            if (typeof this[name] === "function" || name === "searchParams") continue;
+
+            out[name] = this[name];
+        }
+
+        return out;
+    }
+}
+
 class GenericRequest {
-    constructor(method, uri) {
+    constructor(method: string, uri: string) {
         this.opts = {
             method,
             uri,
@@ -56,7 +72,7 @@ class GenericRequest {
     send(data) {
         if (data instanceof Object) {
             const serialize = this.opts.headers["Content-Type"] === "application/x-www-form-urlencoded"
-                ? querystring.encode
+                ? serializeQuery
                 : JSON.stringify;
 
             this.opts.data = serialize(data);
@@ -71,15 +87,17 @@ class GenericRequest {
         return new Promise((resolve, reject) => {
             const opts = Object.assign({}, this.opts);
             Logger.debug("Performing request to", opts.uri);
-            const { request } = opts.uri.startsWith("https")
+
+            const url = new EnumerableURL(opts.uri);
+            const {request} = url.protocol === "https:"
                 ? https
                 : http;
 
             if (Object.keys(opts.query)[0]) {
-                opts.uri += `?${querystring.encode(opts.query)}`;
+                opts.uri += `?${serializeQuery(opts.query)}`;
             }
 
-            const options = Object.assign({}, opts, url.parse(opts.uri));
+            const options = Object.assign({}, opts, url.toJS());
 
             const req = request(options, (res) => {
                 const data = [];
@@ -98,7 +116,7 @@ class GenericRequest {
                         body: (() => {
                             if ((/application\/json/).test(res.headers["content-type"])) {
                                 try {
-                                    return JSON.parse(raw);
+                                    return JSON.parse(raw.toString());
                                 } catch (_) { }
                             }
 

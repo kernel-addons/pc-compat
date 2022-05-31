@@ -1,3 +1,5 @@
-const os: typeof import("os") = PCCompatNative.executeJS(`require("os")`);
+import {makeLazy} from "@common/util";
 
-export default os;
+type OSModule = typeof import("src/preload/bindings").os;
+
+export default makeLazy(() => PCCompatNative.getBinding("os") as OSModule);

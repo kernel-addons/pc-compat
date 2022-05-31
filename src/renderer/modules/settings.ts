@@ -25,6 +25,8 @@ const SettingsRenderer = new class SettingsRenderer {
         },
     ];
 
+    filterItems(item: any) {return true;}
+
     registerPanel(id: string, options: {icon?: React.ReactElement, badgeCount?: number, label: string, render: () => import("react").ReactElement, header?: import("react").ReactElement, order: number, predicate?(): boolean}) {
         const {label, render, order, ...rest} = options;
         const tab = this.panels.find(e => e.id === id)
@@ -80,7 +82,7 @@ const SettingsRenderer = new class SettingsRenderer {
             const panels: any[] = [...this.defaultPanels];
 
             for (let i = 0; i < this.panels.length; i++) {
-                if (this.panels[i].predicate && !this.panels[i].predicate()) continue;
+                if (this.filterItems(this.panels[i]) && (this.panels[i].predicate && !this.panels[i].predicate())) continue;
 
                 panels.push(this.panels[i]);
             }

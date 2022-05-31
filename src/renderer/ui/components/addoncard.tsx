@@ -4,6 +4,7 @@ import DiscordIcon from "@ui/discordicon";
 import {SettingsContext} from "./settingspanel";
 import {settings} from "@powercord/api/settings";
 import {cache} from "@powercord/classes/settings";
+import {fs, electron} from "@node";
 
 export function ToolButton({label, icon, onClick, danger = false, disabled = false}) {
     const {Button, Tooltips: {Tooltip}} = DiscordModules;
@@ -90,7 +91,9 @@ export default function AddonCard({addon, manager, openSettings, hasSettings, ty
                     />}
                     <ToolButton label="Reload" icon="Replay" disabled={!manager.isEnabled?.(addon) ?? true} onClick={() => manager.reload(addon)} />
                     <ToolButton label="Open Path" icon="Folder" onClick={() => {
-                        PCCompatNative.executeJS(`require("electron").shell.showItemInFolder(${JSON.stringify(addon.path)})`);
+                        if (!fs.existsSync(addon.path)) return;
+
+                        electron.shell.showItemInFolder(addon.path);
                     }} />
                     <ToolButton label="Delete" icon="Trash" onClick={() => {
                         Modals.showConfirmationModal("Are you sure?", `Are you sure that you want to delete the ${type} "${addon.manifest.name}"?`, {

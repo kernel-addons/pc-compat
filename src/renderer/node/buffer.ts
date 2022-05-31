@@ -1,4 +1,4 @@
-const Buffer = {};
+const Buffer: typeof import("buffer") = {} as any;
 
 export const setBuffer = function (buffer: any) {
     Object.assign(Buffer, buffer);

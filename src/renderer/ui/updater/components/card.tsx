@@ -35,6 +35,8 @@ export const CurrentBranch = makeLazy(async () => {
     const branch = PCCompatNative.isPacked ? localGitInfo().branchName : (await Git.getBranchName(basePath));
 
     const handleClick = (e: React.MouseEvent) => {
+        if (PCCompatNative.isPacked) return; 
+
         e.preventDefault();
         e.stopPropagation();
 

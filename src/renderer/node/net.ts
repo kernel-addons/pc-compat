@@ -1,9 +1,3 @@
-const methods: String[] = PCCompatNative.executeJS(`Object.keys(require("net"))`);
+import {makeLazy} from "@common/util";
 
-const net = {};
-for(const key of methods) {
-   // @ts-ignore
-   net[key] = PCCompatNative.executeJS(`require("net").${key}`)
-}
-
-export default net;
+export default makeLazy(() => PCCompatNative.getBinding("net"));

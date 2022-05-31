@@ -1,3 +1,3 @@
-const querystring: typeof import("querystring") = PCCompatNative.executeJS(`require("querystring")`);
+import {makeLazy} from "@common/util";
 
-export default querystring;
+export default makeLazy(() => PCCompatNative.getBinding("querystring"));
