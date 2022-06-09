@@ -3,6 +3,7 @@ import Events from "@modules/events";
 
 promise.then(() => {
     const {LocaleManager, LocaleStore} = DiscordModules;
+    if (!LocaleManager || !LocaleStore) return;
 
     locale = LocaleManager.getLocale();
 
@@ -26,14 +27,15 @@ export let messages = {};
 
 export let locale = null;
 
-
 export function loadAllStrings(strings: any) {
+    if (!locale) return;
     for (let locale in strings) {
         loadStrings(locale, strings[locale]);
     }
 };
 
 export function loadStrings(locale: string, strings: any) {
+    if (!locale) return;
     if (!messages[locale]) messages[locale] = {};
 
     Object.assign(messages[locale], strings);
@@ -41,7 +43,7 @@ export function loadStrings(locale: string, strings: any) {
 };
 
 export function injectStrings() {
-    if (!DiscordModules.LocaleManager) return;
+    if (!locale || DiscordModules.LocaleManager) return;
 
     const context = DiscordModules.LocaleManager._provider._context;
 

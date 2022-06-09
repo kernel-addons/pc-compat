@@ -8,8 +8,9 @@ export default class Modals {
     static get TextInput() {return memoize(this, "TextInput", createUpdateWrapper(TextInput));}
 
     static showConfirmationModal(title: string, content: any, options = {}) {
-        const {confirmText = "Okay", cancelText = "Cancel", onConfirm = () => {}, onCancel = () => {}, danger = false} = options as any;
+        const {confirmText = "Okay", cancelText = "Cancel", onConfirm = () => { }, onCancel = () => { }, danger = false} = options as any;
         const {ModalsApi, ConfirmationModal, React, Markdown, Button} = DiscordModules;
+        if (!ModalsApi || !ConfirmationModal || !Markdown || !Button) return;
 
         return ModalsApi.openModal(props => {
             return React.createElement(ConfirmationModal, Object.assign({
@@ -26,7 +27,7 @@ export default class Modals {
     }
 
     static prompt(title: string, content: any, options: any = {}) {
-        const {placeholder = "", onInput = () => {}} = options as any;
+        const {placeholder = "", onInput = () => { }} = options as any;
         let value = "";
 
         return this.showConfirmationModal(title, React.createElement(this.TextInput, {

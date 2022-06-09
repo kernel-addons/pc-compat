@@ -32,6 +32,7 @@ const types = {
 
 export function Notice(props) {
     const {ReactSpring: {useSpring, animated}, Button, Markdown} = DiscordModules;
+    if (!useSpring || !animated || !Button || !Markdown) return;
     const [closing, setClosing] = React.useState(false);
 
     if (props.type && types[props.type]) props.icon = {...types[props.type]};
@@ -98,7 +99,7 @@ export function Notice(props) {
                 </Button>
             </div>
             {props.content && <div className="pc-notice-content">
-                {typeof(props.content) === "string" ? <Markdown>{props.content}</Markdown> : props.content}
+                {typeof (props.content) === "string" ? <Markdown>{props.content}</Markdown> : props.content}
             </div>}
             {Array.isArray(props.buttons) && (
                 <div className="pc-notice-footer">

@@ -20,7 +20,9 @@ const ErrorBoundary = fromPromise(promise.then(() => {
         render() {
             if (this.state.hasError) {
                 return (
-                    <ErrorState>{this.state.error}</ErrorState>
+                    <ErrorState>
+                        {this.state.error}
+                    </ErrorState>
                 );
             }
 

@@ -1,7 +1,6 @@
-import {DOM, memoize, Utilities} from "../../modules";
+import {DOM, Utilities} from "../../modules";
 import {fs, path, require as Require} from "../../node";
 import PluginManager from "../pluginmanager";
-import {getSettings} from './settings';
 
 export type PluginManifest = {
     dependencies?: string[];

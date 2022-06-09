@@ -59,7 +59,7 @@ const filters = new Promise<any[]>(resolve => {
             ) && current(mod);
         }
 
-        if (typeof(module.ensure) === "function") {
+        if (typeof (module.ensure) === "function") {
             const current = filter;
             filter = (mod: any) => current(mod) && module.ensure(mod);
         }
@@ -78,6 +78,7 @@ export const promise = Promise.all([filters, Webpack.whenReady]).then(([filters]
     Object.assign(DiscordModules,
         filters.reduce((modules, {id, map}, index) => {
             const mapper = map ?? NOOP_RET;
+            if (!result[index]) return modules;
             const res = mapper(result[index]);
             modules[id] = res;
 
