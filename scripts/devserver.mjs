@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import {WebSocketServer} from "ws";
 
-const port = 5858;
+const port = 5959;
 const print = (...message) => console.log(new Date().toLocaleTimeString(), "[WS]", ...message);
 
 print("Starting development server...");

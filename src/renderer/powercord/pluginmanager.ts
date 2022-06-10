@@ -47,7 +47,7 @@ export default class PluginManager extends Emitter {
                 if (fs.existsSync(to)) {
                     try {
                         fs.unlinkSync(current)
-                    } catch {}
+                    } catch { }
 
                     continue;
                 }
@@ -76,7 +76,7 @@ export default class PluginManager extends Emitter {
         });
     }
 
-    static loadAll(missing = false) {
+    static loadAll(missing = false, toast = true) {
         if (!fs.statSync(this.folder).isDirectory()) return void Logger.error("PluginsManager", `Plugins dir isn't a folder.`);
         if (!missing) Logger.log("PluginsManager", "Loading plugins...");
 
@@ -104,7 +104,7 @@ export default class PluginManager extends Emitter {
             }
         }
 
-        if (missing && missingEntities.length) {
+        if (missing && toast && missingEntities.length) {
             powercord.api.notices.sendToast(null, {
                 content: `The following plugins were loaded: ${missingEntities.join(', ')}`,
                 header: "Missing plugins found",
@@ -112,7 +112,7 @@ export default class PluginManager extends Emitter {
             });
 
             this.emit("updated");
-        } else if (missing && !missingEntities.length) {
+        } else if (missing && toast && !missingEntities.length) {
             powercord.api.notices.sendToast(null, {
                 content: "Couldn't find any plugins that aren't already loaded.",
                 header: "Missing plugins not found",
@@ -126,7 +126,7 @@ export default class PluginManager extends Emitter {
 
         const object = !window.process || process.contextIsolated ? Module : window.require
         const cache = Object.keys(object.cache).filter(c => ~c.indexOf(plugin));
-        for(const item of cache) {
+        for (const item of cache) {
             delete object.cache[item];
         }
     }

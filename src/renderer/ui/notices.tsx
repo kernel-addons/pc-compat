@@ -155,6 +155,7 @@ export default class Notices {
     static container = DOM.createElement("div", {className: "pc-notices"});
 
     static initialize() {
+        if ("isUnbound" in window) return;
         const {ReactDOM} = DiscordModules;
 
         ReactDOM.render(<NoticesContainer />, this.container);
@@ -168,6 +169,26 @@ export default class Notices {
     }
 
     static show(options: any) {
+        if (!options) return;
+
+        if ("isUnbound" in window && window.unbound) {
+            if (options.type && types[options.type]) options.icon = {...types[options.type]};
+
+            return window.unbound.apis.toasts.open({
+                ...options,
+                color: options.icon?.color,
+                title: options.header,
+                icon: options.icon && typeof options.icon == 'object' ?
+                    () => <FontAwesome
+                        style={{marginRight: 5}}
+                        spin={options.icon.spin}
+                        icon={options.icon.icon}
+                        color={options.icon.color}
+                    /> :
+                    () => <FontAwesome icon={options.icon} />
+            })
+        }
+
         const state = NoticesApi.getState();
 
         if (!options.id || state.notices[options.id]) options.id = uuid();

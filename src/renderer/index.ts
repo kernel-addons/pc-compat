@@ -4,6 +4,7 @@ import PluginManager from "@powercord/pluginmanager";
 import StyleManager from "@powercord/stylemanager";
 import SettingsRenderer from "@modules/settings";
 import {require as Require, path} from "@node";
+import DevServer from "@modules/devserver";
 import DiscordIcon from "@ui/discordicon";
 import {promise} from "@modules/discord";
 import manifest from "../../index.json";
@@ -15,6 +16,12 @@ import {Constants} from "@data";
 import {DOM} from "@modules";
 import {Modals} from "./ui";
 import "./styles/index";
+
+declare global {
+    interface Window {
+        [key: PropertyKey]: any;
+    }
+}
 
 const Logger = Internals.Logger.create("Core");
 
@@ -54,7 +61,7 @@ export default new class PCCompat {
         PluginManager.initialize();
         Updater.initialize();
 
-        // if (__NODE_ENV__ === "DEVELOPMENT") DevServer.initialize();
+        // DevServer.initialize();
 
         this.checkForChangelog();
         this.patchSettingsHeader();
