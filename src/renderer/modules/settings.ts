@@ -79,10 +79,10 @@ const SettingsRenderer = new class SettingsRenderer {
 
             const index = res.findIndex(s => s?.section?.toLowerCase() === "changelog") - 1;
             if (index < 0) return;
-            const panels: any[] = [...this.defaultPanels];
+            const panels: any[] = [...this.defaultPanels.filter(this.filterItems)];
 
             for (let i = 0;i < this.panels.length;i++) {
-                if (this.filterItems(this.panels[i]) && (this.panels[i].predicate && !this.panels[i].predicate())) continue;
+                if (!this.filterItems(this.panels[i]) || (this.panels[i].predicate && !this.panels[i].predicate())) continue;
 
                 panels.push(this.panels[i]);
             }
