@@ -12,6 +12,7 @@ const [useAnnouncementsStore, AnnouncementsApi] = AnnouncementsStore;
 
 const patchClassNames = function () {
     const noticeClasses = Webpack.findByProps("notice", "colorDefault", "buttonMinor");
+    if (!noticeClasses?.notice) return;
 
     if (noticeClasses.notice.indexOf("powercord-announcement")) return;
     noticeClasses.notice += " powercord-announcement";
@@ -52,7 +53,7 @@ export function sendAnnouncement(id: string, options: any) {
         ...state,
         elements: {
             ...state.elements,
-            [id]: { ...options, id }
+            [id]: {...options, id}
         }
     });
 }

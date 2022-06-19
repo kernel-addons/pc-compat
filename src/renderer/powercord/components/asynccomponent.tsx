@@ -1,6 +1,6 @@
 import createForceUpdate from "@flux/forceupdate";
-import Webpack from "@modules/webpack";
 import DiscordModules from "@modules/discord";
+import Webpack from "@modules/webpack";
 
 export default function AsyncComponent({_provider, _fallback, ...props}) {
     const [Component, setComponent] = DiscordModules.React.useState(() => (_fallback ?? (() => null)));
@@ -8,7 +8,7 @@ export default function AsyncComponent({_provider, _fallback, ...props}) {
     DiscordModules.React.useEffect(() => {
         _provider().then(comp => setComponent(() => comp));
     }, [_provider, _fallback]);
-    
+
     return (
         <Component {...props} />
     );

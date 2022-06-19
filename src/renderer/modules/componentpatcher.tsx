@@ -10,6 +10,7 @@ const Logger = new LoggerModule("ComponentPatcher");
 
 const patchAvatars = function () {
     const Avatar = Webpack.findByProps("AnimatedAvatar");
+    if (!Avatar) return;
     Patcher.after("pc-utility-classes-avatar", Avatar, "default", (_, args, res) => {
         if (args[0]?.src?.includes("/avatars")) {
             res.props["data-user-id"] = args[0].src.match(/\/(?:avatars|users)\/(\d+)/)?.[1];
@@ -23,6 +24,7 @@ const patchAvatars = function () {
     })
 
     const AvatarWrapper = Webpack.findByProps("wrapper", "avatar")?.wrapper?.split(" ")?.[0];
+    if (!AvatarWrapper) return;
     setImmediate(() => forceUpdateElement(`.${AvatarWrapper}`));
 };
 
@@ -35,6 +37,7 @@ const injectMessageName = function () {
 
 const injectAsyncFlux = function () {
     const Flux = Webpack.findByProps("connectStores");
+    if (!Flux) return;
 
     Flux.connectStoresAsync = function (stores: Promise<any>[], factory: Function) {
         return (Component: any) => fromPromise(Promise.all(stores).then((stores) => {

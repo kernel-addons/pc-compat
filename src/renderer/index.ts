@@ -1,21 +1,27 @@
 /// <reference path="../../types.d.ts" />
-import {Constants} from "@data";
-import {DOM} from "@modules";
-import {require as Require, path} from "@node";
 import {init as initializeWebpack} from "@powercord/webpack";
 import PluginManager from "@powercord/pluginmanager";
 import StyleManager from "@powercord/stylemanager";
 import SettingsRenderer from "@modules/settings";
-import {promise} from "@modules/discord";
-import * as Internals from "./modules";
-import manifest from "../../index.json";
-import {Modals} from "./ui";
-import DiscordIcon from "@ui/discordicon";
-import Updater from "@ui/updater";
-import "./styles/index";
-import Events from "@modules/events";
+import {require as Require, path} from "@node";
 import DevServer from "@modules/devserver";
+import DiscordIcon from "@ui/discordicon";
+import {promise} from "@modules/discord";
+import manifest from "../../index.json";
+import * as Internals from "./modules";
 import {setBuffer} from "@node/buffer";
+import Events from "@modules/events";
+import Updater from "@ui/updater";
+import {Constants} from "@data";
+import {DOM} from "@modules";
+import {Modals} from "./ui";
+import "./styles/index";
+
+declare global {
+    interface Window {
+        [key: PropertyKey]: any;
+    }
+}
 
 const Logger = Internals.Logger.create("Core");
 
@@ -23,7 +29,7 @@ export default new class PCCompat {
     promises = {
         cancelled: false,
         cancel() {this.cancelled = true;}
-    }
+    };
 
     start() {
         Logger.log("Loading");
@@ -55,7 +61,7 @@ export default new class PCCompat {
         PluginManager.initialize();
         Updater.initialize();
 
-        // if (__NODE_ENV__ === "DEVELOPMENT") DevServer.initialize();
+        // DevServer.initialize();
 
         this.checkForChangelog();
         this.patchSettingsHeader();
@@ -87,7 +93,7 @@ export default new class PCCompat {
     async patchSettingsHeader() {
         const {Webpack, DiscordModules: {Button, Tooltips}} = Internals;
         const SettingsComponents = await Webpack.findLazy(Webpack.Filters.byProps("Header", "Panel"));
-        if (this.promises.cancelled) return;
+        if (this.promises.cancelled || !SettingsComponents || !Button || !Tooltips) return;
 
         const cancel = Internals.Patcher.after("SettingsHeader", SettingsComponents.default, "Header", (_, [props], ret) => {
             if (props.children !== "Powercord") return ret;
@@ -113,5 +119,5 @@ export default new class PCCompat {
         });
     }
 
-    stop() {}
-}
+    stop() { }
+};

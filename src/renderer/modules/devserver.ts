@@ -16,13 +16,13 @@ const DevServer = new class DevServer {
 
     initialize(): void {
         const win = window as any;
-        
+
         if (win.PCDevServer && win.PCDevServer.ws != null) {
             Logger.log("Taking over socket");
             this._ws = win.PCDevServer.ws;
         } else {
             Logger.log("Loading development server...");
-            this._ws = new WebSocket("ws://localhost:5858");
+            this._ws = new WebSocket("ws://localhost:5959");
         }
 
         win.PCDevServer = DevServer;

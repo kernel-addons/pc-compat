@@ -19,7 +19,7 @@ export default class Updater {
 
     static settings = ["fetchPeriod", "autoFetch"];
 
-    static clearPeriod = () => {};
+    static clearPeriod = () => { };
 
     static getName() {return this.constructor.name;}
 
@@ -69,7 +69,10 @@ export default class Updater {
 
     static patchPanelButton() {
         const ConnectedAccount = Webpack.findByDisplayName("AccountConnected");
+        if (!ConnectedAccount) return;
+
         const Account = wrapInHooks(ConnectedAccount)({})?.type;
+        if (!Account) return;
         let originalPanelButton = null;
         let errorCount = 0;
 

@@ -1,7 +1,6 @@
-import {DOM, memoize, Utilities} from "../../modules";
+import {DOM, Utilities} from "../../modules";
 import {fs, path, require as Require} from "../../node";
 import PluginManager from "../pluginmanager";
-import {getSettings} from './settings';
 
 export type PluginManifest = {
     dependencies?: string[];
@@ -25,9 +24,9 @@ export default class Plugin {
 
     settings: any;
 
-    startPlugin?: Function;
+    startPlugin?(): void;
 
-    pluginWillUnload?: Function;
+    pluginWillUnload?(): void;
 
     loadStylesheet(_path: string): void {
         const stylePath = path.isAbsolute(_path) ? _path : path.resolve(this.path, _path);

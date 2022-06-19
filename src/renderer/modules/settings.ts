@@ -72,17 +72,17 @@ const SettingsRenderer = new class SettingsRenderer {
 
     async patchSettingsView() {
         const SettingsView = await Webpack.findLazy(Webpack.Filters.byDisplayName("SettingsView"));
-        if (this.promises.cancelled) return;
+        if (this.promises.cancelled || !SettingsView?.prototype?.getPredicateSections) return;
 
         Patcher.after("PCSettings", SettingsView.prototype, "getPredicateSections", (_, __, res) => {
             if (!Array.isArray(res) || !res.some(e => e?.section?.toLowerCase() === "changelog") || res.some(s => s?.id === "pc-settings")) return;
 
             const index = res.findIndex(s => s?.section?.toLowerCase() === "changelog") - 1;
             if (index < 0) return;
-            const panels: any[] = [...this.defaultPanels];
+            const panels: any[] = [...this.defaultPanels.filter(this.filterItems)];
 
-            for (let i = 0; i < this.panels.length; i++) {
-                if (this.filterItems(this.panels[i]) && (this.panels[i].predicate && !this.panels[i].predicate())) continue;
+            for (let i = 0;i < this.panels.length;i++) {
+                if (!this.filterItems(this.panels[i]) || (this.panels[i].predicate && !this.panels[i].predicate())) continue;
 
                 panels.push(this.panels[i]);
             }
@@ -97,6 +97,7 @@ const SettingsRenderer = new class SettingsRenderer {
     }
 
     forceUpdate() {
+        if (!this.sidebarClass || !this.sidebarClass.standardSidebarView) return;
         const [node] = document.getElementsByName(this.sidebarClass.standardSidebarView);
         if (!node) return;
 
