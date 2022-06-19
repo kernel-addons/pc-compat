@@ -2,7 +2,9 @@ import {sleep} from "../modules/utilities";
 import Webpack from "../modules/webpack";
 import modules from "./data/modules";
 
-export function getModule<module = any>(filter: (Function | string[]), retry: boolean = true, forever: boolean = false): module | Promise<module> {
+type FilterFn = (m: any) => boolean;
+
+export function getModule<module = any>(filter: (FilterFn | string[]), retry: boolean = true, forever: boolean = false): module | Promise<module> {
     if (Array.isArray(filter)) {
         const props = filter;
 
@@ -13,23 +15,25 @@ export function getModule<module = any>(filter: (Function | string[]), retry: bo
 
     if (!retry) return Webpack.findModule(filter, {cache: true, all: false});
 
-    return new Promise<module>(async (resolve) => {
+    return async function() {
         for (let i = 0; i < (forever ? 666 : 21); i++) {
-            const found = Webpack.findModule((filter as Function), {cache: true, all: false});
+            const found = Webpack.findModule((filter as FilterFn), {cache: true, all: false});
             if (found) {
-                return resolve(found);
+                return found;
             }
 
             await sleep(100);
         }
-    });
+
+        return null;
+    }();
 };
 
 export function getModuleByDisplayName<module = any>(displayName: string, retry?: boolean, forever?: boolean): (module | void) | Promise<module | void> {
     return getModule<any>((m: any) => m.displayName?.toLowerCase() === displayName.toLowerCase(), retry, forever);
 };
 
-export function getAllModules(filter: Function | string[]) {
+export function getAllModules(filter: FilterFn | string[]) {
     if (Array.isArray(filter)) {
         const props = filter;
 
