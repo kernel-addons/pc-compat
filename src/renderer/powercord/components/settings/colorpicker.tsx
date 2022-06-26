@@ -1,21 +1,26 @@
-import Webpack from "@modules/webpack";
-import DiscordModules from "@modules/discord";
-import LoggerModule from "@modules/logger";
-import {findInReactTree} from "../../util";
+import DiscordModules, {promise} from "@modules/discord";
+import {findInReactTree, wrapInHooks} from "../../util";
 import {fromPromise} from "../asynccomponent";
 import ErrorBoundary from "../errorboundary";
+import LoggerModule from "@modules/logger";
+import Webpack from "@modules/webpack";
 import FormItem from "./formitem";
 
-const ColorPicker = fromPromise(Webpack.whenReady.then(() => {
-    const LazyColorPicker = Webpack.findByDisplayName("ColorPicker") ?? (() => {
+const ColorPicker = fromPromise(promise.then(async () => {
+    const LazyColorPicker = await (async () => {
         try {
-            const GuildFolderSettingsModal = Webpack.findByDisplayName("GuildFolderSettingsModal");
-            if (!GuildFolderSettingsModal) throw "GuildFolderSettingsModal was not found!";
-            const rendered = GuildFolderSettingsModal.prototype.render.call({state: {}, props: {}});
-            const ColorPicker = findInReactTree(rendered, e => e?.props?.defaultColor != null).type;
-            if (typeof (ColorPicker) !== "function") throw "ColorPicker could not be found!";
-    
-            return ColorPicker;
+            const GuildSettingsRolesEditDisplay = Webpack.findByDisplayName("GuildSettingsRolesEditDisplay");
+            if (!GuildSettingsRolesEditDisplay) throw "GuildSettingsRolesEditDisplay was not found!";
+
+            const Content = wrapInHooks(() => new GuildSettingsRolesEditDisplay({ guild: { id: '' }, role: { id: '' } }))();
+            const ColorPickerFormItem = findInReactTree(Content, r => r.type?.displayName === "ColorPickerFormItem");
+            const ColorPicker = ColorPickerFormItem.type({ role: { id: '' } })
+
+            const loader = findInReactTree(ColorPicker, r => r.props?.defaultColor).type;
+            const lazy = await loader().props.children.type;
+            const mdl = await (lazy._ctor ?? lazy._payload._result)();
+
+            return mdl.default;
         } catch (error) {
             LoggerModule.getLogger("Components")?.error("Failed to get ColorPicker component!", error);
             return () => null;

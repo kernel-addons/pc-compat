@@ -109,14 +109,14 @@ const keys = Object.keys(overrides);
 
 export function wrapInHooks(functionalComponent: Function) {
     return (...args: any) => {
-        const ReactDispatcher = (React as any).__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED.ReactCurrentDispatcher.current;
+        const ReactDispatcher = (DiscordModules.React as any).__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED.ReactCurrentDispatcher.current;
         const originals = keys.map(e => [e, ReactDispatcher[e]]);
 
         Object.assign(ReactDispatcher, overrides);
 
         let returnValue = null, error = null;
         try {
-            returnValue = functionalComponent();
+            returnValue = functionalComponent(...args);
         } catch (err) {
             error = err;
         }
@@ -167,7 +167,7 @@ promise.then(() => {
 
                     const AnalyticsContext = Webpack.findModule(m => [m.default, m.__powercordOriginal_default].includes(wrapped.type));
                     if (!AnalyticsContext) return res;
-                    
+
                     for (const patch of patches ?? []) {
                         Patcher.after(patch.id, AnalyticsContext, "default", (_, args, res) => {
                             const menu = res.props.children.type;

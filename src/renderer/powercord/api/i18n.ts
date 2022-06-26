@@ -5,7 +5,7 @@ promise.then(() => {
     const {LocaleManager, LocaleStore} = DiscordModules;
     if (!LocaleManager || !LocaleStore) return;
 
-    locale = LocaleManager.getLocale();
+    locale = LocaleManager.getLocale() ?? 'en-US';
 
     const listener = () => {
         if (LocaleStore.locale !== locale) {
@@ -43,7 +43,7 @@ export function loadStrings(locale: string, strings: any) {
 };
 
 export function injectStrings() {
-    if (!locale || DiscordModules.LocaleManager) return;
+    if (!locale || !DiscordModules.LocaleManager) return;
 
     const context = DiscordModules.LocaleManager._provider._context;
 
