@@ -4,28 +4,11 @@ import {ipcRenderer} from "electron";
 import path from "path";
 import fs from "fs";
 import * as IPCEvents from "../common/ipcevents";
-import Module from "module";
 
 export default function handleSplash (API) {
     const {windowOptions} = ipcRenderer.sendSync(IPCEvents.GET_WINDOW_DATA);
 
     if (!windowOptions.webPreferences.nativeWindowOpen) {
-        Module._extensions[".scss"] = (module: Module, filename: string) => {
-            const content = ipcRenderer.sendSync(IPCEvents.COMPILE_SASS, filename);
-            module.filecontent = content;
-            module.exports = content;
-
-            return content;
-        }
-
-        Module._extensions[".css"] = (module: Module, filename: string) => {
-            const content = fs.readFileSync(filename, "utf8");
-            module.filecontent = content;
-            module.exports = content;
-
-            return module.exports;
-        },
-
         window.onload = () => {
             let themes = {};
 
@@ -45,7 +28,12 @@ export default function handleSplash (API) {
                     const manifest: any = JSON.parse(fs.readFileSync(manifestPath, { encoding: "utf-8"}));
 
                     if (!manifest?.splashTheme) continue;
-                    const styles = require(path.resolve(folder, manifest.splashTheme));
+
+                    const stylePath = require.resolve(folder, manifest.splashTheme);
+                    const ext = path.extname(stylePath);
+                    const styles = ext === ".scss" ?
+                       ipcRenderer.sendSync(IPCEvents.COMPILE_SASS, stylePath) :
+                       fs.readFileSync(stylePath, "utf8");
 
                     const stylesheet = document.createElement("style");
                     stylesheet.id = theme;

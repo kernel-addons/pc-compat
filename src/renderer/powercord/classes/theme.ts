@@ -1,5 +1,7 @@
 import {DOM, Utilities} from "@modules";
 import {fs, path, require as Require} from "../../node";
+import * as IPCEvents from "@common/ipcevents";
+import electron from "@node/electron";
 
 export type ThemeManifest = {
     name: string;
@@ -31,7 +33,10 @@ export default class Theme {
         const stylePath = path.isAbsolute(_path) ? _path : path.resolve(this.path, _path);
         try {
             if (!fs.existsSync(stylePath)) throw new Error(`Stylesheet not found at ${stylePath}`);
-            const content = Require(stylePath);
+            const content = path.extname(stylePath) === '.scss' ?
+               electron.ipcRenderer.sendSync(IPCEvents.COMPILE_SASS, stylePath) :
+               fs.readFileSync(stylePath, 'utf-8');
+
             const id = `${this.entityID}-${Utilities.random()}`;
 
             this.stylesheets[id] = DOM.injectCSS(id, content);

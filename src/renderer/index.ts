@@ -3,7 +3,7 @@ import {init as initializeWebpack} from "@powercord/webpack";
 import PluginManager from "@powercord/pluginmanager";
 import StyleManager from "@powercord/stylemanager";
 import SettingsRenderer from "@modules/settings";
-import {require as Require, path} from "@node";
+import {require as Require, path, fs} from "@node";
 import DevServer from "@modules/devserver";
 import DiscordIcon from "@ui/discordicon";
 import {promise} from "@modules/discord";
@@ -53,7 +53,7 @@ export default new class PCCompat {
 
         {
             const stylePath = path.resolve(PCCompatNative.getBasePath(), ...(PCCompatNative.isPacked ? ["style.css"] : ["dist", "style.css"]));
-            DOM.injectCSS("core", Require(stylePath));
+            DOM.injectCSS("core", fs.readFileSync(stylePath, 'utf-8'));
             DOM.injectCSS("font-awesome", Constants.FONTAWESOME_BASEURL, {type: "URL", documentHead: true});
         }
 

@@ -285,7 +285,7 @@ if (window.process && !window.process.contextIsolated) {
         return Reflect.apply(oldLoad, this, arguments);
     }
 
-    const _extensions = [".jsx", ".scss", ".css"];
+    const _extensions = [".jsx"];
     for (const ext of _extensions) {
         Module._extensions[ext] = extensions[ext];
     }
