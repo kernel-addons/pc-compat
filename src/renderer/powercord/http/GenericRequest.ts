@@ -19,7 +19,6 @@ class HTTPError extends Error {
 interface GenericRequest {
     opts: {
         method: string,
-        uri: string,
         query: {[s: string]: string},
         headers: object,
         data?: any;
@@ -42,10 +41,12 @@ class EnumerableURL extends URL {
 }
 
 class GenericRequest {
+    uri: string;
+
     constructor(method: string, uri: string) {
+        this.uri = uri;
         this.opts = {
             method,
-            uri,
             query: {},
             headers: {
                 "User-Agent": navigator.userAgent
@@ -86,20 +87,20 @@ class GenericRequest {
     execute() {
         return new Promise((resolve, reject) => {
             const opts = Object.assign({}, this.opts);
-            Logger.debug("Performing request to", opts.uri);
+            Logger.debug("Performing request to", this.uri);
 
-            const url = new EnumerableURL(opts.uri);
+            let uri = this.uri;
+            const url = new EnumerableURL(this.uri);
             const {request} = url.protocol === "https:"
                 ? https
                 : http;
 
             if (Object.keys(opts.query)[0]) {
-                opts.uri += `?${serializeQuery(opts.query)}`;
+                uri += `?${serializeQuery(opts.query)}`;
             }
-
             const options = Object.assign({}, opts, url.toJS());
 
-            const req = request(options, (res) => {
+            const req = request(uri, options, (res) => {
                 const data = [];
 
                 res.on("data", (chunk) => {
@@ -110,7 +111,6 @@ class GenericRequest {
 
                 res.once("end", () => {
                     const raw = Buffer.concat(data);
-
                     const result = {
                         raw,
                         body: (() => {

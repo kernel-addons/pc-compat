@@ -11,7 +11,6 @@ export function get(...args: any[]) {
 
     const emitter = new EventEmitter();
     const req = binding().get(...args);
-
     req.on("all", (event: string, ...args: any[]) => {
         if (event === "end") {
             const data = args.shift();
