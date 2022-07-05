@@ -68,9 +68,9 @@ export default class StyleManager extends Emitter {
         });
     }
 
-    static loadAll(missing = false) {
+    static loadAll(missing = false, toast = true) {
         if (!fs.statSync(this.folder).isDirectory()) return void Logger.error("StyleManager", `Plugins dir isn't a folder.`);
-        if  (!missing) Logger.log("StyleManager", "Loading themes...");
+        if (!missing) Logger.log("StyleManager", "Loading themes...");
 
         const missingEntities = [];
         for (const file of fs.readdirSync(this.folder, "utf8")) {
@@ -84,7 +84,7 @@ export default class StyleManager extends Emitter {
                     if (theme) continue;
 
                     this.loadTheme(location);
-                    missingEntities.push(this.resolve(file).displayName);
+                    missingEntities.push(this.resolve(file));
                 } else {
                     this.loadTheme(location);
                 }
@@ -93,27 +93,28 @@ export default class StyleManager extends Emitter {
             }
         }
 
-        if (missing && missingEntities.length) {
+        if (missing && toast && missingEntities.length) {
             powercord.api.notices.sendToast(null, {
-                content: `The following themes were loaded: ${missingEntities.join(', ')}`,
+                content: `The following themes were loaded: ${missingEntities.map(a => a.displayName).join(', ')}`,
                 header: "Missing themes found",
                 type: "success"
             });
-
-            this.emit("updated");
-        } else if (missing && !missingEntities.length) {
+        } else if (missing && toast && !missingEntities.length) {
             powercord.api.notices.sendToast(null, {
                 content: "Couldn't find any themes that aren't already loaded.",
                 header: "Missing themes not found",
                 type: "danger"
             });
         }
+
+        this.emit("updated");
+        if (missing) return missingEntities;
     }
 
     static clearCache(theme: string) {
-        if (!path.isAbsolute(theme)) theme = path.resolve(this.folder, theme)
+        if (!path.isAbsolute(theme)) theme = path.resolve(this.folder, theme);
 
-        const object = !window.process || process.contextIsolated ? Module : window.require
+        const object = !window.process || process.contextIsolated ? Module : window.require;
         const cache = Object.keys(object.cache).filter(c => ~c.indexOf(theme));
         for(const item of cache) {
             delete object.cache[item];

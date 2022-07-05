@@ -95,7 +95,7 @@ export default class PluginManager extends Emitter {
                     if (plugin) continue;
 
                     this.loadPlugin(location);
-                    missingEntities.push(this.resolve(file).displayName);
+                    missingEntities.push(this.resolve(file));
                 } else {
                     this.loadPlugin(location);
                 }
@@ -106,12 +106,10 @@ export default class PluginManager extends Emitter {
 
         if (missing && toast && missingEntities.length) {
             powercord.api.notices.sendToast(null, {
-                content: `The following plugins were loaded: ${missingEntities.join(', ')}`,
+                content: `The following plugins were loaded: ${missingEntities.map(a => a.displayName).join(', ')}`,
                 header: "Missing plugins found",
                 type: "success"
             });
-
-            this.emit("updated");
         } else if (missing && toast && !missingEntities.length) {
             powercord.api.notices.sendToast(null, {
                 content: "Couldn't find any plugins that aren't already loaded.",
@@ -119,6 +117,9 @@ export default class PluginManager extends Emitter {
                 type: "danger"
             });
         }
+
+        this.emit("updated");
+        if (missing) return missingEntities;
     }
 
     static clearCache(plugin: string) {
