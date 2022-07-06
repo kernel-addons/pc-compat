@@ -96,18 +96,20 @@ export async function waitFor(selector: string) {
     return element;
 }
 
-const overrides = {
+const defaultOverrides = {
     useMemo: factory => factory(),
     useState: initialState => [initialState, () => void 0],
     useReducer: initialValue => [initialValue, () => void 0],
     useEffect: () => {},
     useLayoutEffect: () => {},
     useRef: () => ({current: null}),
-    useCallback: callback => callback
+    useCallback: callback => callback,
+    useContext: ctx => ctx._currentValue
 };
-const keys = Object.keys(overrides);
+export function wrapInHooks(functionalComponent: Function, options?: {[key in keyof typeof defaultOverrides]?: (...args: any[]) => any}) {
+    const overrides = Object.assign({}, options, defaultOverrides);
+    const keys = Object.keys(overrides);
 
-export function wrapInHooks(functionalComponent: Function) {
     return (...args: any) => {
         const ReactDispatcher = (React as any).__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED.ReactCurrentDispatcher.current;
         const originals = keys.map(e => [e, ReactDispatcher[e]]);
@@ -116,7 +118,7 @@ export function wrapInHooks(functionalComponent: Function) {
 
         let returnValue = null, error = null;
         try {
-            returnValue = functionalComponent();
+            returnValue = functionalComponent(...args);
         } catch (err) {
             error = err;
         }
@@ -138,7 +140,7 @@ promise.then(() => {
 
         args[1] = async () => {
             const render = await old(args[0]);
-            return (props) => {
+            return (props: any) => {
                 const res = render(props);
                 const wrapped = typeof res.type === "object" ? res.props.children : res;
 
@@ -150,10 +152,10 @@ promise.then(() => {
                     const Menu = Webpack.findModule(m => m.default?.displayName === displayName);
 
                     for (const patch of patches) {
-                        const Patch = Patcher[patch.before ? 'before' : 'after'].bind(Patcher);
+                        const Patch = Patcher[patch.before ? "before" : "after"].bind(Patcher);
                         Patch(patch.id, Menu, "default", (_, ...args) => {
                             return patch.func.apply(_, args);
-                        })
+                        });
 
                         patch.applied = true;
                     }
@@ -180,16 +182,16 @@ promise.then(() => {
                                 const res = menu.apply(this, args);
                                 try {
                                     return patch.func.apply(this, [args, res]);
-                                } catch(e) {
-                                    Logger.error(`Failed to run context menu injection with id ${patch.id}`, e)
+                                } catch (e) {
+                                    Logger.error(`Failed to run context menu injection with id ${patch.id}`, e);
                                     return res;
                                 }
                             }
 
-                            res.props.children.type = patch.memo
+                            res.props.children.type = patch.memo;
 
                             return res;
-                        })
+                        });
 
                         patch.applied = true;
                     }
@@ -210,9 +212,9 @@ promise.then(() => {
         Patcher.unpatchAll("pc-context-menu-opener")
         for (const menu of Object.keys(menuPatches)) {
             const items = menuPatches[menu];
-            items.map(e => Patcher.unpatchAll(e.id))
+            items.map(e => Patcher.unpatchAll(e.id));
         }
-    })
+    });
 })
 
 export function injectContextMenu(id, name, func, before = false) {
