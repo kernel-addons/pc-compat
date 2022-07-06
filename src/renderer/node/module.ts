@@ -22,9 +22,12 @@ import Buffer from "./buffer";
 export const cache = {};
 const NativeModule = PCCompatNative.getBinding("native") as typeof import("src/preload/bindings/native");
 export const nodeGlobals = ["require", "module", "exports", "__filename", "__dirname", "global"].join(", ");
-export const globalPaths = [
-    path.resolve(PCCompatNative.getBasePath(), "node_modules")
-];
+export const globalPaths = [path.resolve(PCCompatNative.getBasePath(), "node_modules")];
+
+const wrapModule = (code: string, filename: string) => {
+    return new Function(nodeGlobals, `${code}\n\n//# sourceURL=${JSON.stringify(filename).slice(1, -1)}`);
+};
+
 export const extensions = {
     ".js": (module: Module, filename: string) => {
         const fileContent = fs.readFileSync(filename, "utf8");
@@ -39,7 +42,7 @@ export const extensions = {
     },
     ".jsx": (module: Module, filename: string) => {
         const code = JSX.compile(filename);
-        module.filecontent = code;
+        // module.filecontent = code;
         module._compile(code, filename);
 
         return module.exports;
@@ -88,11 +91,25 @@ export class Module {
         if (parent) parent.children.push(this);
     }
 
+    destroy() {
+        this.require = null;
+        this.exports = null;
+        delete cache[this.filename];
+
+        if (this.parent) {
+            const index = this.parent.children.indexOf(this);
+            if (index > -1) this.parent.children.splice(index, 1);
+            this.parent = null;
+        }
+
+
+        for (const child of this.children) {
+            child.destroy();
+        }
+    }
+
     _compile(code: string, filename?: string) {
-        const wrapped = window.eval(`(function (${nodeGlobals}) {
-            ${code}
-            //# sourceURL=${JSON.stringify(this.filename).slice(1, -1)}
-        })`);
+        const wrapped = wrapModule(code, this.filename);
         wrapped(this.require, this, this.exports, this.filename, this.path, window);
     }
 };
@@ -137,7 +154,7 @@ export function createRequire(_path: string, parent: Module): Require {
             case "buffer": return Buffer;
 
             default: {
-                if (mod.startsWith("powercord/")) {
+                if (mod.indexOf("powercord/") === 0) {
                     const value = mod.split("/").slice(1).filter(Boolean).reduce((value, key) => value[key], powercord);
                     if (value) return value;
                 }
@@ -248,12 +265,12 @@ export function load(_path: string, mod: string, req = null) {
     const file = getFilePath(_path, mod);
     if (!fs.existsSync(file)) throw new Error(`Cannot find module ${mod}\ntree:\n\r-${_path}`);
     if (cache[file]) return cache[file].exports;
-    const stats = fs.statSync(file);
-    if (stats.isDirectory()) mod = resolveMain(_path, mod);
+    // const stats = fs.statSync(file);
+    // if (stats.isDirectory()) mod = resolveMain(_path, mod);
     const ext = getExtension(file);
     const loader = extensions[ext];
 
-    if (!loader) throw new Error(`Cannot find module ${file}`);
+    if (!loader) throw new Error(`Cannot find module ${mod}`);
     const module = cache[file] = new Module(file, req);
     const require = createRequire(path.dirname(file), module);
     module.require = require;
