@@ -3,21 +3,14 @@
     "author": "Strencher",
     "id": "strencher.pc-compat",
     "description": "Allows you to load powerCord plugins within Kernel.",
-    "version": "1.3.0-dev",
+    "version": "1.4.0",
     "changelog": [
-        {
-            "type": "ADDED",
-            "title": "Added",
-            "items": [
-                "Added splash screen theming.",
-                "Added plugin reloading."
-            ]
-        },
         {
             "type": "FIXED",
             "title": "Fixes",
             "items": [
-                "Fixed commands entirely, should now work fine again."
+                "Fixed context menus crashing.",
+                "Fixed pc-spotify plugin. (this doesn't add support for powercord accounts)"
             ]
         }
     ]
