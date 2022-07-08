@@ -16,6 +16,7 @@ import {Constants} from "@data";
 import {DOM} from "@modules";
 import {Modals} from "./ui";
 import "./styles/index";
+import Powercord from '@ui/icons/powercord';
 
 declare global {
     interface Window {
@@ -26,6 +27,7 @@ declare global {
 const Logger = Internals.Logger.create("Core");
 
 export default new class PCCompat {
+    _flush = [];
     promises = {
         cancelled: false,
         cancel() {this.cancelled = true;}
@@ -57,19 +59,53 @@ export default new class PCCompat {
             DOM.injectCSS("font-awesome", Constants.FONTAWESOME_BASEURL, {type: "URL", documentHead: true});
         }
 
-        SettingsRenderer.patchSettingsView();
+        this.injectSettings();
         PluginManager.initialize();
         Updater.initialize();
 
         // DevServer.initialize();
 
         this.checkForChangelog();
-        this.patchSettingsHeader();
 
         Events.addEventListener("reload-core", () => {
             DOM.clearCSS("core");
             DOM.clearCSS("font-awesome");
         });
+    }
+
+    async injectSettings() {
+        if (window.isUnbound) return;
+
+        if ("SettingsNative" in window) {
+            if (typeof KernelSettings === "undefined") await new Promise<void>(resolve => {
+                const listener = () => {
+                    resolve();
+                    Internals.DiscordModules.Dispatcher.unsubscribe("KERNEL_SETTINGS_INIT", listener);
+                };
+
+                Internals.DiscordModules.Dispatcher.subscribe("KERNEL_SETTINGS_INIT", listener);
+            });
+
+            SettingsRenderer.injectPanels();
+        } else {
+            const { ModalsApi, Text, Button, ConfirmationModal } = Internals.DiscordModules;
+            ModalsApi.openModal((props) =>
+                <ConfirmationModal
+                    {...props}
+                    header="Missing Dependency"
+                    confirmText="Okay"
+                    cancelText={null}
+                    onCancel={props.onClose}
+                    confirmButtonColor={Button.Colors.BRAND}
+                >
+                    <Text>
+                        Powercord Compatibility requires the <a onClick={() => {
+                            open("https://github.com/strencher-kernel/kernel-settings")
+                        }}>settings</a> package to register its settings tabs.
+                    </Text>
+                </ConfirmationModal>
+            )
+        }
     }
 
     expose(name: string, namespace: any) {
@@ -88,35 +124,6 @@ export default new class PCCompat {
 
             Modals.showChangeLog("PCCompat Changelog", manifest.changelog as unknown as any);
         }
-    }
-
-    async patchSettingsHeader() {
-        const {Webpack, DiscordModules: {Button, Tooltips}} = Internals;
-        const SettingsComponents = await Webpack.findLazy(Webpack.Filters.byProps("Header", "Panel"));
-        if (this.promises.cancelled || !SettingsComponents || !Button || !Tooltips) return;
-
-        const cancel = Internals.Patcher.after("SettingsHeader", SettingsComponents.default, "Header", (_, [props], ret) => {
-            if (props.children !== "Powercord") return ret;
-
-            ret.props.children = [
-                ret.props.children,
-                React.createElement(Tooltips.Tooltip, {
-                    text: "Changelog",
-                    position: "top"
-                }, props => React.createElement(Button, {
-                    ...props,
-                    look: Button.Looks.BLANK,
-                    size: Button.Sizes.NONE,
-                    className: "pc-changelog-button",
-                    onClick: () => {Modals.showChangeLog("PCCompat Changelog", manifest.changelog as unknown as any);},
-                    children: React.createElement(DiscordIcon, {name: "Info"})
-                }))
-            ];
-        });
-
-        Events.addEventListener("reload-core", () => {
-            cancel();
-        });
     }
 
     stop() { }

@@ -6,26 +6,15 @@ import {getSettings} from "@powercord/classes/settings";
 import memoize from "./memoize";
 import {getOwnerInstance} from "@powercord/util";
 import Events from "./events";
+import Powercord from '@ui/icons/powercord';
 
 const SettingsRenderer = new class SettingsRenderer {
-    get sidebarClass() {return memoize(this, "sidebarClass", Webpack.findByProps("standardSidebarView"));}
-
     panels: any[] = [];
 
     promises = {
         cancelled: false,
         cancel() {this.cancelled = true;}
     };
-
-    defaultPanels = [
-        {section: "DIVIDER"},
-        {
-            section: "HEADER",
-            label: "Powercord",
-        },
-    ];
-
-    filterItems(item: any) {return true;}
 
     registerPanel(id: string, options: {icon?: React.ReactElement, badgeCount?: number, label: string, render: () => import("react").ReactElement, header?: import("react").ReactElement, order: number, predicate?(): boolean}) {
         const {label, render, order, ...rest} = options;
@@ -49,60 +38,33 @@ const SettingsRenderer = new class SettingsRenderer {
         };
 
         this.panels = this.panels.concat(panel).sort(this.sortPanels);
-
-        return () => {
-            const index = this.panels.indexOf(panel);
-            if (index < 0) return false;
-            this.panels.splice(index, 1);
-            return true;
-        };
+        this.injectPanel(panel);
     }
 
-    unregisterPanel(id: string) {
-        const panel = this.panels.findIndex(e => e.id === id);
-        if (panel < 0) return;
+    injectPanels() {
+        for(const panel of this.panels) {
+            try {
+                this.injectPanel(panel);
+            } catch {}
+        }
+    }
 
-        this.panels.splice(panel, 1);
-        this.forceUpdate();
+    injectPanel(data) {
+        if (KernelSettings.panels.find(e => e.id === ("kernel-settings-powercord-" + data.label))) return;
+
+        return KernelSettings.register("powercord-" + data.label, {
+            ...data,
+            render: data.element,
+            icon: React.createElement(Powercord, {
+                className: "pc-logo",
+                width: 18,
+                height: 18
+            })
+        })
     }
 
     sortPanels(a, b) {
         return a.order - b.order;
-    }
-
-    async patchSettingsView() {
-        const SettingsView = await Webpack.findLazy(Webpack.Filters.byDisplayName("SettingsView"));
-        if (this.promises.cancelled || !SettingsView?.prototype?.getPredicateSections) return;
-
-        Patcher.after("PCSettings", SettingsView.prototype, "getPredicateSections", (_, __, res) => {
-            if (!Array.isArray(res) || !res.some(e => e?.section?.toLowerCase() === "changelog") || res.some(s => s?.id === "pc-settings")) return;
-
-            const index = res.findIndex(s => s?.section?.toLowerCase() === "changelog") - 1;
-            if (index < 0) return;
-            const panels: any[] = [...this.defaultPanels.filter(this.filterItems)];
-
-            for (let i = 0;i < this.panels.length;i++) {
-                if (!this.filterItems(this.panels[i]) || (this.panels[i].predicate && !this.panels[i].predicate())) continue;
-
-                panels.push(this.panels[i]);
-            }
-
-            res.splice(index, 0, ...panels);
-        });
-
-        Events.addEventListener("reload-core", () => {
-            Patcher.unpatchAll("PCSettings");
-            this.promises.cancel();
-        });
-    }
-
-    forceUpdate() {
-        if (!this.sidebarClass || !this.sidebarClass.standardSidebarView) return;
-        const [node] = document.getElementsByName(this.sidebarClass.standardSidebarView);
-        if (!node) return;
-
-        const instance = getOwnerInstance(node, e => e?.constructor?.displayName === "SettingsView");
-        if (instance) instance.forceUpdate();
     }
 }
 
