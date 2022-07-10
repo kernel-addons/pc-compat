@@ -34,9 +34,10 @@ export default class Plugin {
         const stylePath = path.isAbsolute(_path) ? _path : path.resolve(this.path, _path);
         try {
             if (!fs.existsSync(stylePath)) throw new Error(`Stylesheet not found at ${stylePath}`);
+
             const content = path.extname(stylePath).endsWith('.scss') ?
                electron.ipcRenderer.sendSync(IPCEvents.COMPILE_SASS, stylePath)
-               : fs.readFileSync(stylePath);
+               : fs.readFileSync(stylePath, 'utf-8');
             const id = `${this.entityID}-${Utilities.random()}`;
 
             this.stylesheets[id] = DOM.injectCSS(id, content);
