@@ -5,7 +5,7 @@ export class Readable extends EventEmitter {
    constructor() {
       // @ts-expect-error
       super(...arguments);
-      
+
       ["pipe", "isPaused", "pause", "pipe", "read", "push", "wrap", "unshift", "unpipe", "resume", "_read"].forEach(i => {
          this[i] = () => {
             console.warn("Unimplemented %s", i);
@@ -15,7 +15,7 @@ export class Readable extends EventEmitter {
    }
 }
 
-export default makeLazy(() => {
+export default window.require ? window.require("stream") : makeLazy(() => {
    const binding = PCCompatNative.getBinding("stream") as typeof import("src/preload/bindings/stream").default;
 
    const fn = function () {

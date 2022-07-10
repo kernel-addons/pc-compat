@@ -4,7 +4,7 @@ import EventEmitter from "./events";
 
 type HttpModule = typeof import("src/preload/bindings/http");
 
-const binding = makeLazy(() => PCCompatNative.getBinding("http") as HttpModule);
+const binding = window.require ? window.require("http") : makeLazy(() => PCCompatNative.getBinding("http") as HttpModule);
 
 export function get(url, options, res) {
     if (typeof options === "function") {
@@ -28,7 +28,7 @@ export function get(url, options, res) {
 
         emitter.emit(event, ...args);
     });
-    
+
     Object.assign(emitter, {end: req.end});
 
     return res(emitter), emitter;

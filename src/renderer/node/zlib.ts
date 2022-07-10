@@ -1,3 +1,3 @@
 import {makeLazy} from "@common/util";
 
-export default makeLazy(() => PCCompatNative.getBinding("zlib"));
+export default window.require ? window.require("zlib") : makeLazy(() => PCCompatNative.getBinding("zlib"));

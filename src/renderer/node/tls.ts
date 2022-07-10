@@ -1,3 +1,3 @@
 import {makeLazy} from "@common/util";
 
-export default makeLazy(() => PCCompatNative.getBinding("tls"));
+export default window.require ? window.require("tls") : makeLazy(() => PCCompatNative.getBinding("tls"));

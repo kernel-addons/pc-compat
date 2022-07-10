@@ -1,3 +1,3 @@
 import {makeLazy} from "@common/util";
 
-export default makeLazy(() => PCCompatNative.getBinding("net"));
+export default window.require ? window.require("net") : makeLazy(() => PCCompatNative.getBinding("net"));

@@ -4,7 +4,7 @@ import EventEmitter from "./events";
 
 type HttpModule = typeof import("src/preload/bindings/https");
 
-const binding = makeLazy(() => PCCompatNative.getBinding("https") as HttpModule);
+const binding = window.require ? window.require("https") : makeLazy(() => PCCompatNative.getBinding("https") as HttpModule);
 
 export function get(...args: any[]) {
     const res = args.pop();
@@ -24,7 +24,7 @@ export function get(...args: any[]) {
 
         emitter.emit(event, ...args);
     });
-    
+
     Object.assign(emitter, {end: req.end});
 
     return res(emitter), emitter;

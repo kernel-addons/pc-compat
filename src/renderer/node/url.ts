@@ -1,3 +1,3 @@
 import {makeLazy} from "@common/util";
 
-export default makeLazy(() => PCCompatNative.getBinding("url"));
+export default window.require ? window.require("url") : makeLazy(() => PCCompatNative.getBinding("url"));

@@ -1,3 +1,3 @@
 import {makeLazy} from "@common/util";
 
-export default makeLazy(() => PCCompatNative.getBinding("querystring"));
+export default window.require ? window.require("querystring") : makeLazy(() => PCCompatNative.getBinding("querystring"));

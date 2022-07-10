@@ -2,7 +2,7 @@ import LoggerModule from "@modules/logger";
 
 const Logger = LoggerModule.create("Events");
 
-export default class EventEmitter {
+export default window.require ? window.require("events") : class EventEmitter {
     static get EventEmitter() {return EventEmitter;}
 
     static get defaultMaxListeners() {return 10;}

@@ -6,4 +6,4 @@ export const setBuffer = function (buffer: any) {
     Object.assign(window, {Buffer: buffer.Buffer});
 };
 
-export default Buffer;
+export default window.Buffer ?? Buffer;
