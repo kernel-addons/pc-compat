@@ -7,7 +7,7 @@ const {builtinModules} = require("module");
 
 module.exports = args => {
     const {mode = "renderer", minify = false} = args;
-    
+
     /**@type {import("webpack").Configuration} */
     const config = {
         devtool: !!minify ? false : "eval-source-map",
@@ -34,7 +34,8 @@ module.exports = args => {
                 .concat(builtinModules.flatMap(mod => [[mod, mod], [`node:${mod}`, mod]]))
             ),
             "original-fs": "original-fs",
-            electron: "electron"
+            electron: "electron",
+            sass: "sass"
         },
         module: {
             rules: [
