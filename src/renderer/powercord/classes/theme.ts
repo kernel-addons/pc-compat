@@ -36,7 +36,6 @@ export default class Theme {
             const content = path.extname(stylePath) === '.scss' ?
                electron.ipcRenderer.sendSync(IPCEvents.COMPILE_SASS, stylePath) :
                fs.readFileSync(stylePath, 'utf-8');
-
             const id = `${this.entityID}-${Utilities.random()}`;
 
             this.stylesheets[id] = DOM.injectCSS(id, content);

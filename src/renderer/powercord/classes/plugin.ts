@@ -1,6 +1,7 @@
 import {DOM, Utilities} from "../../modules";
 import {fs, path, require as Require} from "../../node";
 import PluginManager from "../pluginmanager";
+import electron from "@node/electron";
 
 export type PluginManifest = {
     dependencies?: string[];
@@ -32,7 +33,9 @@ export default class Plugin {
         const stylePath = path.isAbsolute(_path) ? _path : path.resolve(this.path, _path);
         try {
             if (!fs.existsSync(stylePath)) throw new Error(`Stylesheet not found at ${stylePath}`);
-            const content = fs.readFileSync(stylePath);
+            const content = path.extname(stylePath).endsWith('.scss') ?
+               electron.ipcRenderer.sendSync.sendSync()
+               : fs.readFileSync(stylePath);
             const id = `${this.entityID}-${Utilities.random()}`;
 
             this.stylesheets[id] = DOM.injectCSS(id, content);

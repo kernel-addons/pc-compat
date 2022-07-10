@@ -34,8 +34,7 @@ module.exports = args => {
                 .concat(builtinModules.flatMap(mod => [[mod, mod], [`node:${mod}`, mod]]))
             ),
             "original-fs": "original-fs",
-            electron: "electron",
-            sass: "sass"
+            electron: "electron"
         },
         module: {
             rules: [
