@@ -42,6 +42,8 @@ const SettingsRenderer = new class SettingsRenderer {
     }
 
     injectPanels() {
+        if (window.isUnbound) return;
+        
         for(const panel of this.panels) {
             try {
                 this.injectPanel(panel);
@@ -50,6 +52,8 @@ const SettingsRenderer = new class SettingsRenderer {
     }
 
     injectPanel(data) {
+        if (window.isUnbound) return;
+
         if (KernelSettings.panels.find(e => e.id === ("kernel-settings-powercord-" + data.label))) return;
 
         return KernelSettings.register("powercord-" + data.label, {
