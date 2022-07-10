@@ -32,7 +32,7 @@ export default class Plugin {
         const stylePath = path.isAbsolute(_path) ? _path : path.resolve(this.path, _path);
         try {
             if (!fs.existsSync(stylePath)) throw new Error(`Stylesheet not found at ${stylePath}`);
-            const content = Require(stylePath);
+            const content = fs.readdirSync(stylePath);
             const id = `${this.entityID}-${Utilities.random()}`;
 
             this.stylesheets[id] = DOM.injectCSS(id, content);
