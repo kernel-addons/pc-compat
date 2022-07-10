@@ -1,6 +1,7 @@
 import {DOM, Utilities} from "../../modules";
 import {fs, path, require as Require} from "../../node";
 import PluginManager from "../pluginmanager";
+import * as IPCEvents from "@common/ipcevents";
 import electron from "@node/electron";
 
 export type PluginManifest = {
@@ -34,7 +35,7 @@ export default class Plugin {
         try {
             if (!fs.existsSync(stylePath)) throw new Error(`Stylesheet not found at ${stylePath}`);
             const content = path.extname(stylePath).endsWith('.scss') ?
-               electron.ipcRenderer.sendSync.sendSync()
+               electron.ipcRenderer.sendSync(IPCEvents.COMPILE_SASS, stylePath)
                : fs.readFileSync(stylePath);
             const id = `${this.entityID}-${Utilities.random()}`;
 
