@@ -77,7 +77,7 @@ export default new class PCCompat {
         if (window.isUnbound) return;
 
         if ("SettingsNative" in window) {
-            if (typeof KernelSettings === "undefined") await new Promise<void>(resolve => {
+            if (typeof window.KernelSettings === "undefined") await new Promise<void>(resolve => {
                 const listener = () => {
                     resolve();
                     Internals.DiscordModules.Dispatcher.unsubscribe("KERNEL_SETTINGS_INIT", listener);
