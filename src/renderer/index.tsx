@@ -100,7 +100,7 @@ export default new class PCCompat {
                 >
                     <Text>
                         Powercord Compatibility requires the <a onClick={() => {
-                            open("https://github.com/strencher-kernel/kernel-settings")
+                            open("https://github.com/strencher-kernel/settings")
                         }}>settings</a> package to register its settings tabs.
                     </Text>
                 </ConfirmationModal>
