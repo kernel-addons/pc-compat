@@ -20,9 +20,9 @@ const DataStore = new class DataStore extends Store<"misc" | "data-update"> {
         }
 
         const basePath = PCCompatNative.getBasePath();
-        const previous = path.join(basePath, "config");
+        const previous = path.resolve(this.baseDir, "storage", "strencher.pc-compat");
 
-        if (fs.existsSync(previous) && !this.getMisc("migratedSettings", false)) {
+        if (fs.existsSync(previous)) {
             Logger.log("Old settings folder detected, migrating settings.")
             const files = fs.readdirSync(previous);
 
@@ -35,18 +35,23 @@ const DataStore = new class DataStore extends Store<"misc" | "data-update"> {
                 if (fs.existsSync(to)) continue;
 
                 // Move the file
-                Logger.log(`Migrating ${path.basename(basePath)}/${path.basename(previous)}/${file}`);
+                Logger.log(`Migrating storage/${path.basename(previous)}/${file}`);
                 fs.renameSync(current, to);
             }
 
-            this.setMisc(void 0, "migratedSettings", true);
+            try {
+               fs.rmSync(previous, { recursive: true, force: true });
+            } catch(e) {
+               console.log(e)
+             }
+
             Logger.log("Migration completed.");
         }
     }
 
     baseDir: string = path.resolve(PCCompatNative.getBasePath(), "..", "..");
 
-    configFolder = path.resolve(this.baseDir, "storage", "strencher.pc-compat");
+    configFolder = path.resolve(this.baseDir, "powercord", "settings");
 
     cache = new Map();
 
@@ -83,7 +88,7 @@ const DataStore = new class DataStore extends Store<"misc" | "data-update"> {
     }
 
     getMisc(misc: string = "", def: any) {
-        return getProps(this.tryLoadData("misc"), misc) ?? def;
+        return getProps(this.tryLoadData("misc", def), misc);
     }
 
     setMisc(misc: any = this.getMisc("", {}), prop: string, value: any) {

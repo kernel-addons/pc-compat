@@ -4,8 +4,9 @@ const constants = {
 	WEBSITE: "https://github.com/strencher-kernel/pc-compat",
 	I18N_WEBSITE: "https://example.com",
 	REPO_URL: "strencher-kernel/pc-compat",
-
-	SETTINGS_FOLDER: path.resolve(PCCompatNative.getBasePath(), "config"),
+	get SETTINGS_FOLDER() {
+      return path.resolve(PCCompatNative.getBasePath(), "..", "powercord", "settings")
+   },
 	CACHE_FOLDER: null,
 	LOGS_FOLDER: null,
 

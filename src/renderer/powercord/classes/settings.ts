@@ -64,8 +64,6 @@ export function getSettings(id: string): any {
         const Settings = new SettingsModule(id);
         cache.set(id, Settings);
 
-        Settings.save();
-
         return Settings;
     }
 
