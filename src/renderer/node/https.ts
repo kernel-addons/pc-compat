@@ -4,7 +4,7 @@ import Buffer from "./buffer";
 
 type HttpModule = typeof import("src/preload/bindings/https");
 
-const binding = makeLazy(() => window.require ? window.require("https") : PCCompatNative.getBinding("https") as HttpModule);
+const binding = makeLazy(() => !window.process || process.contextIsolated ? PCCompatNative.getBinding("https") as HttpModule : window.require("https"));
 
 export function get(...args: any[]) {
     const res = args.pop();

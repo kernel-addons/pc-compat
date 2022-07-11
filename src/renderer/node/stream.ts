@@ -15,7 +15,7 @@ export class Readable extends EventEmitter {
 }
 
 export default makeLazy(() => {
-   if (window.require) {
+   if (window.process && !process.contextIsolated) {
       return window.require("stream");
    }
 

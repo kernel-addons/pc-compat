@@ -73,6 +73,7 @@ export default class StyleManager extends Emitter {
         if (!missing) Logger.log("Loading themes...");
 
         const missingEntities = [];
+        const start = performance.now();
         for (const file of fs.readdirSync(this.folder, "utf8")) {
             const location = path.resolve(this.folder, file);
             if (!fs.statSync(location).isDirectory()) continue;
@@ -107,7 +108,7 @@ export default class StyleManager extends Emitter {
             });
         }
 
-        if (!missing) Logger.log("Finished loading themes.");
+        if (!missing) Logger.log(`Finished loading themes in ${(performance.now() - start).toFixed(0)}ms.`);
         this.emit("updated");
         if (missing) return missingEntities;
     }

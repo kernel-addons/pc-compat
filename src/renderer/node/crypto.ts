@@ -1,3 +1,3 @@
 import {makeLazy} from "@common/util";
 
-export default makeLazy(() => window.require ? window.require("crypto") : PCCompatNative.getBinding("crypto"));
+export default makeLazy(() => !window.process || process.contextIsolated ? PCCompatNative.getBinding("crypto") : window.require("crypto"));

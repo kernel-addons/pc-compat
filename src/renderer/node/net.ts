@@ -1,3 +1,3 @@
 import {makeLazy} from "@common/util";
 
-export default makeLazy(() => window.require ? window.require("net") : PCCompatNative.getBinding("net"));
+export default makeLazy(() => !window.process || process.contextIsolated ? PCCompatNative.getBinding("net") : window.require("net"));

@@ -2,7 +2,7 @@ import LoggerModule from "@modules/logger";
 
 const Logger = LoggerModule.create("Events");
 
-export default window.require ? window.require("events") : class EventEmitter {
+export default !window.process || process.contextIsolated ? class EventEmitter {
     static get EventEmitter() {return EventEmitter;}
 
     static get defaultMaxListeners() {return 10;}
@@ -87,4 +87,4 @@ export default window.require ? window.require("events") : class EventEmitter {
     get removeListener() {return this.off;}
 
     get addListener() {return this.on;}
-};
+} : window.require("events");

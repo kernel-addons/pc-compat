@@ -4,7 +4,7 @@ import Buffer from "./buffer";
 
 type HttpModule = typeof import("src/preload/bindings/http");
 
-const binding = makeLazy(() => window.require ? window.require("http") : PCCompatNative.getBinding("http") as HttpModule);
+const binding = makeLazy(() => !window.process || process.contextIsolated ? PCCompatNative.getBinding("http") as HttpModule : window.require("http"));
 
 export function get(url, options, res) {
     if (typeof options === "function") {
