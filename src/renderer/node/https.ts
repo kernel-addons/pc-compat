@@ -4,9 +4,14 @@ import Buffer from "./buffer";
 
 type HttpModule = typeof import("src/preload/bindings/https");
 
-const binding = makeLazy(() => !window.process || process.contextIsolated ? PCCompatNative.getBinding("https") as HttpModule : window.require("https"));
+const isIsolated = !window.process || process.contextIsolated;
+const binding = makeLazy(() => isIsolated ? PCCompatNative.getBinding("https") as HttpModule : window.require("https"));
 
 export function get(...args: any[]) {
+    if (!isIsolated) {
+        return binding().get.apply(binding(), arguments);
+    }
+
     const res = args.pop();
 
     const emitter = new EventEmitter();
@@ -30,9 +35,19 @@ export function get(...args: any[]) {
     return res(emitter), emitter;
 }
 
-export function request(...args: any[]) {return Reflect.apply(get, this, args);}
+export function request(...args: any[]) {
+    if (!isIsolated) {
+        return binding().get.apply(binding(), arguments);
+    }
+
+    return Reflect.apply(get, this, args);
+}
 
 export function createServer() {
+    if (!isIsolated) {
+        return binding().createServer.apply(binding(), arguments);
+    }
+
     // @ts-expect-error
     return DiscordNative.nativeModules.requireModule("discord_rpc").RPCWebSocket.http.createServer.apply(this, arguments);
 }
