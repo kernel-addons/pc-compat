@@ -1,16 +1,16 @@
-import DataStore from "@modules/datastore";
-import DiscordModules from "@modules/discord";
-import Events from "@modules/events";
-import LoggerModule from "@modules/logger";
-import Patcher from "@modules/patcher";
-import SettingsRenderer from "@modules/settings";
-import Webpack from "@modules/webpack";
 import {getOwnerInstance, wrapInHooks} from "@powercord/util";
-import Notices from "@ui/notices";
-import UpdatesBadge from "./components/badge";
-import UpdaterPanel from "./components/panel";
 import UpdatesStore, {DEFAULT_CONFIG} from "./store";
 import {default as UpdaterModule} from "./updater";
+import SettingsRenderer from "@modules/settings";
+import DiscordModules from "@modules/discord";
+import UpdatesBadge from "./components/badge";
+import UpdaterPanel from "./components/panel";
+import DataStore from "@modules/datastore";
+import LoggerModule from "@modules/logger";
+import Patcher from "@modules/patcher";
+import Webpack from "@modules/webpack";
+import Events from "@modules/events";
+import Notices from "@ui/notices";
 
 const Logger = new LoggerModule("Updater");
 

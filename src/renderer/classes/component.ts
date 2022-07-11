@@ -1,4 +1,3 @@
-
 export default class Component<P = {}, S = {}, C = any> implements React.Component<P, S, C> {
     declare state: S;
     declare props: P;

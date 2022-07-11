@@ -1,7 +1,7 @@
-import {DOM, Utilities} from "@modules";
-import {fs, path, require as Require} from "../../node";
 import * as IPCEvents from "@common/ipcevents";
+import {DOM, Utilities} from "@modules";
 import electron from "@node/electron";
+import {fs, path} from "@node";
 
 export type ThemeManifest = {
     name: string;

@@ -1,5 +1,5 @@
-import electron from "../../node/electron";
-import * as IPCEvents from "../../../common/ipcevents";
+import * as IPCEvents from "@common/ipcevents";
+import electron from "@node/electron";
 
 export default class SASS {
     static compile(file: string) {

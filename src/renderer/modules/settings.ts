@@ -1,12 +1,7 @@
-import Webpack from "./webpack";
-import Patcher from "./patcher";
-import DiscordModules from "./discord";
 import SettingsPanel from "@ui/components/settingspanel";
 import {getSettings} from "@powercord/classes/settings";
-import memoize from "./memoize";
-import {getOwnerInstance} from "@powercord/util";
-import Events from "./events";
 import Powercord from '@ui/icons/powercord';
+import DiscordModules from "./discord";
 
 const SettingsRenderer = new class SettingsRenderer {
     panels: any[] = [];
@@ -43,7 +38,7 @@ const SettingsRenderer = new class SettingsRenderer {
 
     injectPanels() {
         if (window.isUnbound) return;
-        
+
         for(const panel of this.panels) {
             try {
                 this.injectPanel(panel);

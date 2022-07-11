@@ -2,10 +2,8 @@
 import {init as initializeWebpack} from "@powercord/webpack";
 import PluginManager from "@powercord/pluginmanager";
 import StyleManager from "@powercord/stylemanager";
-import SettingsRenderer from "@modules/settings";
 import {require as Require, path, fs} from "@node";
-import DevServer from "@modules/devserver";
-import DiscordIcon from "@ui/discordicon";
+import SettingsRenderer from "@modules/settings";
 import {promise} from "@modules/discord";
 import manifest from "../../index.json";
 import * as Internals from "./modules";
@@ -16,7 +14,6 @@ import {Constants} from "@data";
 import {DOM} from "@modules";
 import {Modals} from "./ui";
 import "./styles/index";
-import Powercord from '@ui/icons/powercord';
 
 declare global {
     interface Window {
@@ -34,7 +31,7 @@ export default new class PCCompat {
     };
 
     start() {
-        Logger.log("Loading");
+        Logger.log("Initializing...");
         promise.then(this.onStart.bind(this));
     }
 
@@ -64,6 +61,8 @@ export default new class PCCompat {
         Updater.initialize();
 
         // DevServer.initialize();
+
+        Logger.log("Initialized.")
 
         this.checkForChangelog();
 

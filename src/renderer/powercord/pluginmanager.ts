@@ -1,12 +1,13 @@
-import AddonPanel from "@ui/components/addonpanel";
+import {Module, require as Require, electron, fs, path} from "@node";
 import {DataStore, DiscordModules} from "@modules";
-import LoggerModule from "@modules/logger";
+
+import AddonPanel from "@ui/components/addonpanel";
 import SettingsRenderer from "../modules/settings";
-import {fs, path, require as Require, Module, electron} from "@node";
-import Plugin from "./classes/plugin";
 import Emitter from "../classes/staticemitter";
-import {globalPaths} from "@node/module";
 import {getSettings} from "./classes/settings";
+import LoggerModule from "@modules/logger";
+import {globalPaths} from "@node/module";
+import Plugin from "./classes/plugin";
 import Events from "@modules/events";
 
 const Logger = LoggerModule.create("PluginManager");
@@ -78,7 +79,7 @@ export default class PluginManager extends Emitter {
 
     static loadAll(missing = false, toast = true) {
         if (!fs.statSync(this.folder).isDirectory()) return void Logger.error("PluginsManager", `Plugins dir isn't a folder.`);
-        if (!missing) Logger.log("PluginsManager", "Loading plugins...");
+        if (!missing) Logger.log("Loading plugins...");
 
         const missingEntities = [];
         for (const file of fs.readdirSync(this.folder, "utf8")) {
@@ -118,6 +119,7 @@ export default class PluginManager extends Emitter {
             });
         }
 
+        if (!missing) Logger.log("Finished loading plugins.");
         this.emit("updated");
         if (missing) return missingEntities;
     }
@@ -159,6 +161,7 @@ export default class PluginManager extends Emitter {
         try {
             this.clearCache(location);
             const data = Require(location);
+            if(!data?.prototype) throw new Error("Plugin had no exports");
 
             Object.defineProperties(data.prototype, {
                 entityID: {
@@ -250,7 +253,7 @@ export default class PluginManager extends Emitter {
         if (!plugin) return;
 
         try {
-            plugin._unload();
+            plugin._unload?.();
             if (log) {
                 Logger.log(`${plugin.displayName} has been stopped!`);
             }

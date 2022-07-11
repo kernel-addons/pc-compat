@@ -1,8 +1,8 @@
-import {DOM, Utilities} from "../../modules";
-import {fs, path, require as Require} from "../../node";
-import PluginManager from "../pluginmanager";
 import * as IPCEvents from "@common/ipcevents";
+import {DOM, Utilities} from "../../modules";
+import PluginManager from "../pluginmanager";
 import electron from "@node/electron";
+import {fs, path} from "../../node";
 
 export type PluginManifest = {
     dependencies?: string[];
@@ -69,7 +69,7 @@ export default class Plugin {
 
     _unload() {
         this.pluginWillUnload?.();
-        for (const stylesheet in this.stylesheets) {
+        for (const stylesheet in this.stylesheets ?? {}) {
             DOM.clearCSS(stylesheet);
         }
     }

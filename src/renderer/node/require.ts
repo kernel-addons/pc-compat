@@ -1,6 +1,6 @@
+import * as IPCEvents from "@common/ipcevents";
 import {createRequire} from "./module";
 import path from "./path";
-import * as IPCEvents from "@common/ipcevents";
 
 if (!window.process) {
     try {

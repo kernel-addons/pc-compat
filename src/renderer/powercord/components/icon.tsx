@@ -1,6 +1,6 @@
+import {fromPromise} from "./asynccomponent";
 import {promise} from "@modules/discord";
 import Webpack from "@modules/webpack"
-import {fromPromise} from "./asynccomponent";
 
 const Icon: any = fromPromise(promise.then(() => {
     const Icons = Webpack.findModules(m => typeof m === 'function' && m.toString().indexOf('"currentColor"') !== -1)

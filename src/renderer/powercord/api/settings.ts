@@ -1,5 +1,5 @@
-import {promise} from "@modules/discord";
 import {getSettings} from "@powercord/classes/settings";
+import {promise} from "@modules/discord";
 
 export let store = null;
 export let settings = new Map();

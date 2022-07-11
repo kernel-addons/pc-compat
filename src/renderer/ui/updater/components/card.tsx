@@ -1,18 +1,18 @@
-import { SettingsContext } from "@ui/components/settingspanel";
+import {SettingsContext} from "@ui/components/settingspanel";
 import Divider from "@powercord/components/divider";
-import { joinClassNames } from "@modules/utilities";
-import { memoizeValue } from "@modules/memoize";
+import {joinClassNames} from "@modules/utilities";
+import {memoizeValue} from "@modules/memoize";
 import DiscordModules from "@modules/discord";
 import DiscordIcon from "@ui/discordicon";
 import makeLazy from "@modules/makelazy";
 import SettingsPanel from "./settings";
 import Git from "@modules/simplegit";
 import UpdatesStore from "../store";
-import Updater from "../updater";
-import Icon from "@ui/icons";
-import path from "@node/path";
-import fs from "@node/fs";
 import BranchModal from "./branch";
+import Updater from "../updater";
+import path from "@node/path";
+import Icon from "@ui/icons";
+import fs from "@node/fs";
 
 const basePath = PCCompatNative.getBasePath();
 
@@ -35,7 +35,7 @@ export const CurrentBranch = makeLazy(async () => {
     const branch = PCCompatNative.isPacked ? localGitInfo().branchName : (await Git.getBranchName(basePath));
 
     const handleClick = (e: React.MouseEvent) => {
-        if (PCCompatNative.isPacked) return; 
+        if (PCCompatNative.isPacked) return;
 
         e.preventDefault();
         e.stopPropagation();

@@ -1,8 +1,8 @@
 import DiscordModules, {promise} from "@modules/discord";
-import Components from "@modules/components";
 import {joinClassNames} from "@modules/utilities";
-import Divider from "../divider";
 import {fromPromise} from "../asynccomponent";
+import Components from "@modules/components";
+import Divider from "../divider";
 
 export default fromPromise(promise.then(() => {
     const {Forms, Text} = DiscordModules;

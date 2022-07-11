@@ -1,5 +1,5 @@
-import electron from "electron";
 import {cloneObject} from "../util";
+import electron from "electron";
 
 const {contextIsolated = true} = process;
 

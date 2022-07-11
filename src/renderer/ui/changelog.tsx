@@ -1,7 +1,7 @@
+import {fromPromise} from "@powercord/components/asynccomponent";
 import DiscordModules, {promise} from "@modules/discord";
 import {joinClassNames} from "@modules/utilities";
 import Webpack, {Filters} from "@modules/webpack";
-import {fromPromise} from "@powercord/components/asynccomponent";
 
 export type ChangeLogItem = {
     title: string;

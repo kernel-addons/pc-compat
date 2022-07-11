@@ -1,9 +1,9 @@
-import Patcher from "./patcher";
-import Webpack from "./webpack"
-import DiscordModules, {promise} from "./discord";
+import {fromPromise} from "@powercord/components/asynccomponent";
 import {forceUpdateElement} from "@powercord/util";
 import LoggerModule from "./logger";
-import {fromPromise} from "@powercord/components/asynccomponent";
+import {promise} from "./discord";
+import Patcher from "./patcher";
+import Webpack from "./webpack"
 import Events from "./events";
 
 const Logger = new LoggerModule("ComponentPatcher");

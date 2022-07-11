@@ -1,7 +1,7 @@
 import * as IPCEvents from "../common/ipcevents";
 import {cloneObject} from "../common/util";
-import path from "path";
 import createIPC from "./ipc";
+import path from "path";
 
 const callbacks = new Map<string, Set<Function>>();
 const {IPC} = createIPC();

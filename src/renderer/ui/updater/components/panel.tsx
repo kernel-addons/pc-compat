@@ -1,9 +1,9 @@
-import UpdaterCard from "./card";
-import Update from "./update";
-import UpdatesStore from "../store";
-import Updater from "../updater";
-import Git from "@modules/simplegit";
 import DiscordModules from "@modules/discord";
+import Git from "@modules/simplegit";
+import UpdatesStore from "../store";
+import UpdaterCard from "./card";
+import Updater from "../updater";
+import Update from "./update";
 
 export function usePromise<T>(promise: Promise<T>): null | T {
     const [state, setState] = React.useState(null);
@@ -23,7 +23,7 @@ export default function UpdaterPanel() {
     const handleFetchStart = function () {
         Updater.fetchAllUpdates();
     };
-    
+
     return (
         <div>
             {hasGit === false && (

@@ -1,10 +1,10 @@
-import * as sucrase from "sucrase";
-import * as sass from "sass";
 import {ipcMain, app, BrowserWindow} from "electron";
 import * as IPCEvents from "../common/ipcevents";
+import * as sucrase from "sucrase";
+import CP from "child_process";
+import * as sass from "sass";
 import path from "path";
 import fs from "fs";
-import CP from "child_process";
 
 const cache = (() => {
   if (path.basename(__dirname) === "dist") {

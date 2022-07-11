@@ -1,5 +1,5 @@
-import DiscordModules, {promise} from "@modules/discord";
 import ErrorBoundary from "@powercord/components/errorboundary";
+import DiscordModules, {promise} from "@modules/discord";
 
 export let SettingsContext = null;
 

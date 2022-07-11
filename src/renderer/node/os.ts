@@ -2,4 +2,4 @@ import {makeLazy} from "@common/util";
 
 type OSModule = typeof import("src/preload/bindings").os;
 
-export default window.require ? window.require("os") : makeLazy(() => PCCompatNative.getBinding("os") as OSModule);
+export default makeLazy(() => window.require ? window.require("os") : PCCompatNative.getBinding("os") as OSModule);

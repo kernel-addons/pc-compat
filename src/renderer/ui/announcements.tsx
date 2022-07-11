@@ -1,5 +1,5 @@
-import {findInReactTree, getOwnerInstance, waitFor} from "@powercord/util";
 import AnnouncementContainer, {AnnouncementsStore} from "./components/announcementcontainer";
+import {findInReactTree, getOwnerInstance, waitFor} from "@powercord/util";
 import LoggerModule from "@modules/logger";
 import {promise} from "@modules/discord";
 import Patcher from "@modules/patcher";

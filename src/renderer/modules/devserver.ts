@@ -1,6 +1,6 @@
-import Events from "./events";
-import LoggerModule from "./logger";
 import {testJSON} from "./utilities";
+import LoggerModule from "./logger";
+import Events from "./events";
 
 const Logger = new LoggerModule("DevServer");
 

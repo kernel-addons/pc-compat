@@ -1,7 +1,7 @@
 import {DiscordModules, Webpack, Patcher} from "@modules";
+import LoggerModule from "@modules/logger";
 import {promise} from "@modules/discord";
 import Events from "@modules/events";
-import LoggerModule from "@modules/logger";
 
 const Logger = LoggerModule.create("Utilities");
 

@@ -1,8 +1,8 @@
-import memoize from "@modules/memoize";
-import {createUpdateWrapper} from "@modules/utilities";
 import TextInput from "@powercord/components/settings/textinput";
-import DiscordModules from "../modules/discord";
+import {createUpdateWrapper} from "@modules/utilities";
 import ChangeLog, {ChangeLogItems} from "./changelog";
+import DiscordModules from "../modules/discord";
+import memoize from "@modules/memoize";
 
 export default class Modals {
     static get TextInput() {return memoize(this, "TextInput", createUpdateWrapper(TextInput));}

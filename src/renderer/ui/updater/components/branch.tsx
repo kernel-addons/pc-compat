@@ -1,7 +1,7 @@
-import Component from "@classes/component";
 import DiscordModules from "@modules/discord";
-import Git from "@modules/simplegit";
+import Component from "@classes/component";
 import DiscordIcon from "@ui/discordicon";
+import Git from "@modules/simplegit";
 import Notices from "@ui/notices";
 
 export default class BranchModal extends Component<{onClose: Function, transitionState: number}> {
@@ -73,10 +73,10 @@ export default class BranchModal extends Component<{onClose: Function, transitio
                     content: "Failed to switch branch. See console for more details."
                 });
             });
-        
+
         this.props.onClose();
     }
-    
+
     render() {
         const {ModalComponents: {ModalRoot, ModalHeader, ModalContent, ModalFooter, ModalSize, ModalCloseButton}, Header, Flex, Button, Spinner} = DiscordModules;
 
@@ -88,7 +88,7 @@ export default class BranchModal extends Component<{onClose: Function, transitio
                 </ModalHeader>
                 <ModalContent className="pc-branch-modal-inner">
                     {
-                        this.state.loaded 
+                        this.state.loaded
                             ? this.state.branches.map(branch => this.renderItem(branch))
                             : <Spinner type={Spinner.Type.WANDERING_CUBES} />
                     }

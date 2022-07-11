@@ -1,11 +1,11 @@
-import FolderOpened from "./folder-open";
-import Folder from "./folder";
-import PaintBrush from "./paint-brush";
-import Save from "./save";
 import VerifiedShield from "./verified_shield";
+import WarningShield from "./warning_shield";
+import FolderOpened from "./folder-open";
+import PaintBrush from "./paint-brush";
+import Folder from "./folder";
+import Save from "./save";
 import Sass from "./sass";
 import Css from "./css";
-import WarningShield from "./warning_shield";
 
 export const Icons = {FolderOpened, Folder, PaintBrush, Save, VerifiedShield, Sass, Css, WarningShield};
 

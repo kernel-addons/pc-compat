@@ -1,8 +1,8 @@
-import {Store} from "@classes";
-import {DataStore} from "@modules";
-import {promise} from "@modules/discord";
-import {GithubRelease} from "@modules/github";
 import {defaultSettings} from "./components/settings";
+import {GithubRelease} from "@modules/github";
+import {promise} from "@modules/discord";
+import {DataStore} from "@modules";
+import {Store} from "@classes";
 
 export type CoreUpdate = {
     release: GithubRelease,

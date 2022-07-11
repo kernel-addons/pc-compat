@@ -1,10 +1,10 @@
 import {makeLazy} from "@common/util";
-import Buffer from "./buffer";
 import EventEmitter from "./events";
+import Buffer from "./buffer";
 
 type HttpModule = typeof import("src/preload/bindings/https");
 
-const binding = window.require ? window.require("https") : makeLazy(() => PCCompatNative.getBinding("https") as HttpModule);
+const binding = makeLazy(() => window.require ? window.require("https") : PCCompatNative.getBinding("https") as HttpModule);
 
 export function get(...args: any[]) {
     const res = args.pop();

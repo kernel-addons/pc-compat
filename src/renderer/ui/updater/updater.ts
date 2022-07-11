@@ -1,9 +1,9 @@
+import UpdatesStore, {AddonUpdate, CoreUpdate, DEFAULT_CONFIG} from "./store";
+import PluginManager from "@powercord/pluginmanager";
+import StyleManager from "@powercord/stylemanager";
 import DataStore from "@modules/datastore";
 import Github from "@modules/github";
 import Git from "@modules/simplegit";
-import PluginManager from "@powercord/pluginmanager";
-import StyleManager from "@powercord/stylemanager";
-import UpdatesStore, {AddonUpdate, CoreUpdate, DEFAULT_CONFIG} from "./store";
 
 const UpdaterNative = PCCompatNative.getBinding("updater") as typeof import("src/preload/bindings/updater");
 const getId = (() => {
@@ -91,13 +91,13 @@ export default class Updater {
             .map(addon => () => this.processUpdateCheck(addon));
 
         checks.unshift(() => this.processCoreUpdateCheck() as unknown as any);
-        
+
         if (this.getSetting("useQueue", false)) {
             await checks.reduce((prev, check) => prev.then(async () => {
                 const result = await check();
                 if (result) updates.push(result);
             }), Promise.resolve());
-        } 
+        }
         else {
             await Promise.allSettled(checks.map(async check => {
                 const result = await check();

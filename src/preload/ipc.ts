@@ -1,18 +1,18 @@
-import {ipcRenderer} from "electron";
 import * as IPCEvents from "../common/ipcevents";
+import {ipcRenderer} from "electron";
 
 const createIPC = function () {
     const events = {};
-    
+
     const IPC = {
         on(event: string, callback: Function) {
             if (!events[event]) events[event] = new Set();
-    
+
             return events[event].add(callback), IPC.off.bind(null, event, callback);
         },
         off(event: string, callback: Function) {
             if (!events[event]) return;
-    
+
             events[event].delete(callback);
         },
         once(event: string, callback: Function) {
@@ -23,7 +23,7 @@ const createIPC = function () {
         },
         dispatch(event: string, ...args: any[]) {
             if (!events[event]) return;
-    
+
             for (const callback of events[event]) {
                 try {callback(...args);}
                 catch (error) {console.error(error);}

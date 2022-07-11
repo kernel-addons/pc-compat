@@ -1,12 +1,12 @@
-import DOM from "@modules/dom";
-import DiscordModules, {promise} from "@modules/discord";
-import createStore from "@flux/zustand";
 import ErrorBoundary from "@powercord/components/errorboundary";
+import DiscordModules, {promise} from "@modules/discord";
 import {joinClassNames, uuid} from "@modules/utilities";
-import DiscordIcon from "./discordicon";
-import createDispatcher from "@flux/dispatcher";
 import {FontAwesome} from "@powercord/components/icons";
+import createDispatcher from "@flux/dispatcher";
+import createStore from "@flux/zustand";
+import DiscordIcon from "./discordicon";
 import Events from "@modules/events";
+import DOM from "@modules/dom";
 
 const [useNoticesStore, NoticesApi] = createStore({notices: {}});
 const Dispatcher = createDispatcher();

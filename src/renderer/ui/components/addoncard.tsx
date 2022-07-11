@@ -1,10 +1,10 @@
-import Modals from "../modals";
+import {cache} from "@powercord/classes/settings";
+import {settings} from "@powercord/api/settings";
+import {SettingsContext} from "./settingspanel";
 import DiscordModules from "@modules/discord";
 import DiscordIcon from "@ui/discordicon";
-import {SettingsContext} from "./settingspanel";
-import {settings} from "@powercord/api/settings";
-import {cache} from "@powercord/classes/settings";
 import {fs, electron} from "@node";
+import Modals from "../modals";
 
 export function ToolButton({label, icon, onClick, danger = false, disabled = false}) {
     const {Button, Tooltips: {Tooltip}} = DiscordModules;

@@ -1,10 +1,10 @@
 import {makeLazy} from "@common/util";
-import Buffer from "./buffer";
 import EventEmitter from "./events";
+import Buffer from "./buffer";
 
 type HttpModule = typeof import("src/preload/bindings/http");
 
-const binding = window.require ? window.require("http") : makeLazy(() => PCCompatNative.getBinding("http") as HttpModule);
+const binding = makeLazy(() => window.require ? window.require("http") : PCCompatNative.getBinding("http") as HttpModule);
 
 export function get(url, options, res) {
     if (typeof options === "function") {

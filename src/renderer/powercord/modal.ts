@@ -1,4 +1,4 @@
-import DiscordModules, {promise} from "../modules/discord";
+import DiscordModules from "../modules/discord";
 import Modal from "@powercord/components/modal";
 
 export function open(Component: any) {

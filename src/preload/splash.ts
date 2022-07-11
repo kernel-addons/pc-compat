@@ -1,9 +1,9 @@
 // @ts-nocheck
 
+import * as IPCEvents from "../common/ipcevents";
 import {ipcRenderer} from "electron";
 import path from "path";
 import fs from "fs";
-import * as IPCEvents from "../common/ipcevents";
 
 export default function handleSplash (API) {
     const {windowOptions} = ipcRenderer.sendSync(IPCEvents.GET_WINDOW_DATA);

@@ -1,19 +1,22 @@
-import createIPC from "./ipc";
 import {contextBridge, ipcRenderer} from "electron";
 import {cloneObject, getKeys} from "../common/util";
-import Module from "module";
-import path from "path";
 import * as IPCEvents from "../common/ipcevents";
-import handleSplash from './splash';
-import Process from "./process";
 import {basePath, isPacked} from "./util";
 import * as bindings from "./bindings";
+import handleSplash from "./splash";
+import Process from "./process";
+import createIPC from "./ipc";
+import Module from "module";
+import path from "path";
 
 const {IPC, events} = createIPC();
 
 const nodeModulesPath = path.resolve(process.cwd(), "resources", "app-original.asar", "node_modules");
-// @ts-ignore - Push modules
-if (!Module.globalPaths.includes(nodeModulesPath)) Module.globalPaths.push(nodeModulesPath);
+// @ts-ignore
+if (!Module.globalPaths.includes(nodeModulesPath)) {
+   // @ts-ignore - Push modules
+   Module.globalPaths.push(nodeModulesPath);
+}
 
 const API = {
     isPacked,

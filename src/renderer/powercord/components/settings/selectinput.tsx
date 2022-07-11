@@ -1,5 +1,5 @@
-import {DiscordModules} from "../../../modules";
-import FormItem from './formitem';
+import {DiscordModules} from "@modules";
+import FormItem from "./formitem";
 
 export default function SelectInput(props) {
     const {SelectInput} = DiscordModules;

@@ -1,9 +1,9 @@
-import Component from "@classes/component";
-import DiscordModules from "@modules/discord";
-import Error from "@ui/icons/error";
-import Modals from "@ui/modals";
 import UpdatesStore, {CoreUpdate as CoreUpdateType, AddonUpdate as AddonUpdateType, Update as UpdateType, CoreUpdate} from "../store";
+import DiscordModules from "@modules/discord";
+import Component from "@classes/component";
+import Error from "@ui/icons/error";
 import Updater from "../updater";
+import Modals from "@ui/modals";
 
 export default class Update extends Component<UpdateType, {isInstalling: boolean}> {
     state = {
@@ -95,7 +95,7 @@ export default class Update extends Component<UpdateType, {isInstalling: boolean
         className?: string
     }) {
         const {Tooltips, Button} = DiscordModules;
-        
+
         return (
             <Tooltips.Tooltip text={label}>
                 {(tooltipProps: any) => (
@@ -189,7 +189,7 @@ export default class Update extends Component<UpdateType, {isInstalling: boolean
         const {Forms, Button, Tooltips, Spinner} = DiscordModules;
         const failed = UpdatesStore.useState(() => (UpdatesStore.getUpdate(props.id) as UpdateType).failed);
         const isIgnored = UpdatesStore.useState(() => UpdatesStore.isIgnored((props as AddonUpdateType).entityId ?? props.type));
-        
+
         return (
             <div className={`pc-update pc-${props.type}-update`} style={this.style(failed, isIgnored)}>
                 <Forms.FormItem title={this.renderTitle()}>

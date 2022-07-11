@@ -1,26 +1,22 @@
-import Webpack from "@modules/webpack";
-import LoggerModule from "@modules/logger";
-import components from "../data/components";
-import {promise} from "@modules/discord";
-import {createUpdateWrapper} from "@modules/utilities";
-
-import TextInput from "./settings/textinput";
-import RadioGroup from "./settings/radiogroup";
-import SelectInput from "./settings/selectinput";
-import Category from './settings/category';
-import TextAreaInput from './settings/textareainput';
-import Divider from "./divider"
 import ColorPicker, {ColorPickerInput} from "./settings/colorpicker";
+import {createUpdateWrapper} from "@modules/utilities";
+import TextAreaInput from "./settings/textareainput";
+import SelectInput from "./settings/selectinput";
+import RadioGroup from "./settings/radiogroup";
+import AsyncComponent from "./asynccomponent";
+import TextInput from "./settings/textinput";
 import SliderInput from "./settings/slider";
+import components from "../data/components";
+import Category from "./settings/category";
 import FormItem from "./settings/formitem";
 import Checkbox from "./settings/checkbox";
+import {promise} from "@modules/discord";
+import * as Icons from "./icons/index";
+import Webpack from "@modules/webpack";
+import Divider from "./divider"
+import Modal from "./modal";
 import Icon from "./icon";
 
-import AsyncComponent from "./asynccomponent";
-import Modal from "./modal";
-import * as Icons from "./icons/index";
-
-new LoggerModule("Components", true);
 
 let Components = {
     settings: {

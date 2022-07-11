@@ -1,9 +1,8 @@
-const path = require("path");
-const CircularDependencyPlugin = require("circular-dependency-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const {builtinModules} = require("module");
 const {DefinePlugin} = require("webpack");
 const pkg = require("./package.json");
-const {builtinModules} = require("module");
+const path = require("path");
 
 module.exports = args => {
     const {mode = "renderer", minify = false} = args;
@@ -96,7 +95,7 @@ module.exports = args => {
                 "@common":      path.resolve(__dirname, "./src/common"),
                 "@classes":     path.resolve(__dirname, "./src/renderer/classes"),
                 "@flux":        path.resolve(__dirname, "./src/renderer/flux"),
-                "@decorators":  path.resolve(__dirname, "./src/renderer/decorators")
+                "@decorators":  path.resolve(__dirname, "./src/renderer/decorators"),
             }
         },
         plugins: [

@@ -1,5 +1,5 @@
-import LoggerModule from "@modules/logger";
 import DiscordModules from "@modules/discord";
+import LoggerModule from "@modules/logger";
 
 export type ValidateListener = (...args: any[]) => boolean;
 
@@ -30,7 +30,7 @@ export default class Store<events = string> {
 
         for (let index = 0; index < toFire.length; index++) {
             const listener = toFire[index];
-            
+
             try {listener(...args);}
             catch (error) {this.logger.error(`Store:${this.constructor.name}`, error);}
         }

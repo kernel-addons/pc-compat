@@ -1,5 +1,5 @@
-import {DataStore} from "../../modules";
-import DiscordModules, {promise} from "../../modules/discord";
+import DiscordModules, {promise} from "@modules/discord";
+import {DataStore} from "@modules";
 
 let SettingsModule;
 

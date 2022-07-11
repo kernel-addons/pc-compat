@@ -1,10 +1,10 @@
+import {fs, Module, path, require as Require, electron} from "@node";
 import AddonPanel from "@ui/components/addonpanel";
 import {DataStore, DiscordModules} from "@modules";
 import SettingsRenderer from "@modules/settings";
-import LoggerModule from "@modules/logger";
-import {fs, Module, path, require as Require, electron} from "@node";
 import Emitter from "../classes/staticemitter";
 import Theme from "@powercord/classes/theme";
+import LoggerModule from "@modules/logger";
 import Events from "@modules/events";
 
 const Logger = LoggerModule.create("StyleManager");
@@ -70,7 +70,7 @@ export default class StyleManager extends Emitter {
 
     static loadAll(missing = false, toast = true) {
         if (!fs.statSync(this.folder).isDirectory()) return void Logger.error("StyleManager", `Plugins dir isn't a folder.`);
-        if (!missing) Logger.log("StyleManager", "Loading themes...");
+        if (!missing) Logger.log("Loading themes...");
 
         const missingEntities = [];
         for (const file of fs.readdirSync(this.folder, "utf8")) {
@@ -107,6 +107,7 @@ export default class StyleManager extends Emitter {
             });
         }
 
+        if (!missing) Logger.log("Finished loading themes.");
         this.emit("updated");
         if (missing) return missingEntities;
     }
@@ -236,7 +237,7 @@ export default class StyleManager extends Emitter {
         if (!theme) return;
 
         try {
-            theme._unload();
+            theme._unload?.();
             if (log) {
                 Logger.log(`${theme.displayName} has been stopped!`);
             }
