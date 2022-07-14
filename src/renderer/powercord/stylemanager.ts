@@ -55,7 +55,7 @@ export default class StyleManager extends Emitter {
 
         SettingsRenderer.registerPanel("pc-moduleManager-themes", {
             label: "Themes",
-            order: 2,
+            order: 11,
             render: () => DiscordModules.React.createElement(AddonPanel, {type: "theme", manager: this})
         });
 

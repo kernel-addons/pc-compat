@@ -11,9 +11,9 @@ const SettingsRenderer = new class SettingsRenderer {
         cancel() {this.cancelled = true;}
     };
 
-    registerPanel(id: string, options: {icon?: React.ReactElement, badgeCount?: number, label: string, render: () => import("react").ReactElement, header?: import("react").ReactElement, order: number, predicate?(): boolean}) {
+    registerPanel(id: string, options: {icon?: React.ReactElement, badgeCount?: number, label: string, render: () => import("react").ReactElement, header?: import("react").ReactElement, order: number, predicate?(): boolean;}) {
         const {label, render, order, ...rest} = options;
-        const tab = this.panels.find(e => e.id === id)
+        const tab = this.panels.find(e => e.id === id);
 
         if (tab) throw new Error(`Settings tab ${id} is already registered!`);
 
@@ -39,7 +39,7 @@ const SettingsRenderer = new class SettingsRenderer {
     injectPanels() {
         if (window.isUnbound) return;
 
-        for(const panel of this.panels) {
+        for (const panel of this.panels) {
             try {
                 this.injectPanel(panel);
             } catch {}
@@ -49,8 +49,10 @@ const SettingsRenderer = new class SettingsRenderer {
     injectPanel(data) {
         if (window.isUnbound || !window.KernelSettings) return;
 
+        // @ts-ignore
         if (KernelSettings.panels.find(e => e.id === ("kernel-settings-powercord-" + data.label))) return;
 
+        // @ts-ignore
         return KernelSettings.register("powercord-" + data.label, {
             ...data,
             render: data.element,
@@ -59,12 +61,12 @@ const SettingsRenderer = new class SettingsRenderer {
                 width: 18,
                 height: 18
             })
-        })
+        });
     }
 
     sortPanels(a, b) {
         return a.order - b.order;
     }
-}
+};
 
 export default SettingsRenderer;

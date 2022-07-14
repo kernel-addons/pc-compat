@@ -36,7 +36,7 @@ export default class Updater {
 
         SettingsRenderer.registerPanel("pc-updater", {
             label: "Updater",
-            order: 3,
+            order: 12,
             icon: <UpdatesBadge type="sidebar" />,
             render: () => (
                 <UpdaterPanel />

@@ -6,11 +6,13 @@
     font-family: "Font Awesome 5 Pro" !important;
 }
 
-.fal, .far {
+.fal,
+.far {
     font-family: "Font Awesome 5 Pro" !important;
 }
 
-.fa, .fas {
+.fa,
+.fas {
     font-family: "Font Awesome 5 Pro" !important;
 }
 
@@ -44,7 +46,8 @@
     border-top-left-radius: 0;
 }
 
-.pc-spinner, .pc-spinner > span {
+.pc-spinner,
+.pc-spinner > span {
     display: inline;
 }
 
@@ -64,4 +67,10 @@
 
 .pc-radio-dot {
     color: var(--brand-experiment);
+}
+
+.pc-changelog-social-link,
+.pc-changelog-modal-footer {
+    display: flex;
+    align-items: center;
 }

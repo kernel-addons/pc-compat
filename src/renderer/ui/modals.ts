@@ -8,7 +8,7 @@ export default class Modals {
     static get TextInput() {return memoize(this, "TextInput", createUpdateWrapper(TextInput));}
 
     static showConfirmationModal(title: string, content: any, options = {}) {
-        const {confirmText = "Okay", cancelText = "Cancel", onConfirm = () => { }, onCancel = () => { }, danger = false} = options as any;
+        const {confirmText = "Okay", cancelText = "Cancel", onConfirm = () => {}, onCancel = () => {}, danger = false} = options as any;
         const {ModalsApi, ConfirmationModal, React, Markdown, Button} = DiscordModules;
         if (!ModalsApi || !ConfirmationModal || !Markdown || !Button) return;
 
@@ -22,12 +22,12 @@ export default class Modals {
                 confirmButtonColor: danger ? Button.Colors.RED : Button.Colors.BRAND
             }, props),
                 typeof (content) === "string" ? React.createElement(Markdown, null, content) : content
-            )
+            );
         });
     }
 
     static prompt(title: string, content: any, options: any = {}) {
-        const {placeholder = "", onInput = () => { }} = options as any;
+        const {placeholder = "", onInput = () => {}} = options as any;
         let value = "";
 
         return this.showConfirmationModal(title, React.createElement(this.TextInput, {
@@ -48,11 +48,11 @@ export default class Modals {
         return this.showConfirmationModal(title, content, {cancelText: null});
     }
 
-    static showChangeLog(title: string, items: ChangeLogItems) {
+    static showChangeLog({title, items, image, date}: {title: string, items: ChangeLogItems, image?: string, date?: number;}) {
         const {ModalsApi} = DiscordModules;
 
         return ModalsApi.openModal(props => {
-            return React.createElement(ChangeLog, Object.assign({title, items}, props))
+            return React.createElement(ChangeLog, Object.assign({title, items, image, date}, props));
         });
     }
 }

@@ -19,17 +19,20 @@ export function formatTime(time) {
     const minutes = Math.floor(time / 60) % 60;
     const seconds = time % 60;
 
-    return [ hours, minutes, seconds ]
-      .map(v => v < 10 ? `0${v}` : v)
-      .filter((v, i) => v !== "00" || i > 0)
-      .join(":");
+    return [hours, minutes, seconds]
+        .map(v => v < 10 ? `0${v}` : v)
+        .filter((v, i) => v !== "00" || i > 0)
+        .join(":");
 };
 
 export function findInTree(tree = {}, filter = _ => _, {ignore = [], walkable = [], maxProperties = 100} = {}): any {
-    let stack = [tree];
+    const stack = [tree];
     const wrapFilter = function (...args) {
-        try { return Reflect.apply(filter, this, args); }
-        catch { return false; }
+        try {
+            return Reflect.apply(filter, this, args);
+        } catch {
+            return false;
+        }
     };
 
     while (stack.length && maxProperties) {
@@ -73,7 +76,7 @@ export function getOwnerInstance(node, filter = _ => true) {
     const matches = function () {
         const isInstanceOf = current?.stateNode instanceof DiscordModules.React.Component;
         return isInstanceOf && filter(current?.stateNode);
-    }
+    };
 
     while (!matches()) {
         current = current?.return;
@@ -91,7 +94,7 @@ export async function waitFor(selector: string) {
 
     do {
         await sleep(1);
-    } while(!(element = document.querySelector(selector)));
+    } while (!(element = document.querySelector(selector)));
 
     return element;
 }
@@ -186,7 +189,7 @@ promise.then(() => {
                                     Logger.error(`Failed to run context menu injection with id ${patch.id}`, e);
                                     return res;
                                 }
-                            }
+                            };
 
                             res.props.children.type = patch.memo;
 
@@ -196,26 +199,26 @@ promise.then(() => {
                         patch.applied = true;
                     }
 
-                    delete menuPatches[displayName]
+                    delete menuPatches[displayName];
 
                     wrapped.type = AnalyticsContext.default;
                 }
 
-                return res
-            }
-        }
+                return res;
+            };
+        };
 
-        return args
-    })
+        return args;
+    });
 
     Events.addEventListener("reload-core", () => {
-        Patcher.unpatchAll("pc-context-menu-opener")
+        Patcher.unpatchAll("pc-context-menu-opener");
         for (const menu of Object.keys(menuPatches)) {
             const items = menuPatches[menu];
             items.map(e => Patcher.unpatchAll(e.id));
         }
     });
-})
+});
 
 export function injectContextMenu(id, name, func, before = false) {
     menuPatches[name] ??= [];

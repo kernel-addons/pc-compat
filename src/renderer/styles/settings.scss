@@ -7,9 +7,27 @@
         margin-bottom: 20px;
         font-weight: bold;
         font-size: 20px;
-        font-weight: 600;
+        font-weight: 500;
         font-family: var(--font-display);
         color: var(--header-primary);
+    }
+
+    .pc-settings-toolbutton {
+        padding: 5px;
+        display: flex;
+        border-radius: 5px;
+        color: var(--interactive-normal);
+
+        &:hover {
+            background: var(--background-modifier-hover);
+            color: var(--interactive-hover);
+            cursor: pointer;
+        }
+
+        &:active {
+            background: var(--background-modifier-active);
+            color: var(--interactive-active);
+        }
     }
 
     .pc-settings-addons-controls {
@@ -17,7 +35,9 @@
         align-items: center;
         margin-bottom: 10px;
 
-        .pc-settings-overflow-menu, .pc-settings-open-folder, .pc-settings-load-missing {
+        .pc-settings-overflow-menu,
+        .pc-settings-open-folder,
+        .pc-settings-load-missing {
             margin-left: 5px;
 
             svg {
@@ -26,7 +46,58 @@
         }
 
         .pc-settings-addons-search {
-            flex-grow: 1;
+            width: 250px;
+            border-radius: 3px;
+            padding: 3px;
+
+            & > div {
+                overflow: initial !important;
+
+                & > input {
+                    padding: 2px 3px !important;
+
+                    &::placeholder {
+                        font-size: 13px !important;
+                    }
+                }
+            }
+        }
+
+        .pc-settings-addons-buttons {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+
+            @media only screen and (max-width: 925px) {
+                .pc-settings-addon-panel-button-text {
+                    display: none;
+                }
+            }
+
+            .pc-settings-addon-panel-button {
+                color: var(--interactive-normal);
+                transition: background-color .05s;
+                padding: 5px;
+                display: flex;
+                align-items: center;
+                border-radius: 5px;
+                text-align: center;
+                gap: .3rem;
+
+                &:hover {
+                    background: var(--background-modifier-hover);
+                    color: var(--interactive-hover);
+                    cursor: pointer;
+                }
+
+                &:active {
+                    transform: translateY(1px);
+                    background: var(--background-modifier-active);
+                    color: var(--interactive-active);
+                    cursor: pointer;
+                }
+            }
         }
     }
 

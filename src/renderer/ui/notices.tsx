@@ -13,20 +13,20 @@ const Dispatcher = createDispatcher();
 
 const types = {
     info: {
-        icon: 'info-circle',
-        color: 'var(--info-help-foreground)'
+        icon: "info-circle",
+        color: "var(--info-help-foreground)"
     },
     warning: {
-        icon: 'exclamation-circle',
-        color: 'var(--info-warning-foreground)'
+        icon: "exclamation-circle",
+        color: "var(--info-warning-foreground)"
     },
     danger: {
-        icon: 'times-circle',
-        color: 'var(--info-danger-foreground)'
+        icon: "times-circle",
+        color: "var(--info-danger-foreground)"
     },
     success: {
-        icon: 'check-circle',
-        color: 'var(--info-positive-foreground)'
+        icon: "check-circle",
+        color: "var(--info-positive-foreground)"
     }
 };
 
@@ -77,7 +77,7 @@ export function Notice(props) {
         >
             <div className="pc-notice-header">
                 <div className="pc-notice-header-name">
-                    {props.icon && typeof props.icon == 'object' ?
+                    {props.icon && typeof props.icon == "object" ?
                         <FontAwesome
                             className="pc-notice-icon"
                             spin={props.icon.spin}
@@ -109,7 +109,7 @@ export function Notice(props) {
                             look={Button.Looks[button.look?.toUpperCase() || "FILLED"]}
                             size={Button.Sizes[button.size?.toUpperCase() || "MIN"]}
                             onClick={() => {
-                                button.onClick?.()
+                                button.onClick?.();
                                 setClosing(true);
                             }}
                             key={"button-" + i}
@@ -178,7 +178,7 @@ export default class Notices {
                 ...options,
                 color: options.icon?.color,
                 title: options.header,
-                icon: options.icon && typeof options.icon == 'object' ?
+                icon: options.icon && typeof options.icon == "object" ?
                     () => <FontAwesome
                         style={{marginRight: 5}}
                         spin={options.icon.spin}
@@ -186,7 +186,7 @@ export default class Notices {
                         color={options.icon.color}
                     /> :
                     () => <FontAwesome icon={options.icon} />
-            })
+            });
         }
 
         const state = NoticesApi.getState();

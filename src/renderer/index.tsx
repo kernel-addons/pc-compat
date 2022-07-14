@@ -50,19 +50,15 @@ export default new class PCCompat {
             writable: false
         });
 
-        {
-            const stylePath = path.resolve(PCCompatNative.getBasePath(), ...(PCCompatNative.isPacked ? ["style.css"] : ["dist", "style.css"]));
-            DOM.injectCSS("core", fs.readFileSync(stylePath, 'utf-8'));
-            DOM.injectCSS("font-awesome", Constants.FONTAWESOME_BASEURL, {type: "URL", documentHead: true});
-        }
+        const stylePath = path.resolve(PCCompatNative.getBasePath(), ...(PCCompatNative.isPacked ? ["style.css"] : ["dist", "style.css"]));
+        DOM.injectCSS("core", fs.readFileSync(stylePath, 'utf-8'));
+        DOM.injectCSS("font-awesome", Constants.FONTAWESOME_BASEURL, {type: "URL", documentHead: true});
 
         this.injectSettings();
         PluginManager.initialize();
         Updater.initialize();
 
-        // DevServer.initialize();
-
-        Logger.log("Initialized.")
+        Logger.log("Initialized.");
 
         this.checkForChangelog();
 
@@ -87,7 +83,7 @@ export default new class PCCompat {
 
             SettingsRenderer.injectPanels();
         } else {
-            const { ModalsApi, Text, Button, ConfirmationModal } = Internals.DiscordModules;
+            const {ModalsApi, Text, Button, ConfirmationModal} = Internals.DiscordModules;
             ModalsApi.openModal((props) =>
                 <ConfirmationModal
                     {...props}
@@ -99,11 +95,11 @@ export default new class PCCompat {
                 >
                     <Text>
                         Powercord Compatibility requires the <a onClick={() => {
-                            open("https://github.com/strencher-kernel/settings")
+                            open("https://github.com/strencher-kernel/settings");
                         }}>settings</a> package to register its settings tabs.
                     </Text>
                 </ConfirmationModal>
-            )
+            );
         }
     }
 
@@ -121,9 +117,14 @@ export default new class PCCompat {
         if (latestUsedVersion !== manifest.version) {
             Internals.DataStore.trySaveData("info", {latestUsedVersion: manifest.version});
 
-            Modals.showChangeLog("PCCompat Changelog", manifest.changelog as unknown as any);
+            Modals.showChangeLog({
+                title: "Powercord Changelog",
+                items: manifest.changelog.items as unknown as any,
+                image: manifest.changelog.image,
+                date: manifest.changelog.date
+            });
         }
     }
 
-    stop() { }
+    stop() {}
 };

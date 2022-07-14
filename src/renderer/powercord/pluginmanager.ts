@@ -64,7 +64,7 @@ export default class PluginManager extends Emitter {
 
         SettingsRenderer.registerPanel("pc-moduleManager-plugins", {
             label: "Plugins",
-            order: 1,
+            order: 10,
             render: () => DiscordModules.React.createElement(AddonPanel, {type: "plugin", manager: this})
         });
 

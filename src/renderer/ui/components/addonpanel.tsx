@@ -31,8 +31,8 @@ export async function sortAddons(addons: any[], order: "ascending" | "descending
             if (second > first) return -1;
 
             return 0;
-        })
-        [order === "ascending" ? "reverse" : "slice"](0);
+        }).filter(Boolean)
+    [order === "ascending" ? "reverse" : "slice"](0);
 };
 
 export function OverflowContextMenu({type: addonType}) {
@@ -113,10 +113,10 @@ export function OverflowContextMenu({type: addonType}) {
 };
 
 export default function AddonPanel({manager, type}) {
-    const {React, Button, Tooltips, SearchBar, PlaceholderClasses, Popout, LocaleManager: {Messages}} = DiscordModules;
+    const {React, SearchBar, PlaceholderClasses, Popout, LocaleManager: {Messages}} = DiscordModules;
 
     const [query, setQuery] = React.useState("");
-    const [addons, setAddons] = React.useState(null);
+    const [addons, setAddons] = React.useState(manager.addons);
     const [sortBy, searchOptions, order] = DataStore.useEvent("misc", () => [
         DataStore.getMisc(`${type}.sortBy`, "name"),
         DataStore.getMisc(`${type}.searchOption`, {author: true, name: true, description: true}),
@@ -130,7 +130,7 @@ export default function AddonPanel({manager, type}) {
 
         manager.on("updated", () => {
             setAddons(manager.addons);
-        })
+        });
     }, [manager]);
 
     React.useEffect(() => {
@@ -147,7 +147,6 @@ export default function AddonPanel({manager, type}) {
         <div className="pc-settings-addons">
             <div className="pc-settings-addons-controls">
                 <SearchBar
-                    // @ts-ignore
                     onQueryChange={(value) => setQuery(value)}
                     onClear={() => setQuery("")}
                     placeholder={`Search ${type}s...`}
@@ -155,57 +154,35 @@ export default function AddonPanel({manager, type}) {
                     query={query}
                     className="pc-settings-addons-search"
                 />
-                <Tooltips.Tooltip text="Load missing" position="bottom">
-                    {props => (
-                        <Button
-                            {...props}
-                            size={Button.Sizes.NONE}
-                            look={Button.Looks.BLANK}
-                            className="pc-settings-load-missing"
-                            onClick={() => manager.loadAll(true)}
-                        >
-                            <DiscordIcon name="Replay" width={20} height={20} />
-                        </Button>
-                    )}
-                </Tooltips.Tooltip>
-                <Tooltips.Tooltip text="Open folder" position="bottom">
-                    {props => (
-                        <Button
-                            {...props}
-                            size={Button.Sizes.NONE}
-                            look={Button.Looks.BLANK}
-                            className="pc-settings-open-folder"
-                            onClick={() => electron.shell.openPath(manager.folder)}
-                        >
-                            <DiscordIcon name="Folder" width={20} height={20} />
-                        </Button>
-                    )}
-                </Tooltips.Tooltip>
-                <Tooltips.Tooltip text="Options" position="bottom">
-                    {props => (
-                        <Popout
-                            position={Popout.Positions.TOP}
-                            animation={Popout.Animation.SCALE}
-                            align={Popout.Align.RIGHT}
-                            spacing={12}
-                            renderPopout={() => (
-                                <OverflowContextMenu type={type} />
-                            )}
-                        >
-                            {popoutProps => (
-                                <Button
-                                    {...props}
-                                    {...popoutProps}
-                                    size={Button.Sizes.NONE}
-                                    look={Button.Looks.BLANK}
-                                    className="pc-settings-overflow-menu"
-                                >
-                                    <DiscordIcon name="OverflowMenu" width="20" height="20" />
-                                </Button>
-                            )}
-                        </Popout>
-                    )}
-                </Tooltips.Tooltip>
+                <div className="pc-settings-addons-buttons">
+                    <div className="pc-settings-addon-panel-button" onClick={() => manager.loadAll(true)}>
+                        <DiscordIcon name="Replay" width={24} height={24} />
+                        <div className="pc-settings-addon-panel-button-text">
+                            Load Missing
+                        </div>
+                    </div>
+                    <div className="pc-settings-addon-panel-button" onClick={() => electron.shell.openPath(manager.folder)}>
+                        <DiscordIcon name="Folder" width={24} height={24} />
+                        <div className="pc-settings-addon-panel-button-text">
+                            Open Folder
+                        </div>
+                    </div>
+                    <Popout
+                        position={Popout.Positions.TOP}
+                        animation={Popout.Animation.FADE}
+                        align={Popout.Align.RIGHT}
+                        spacing={12}
+                        renderPopout={() => (
+                            <OverflowContextMenu type={type} />
+                        )}
+                    >
+                        {popoutProps => (
+                            <div {...popoutProps} className="pc-settings-addon-panel-button">
+                                <DiscordIcon name="OverflowMenu" width={24} height={24} />
+                            </div>
+                        )}
+                    </Popout>
+                </div>
             </div>
             <div className="pc-settings-card-scroller">
                 {addons?.length
@@ -214,7 +191,7 @@ export default function AddonPanel({manager, type}) {
                         hasSettings={false}
                         manager={manager}
                         type={type}
-                        key={addon.manifest.name}
+                        key={addon.manifest?.name}
                         openSettings={() => {}}
                     />)
                     : <div className="pc-settings-empty">
@@ -224,6 +201,6 @@ export default function AddonPanel({manager, type}) {
                     </div>
                 }
             </div>
-        </div>
+        </div >
     );
 };

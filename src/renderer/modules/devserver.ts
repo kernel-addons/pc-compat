@@ -29,7 +29,7 @@ const DevServer = new class DevServer {
         this._ws.onmessage = this.handleMessage;
         this._ws.onerror = (error) => {
             Logger.error("DevServer", "Fatal error:", error);
-        }
+        };
         this._ws.onclose = () => {
             this._ws = null;
             Logger.error("Connection closed...");
@@ -61,7 +61,7 @@ const DevServer = new class DevServer {
                 Logger.log("Unknown operation:", message.operation);
             };
         }
-    }
+    };
 
     send(operation: "HELLO" | "CLOSE", data: any): void {
         if (!this._ws) throw "Tried sending message without connection established";
@@ -106,6 +106,6 @@ const DevServer = new class DevServer {
             } break;
         }
     }
-}
+};
 
 export default DevServer;

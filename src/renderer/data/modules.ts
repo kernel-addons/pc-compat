@@ -149,6 +149,9 @@ export default {
     FormClasses: {
         props: ["formText", "description"]
     },
+    Heading: {
+        props: ["Heading"]
+    },
     // ContextMenu
     ContextMenu: {
         type: "MERGE",
@@ -173,4 +176,4 @@ export default {
     PlaceholderClasses: {
         props: ["emptyStateImage", "emptyStateSubtext"]
     }
-}
+};

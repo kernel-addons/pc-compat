@@ -1,18 +1,17 @@
 .pc-settings-addon-card {
     position: relative;
-    border-radius: 4px;
-    background: var(--deprecated-card-editable-bg);
-    border-left: 4px solid var(--plugin-color);
+    border-radius: 5px;
+    background: var(--background-secondary);
     flex-grow: 1;
-    padding: 15px;
-    padding-bottom: 10px;
-    margin: 10px 10px 10px 0;
-    transition: box-shadow .2s ease-out,transform .2s ease-out,background .2s ease-out,opacity .2s ease-in,-webkit-box-shadow .2s ease-out,-webkit-transform .2s ease-out;
+    margin: 5px 0;
+    transition: box-shadow .2s ease-out, transform .2s ease-out, background .2s ease-out, opacity .2s ease-in, -webkit-box-shadow .2s ease-out, -webkit-transform .2s ease-out;
 
     .pc-settings-card-header {
         display: flex;
+        background: var(--background-secondary-alt);
         align-items: center;
-        padding-bottom: 10px;
+        padding: 12.5px 20px;
+        border-radius: 5px 5px 0 0;
 
         .pc-settings-card-field {
             font-weight: 600;
@@ -27,11 +26,16 @@
 
         & > .pc-settings-card-controls {
             & > * {
-                margin-left: 5px;
+                margin-left: 0.5px;
             }
 
             margin-left: auto;
+            align-items: center;
             display: flex;
+        }
+
+        .pc-settings-card-controls div:last-child {
+            margin-left: 10px !important;
         }
 
         span[class*="disabledButtonWrapper"] {
@@ -40,7 +44,8 @@
     }
 
     .pc-settings-card-desc {
-        padding-bottom: 5px;
+        padding: 15px;
+        min-height: 65px;
 
         & div[class*="paragraph"] {
             margin: 0px !important;
@@ -49,16 +54,16 @@
 }
 
 .pc-settings-empty {
-   display: flex;
-   align-items: center;
-   flex-direction: column;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
 
     div {
         margin-bottom: 25px;
     }
 
     p {
-        font-size: 18px;
+        font-size: 14px;
         margin-bottom: 0;
         opacity: .7;
     }

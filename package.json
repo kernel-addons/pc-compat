@@ -1,39 +1,39 @@
 {
-  "name": "pc-compat",
-  "version": "1.0.0",
-  "description": "A Kernel compatibility layer for powercord plugins and themes.",
-  "main": "index.js",
-  "scripts": {
-    "build-renderer": "webpack --progress --env=mode=renderer --env=minify=true",
-    "build-main": "webpack --progress --env=mode=main --env=minify=true",
-    "build-preload": "webpack --progress --env=mode=preload --env=minify=true",
-    "build": "pnpm run build-renderer && pnpm run build-main && pnpm run build-preload",
-    "initialize": "pnpm install --production",
-    "start-server": "node scripts/devserver.mjs"
-  },
-  "keywords": [],
-  "author": "Strencher & eternal",
-  "license": "Unlicensed",
-  "devDependencies": {
-    "@swc/core": "^1.2.124",
-    "@types/lodash": "^4.14.176",
-    "@types/node": "^17.0.41",
-    "@types/react": "^17.0.37",
-    "@types/react-dom": "^17.0.11",
-    "asar": "^3.1.0",
-    "circular-dependency-plugin": "^5.2.2",
-    "css-loader": "^6.6.0",
-    "mini-css-extract-plugin": "^2.5.3",
-    "sass-loader": "^12.6.0",
-    "swc-loader": "^0.1.15",
-    "webpack": "^5.69.0",
-    "webpack-cli": "^4.10.0",
-    "ws": "^8.5.0"
-  },
-  "dependencies": {
-    "chokidar": "^3.5.3",
-    "node-watch": "^0.7.3",
-    "sass": "^1.43.4",
-    "sucrase": "^3.21.0"
-  }
+    "name": "pc-compat",
+    "version": "1.0.0",
+    "description": "A Kernel compatibility layer for powercord plugins and themes.",
+    "main": "index.js",
+    "scripts": {
+        "build-renderer": "webpack --progress --env=mode=renderer --env=minify=true",
+        "build-main": "webpack --progress --env=mode=main --env=minify=true",
+        "build-preload": "webpack --progress --env=mode=preload --env=minify=true",
+        "build": "pnpm run build-renderer && pnpm run build-main && pnpm run build-preload",
+        "initialize": "pnpm install --production",
+        "start-server": "node scripts/devserver.mjs"
+    },
+    "keywords": [],
+    "author": "Strencher & eternal",
+    "license": "Unlicensed",
+    "devDependencies": {
+        "@swc/core": "^1.2.124",
+        "@types/lodash": "^4.14.176",
+        "@types/node": "^17.0.41",
+        "@types/react": "^17.0.37",
+        "@types/react-dom": "^17.0.11",
+        "asar": "^3.1.0",
+        "circular-dependency-plugin": "^5.2.2",
+        "css-loader": "^6.6.0",
+        "mini-css-extract-plugin": "^2.5.3",
+        "sass-loader": "^12.6.0",
+        "swc-loader": "^0.1.15",
+        "webpack": "^5.69.0",
+        "webpack-cli": "^4.10.0",
+        "ws": "^8.5.0"
+    },
+    "dependencies": {
+        "chokidar": "^3.5.3",
+        "node-watch": "^0.7.3",
+        "sass": "^1.43.4",
+        "sucrase": "^3.21.0"
+    }
 }

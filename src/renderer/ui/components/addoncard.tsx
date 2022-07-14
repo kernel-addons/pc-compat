@@ -1,27 +1,25 @@
 import {cache} from "@powercord/classes/settings";
+import {sendToast} from "@powercord/api/notices";
 import {settings} from "@powercord/api/settings";
 import {SettingsContext} from "./settingspanel";
 import DiscordModules from "@modules/discord";
 import DiscordIcon from "@ui/discordicon";
-import {fs, electron} from "@node";
 import Modals from "../modals";
 
 export function ToolButton({label, icon, onClick, danger = false, disabled = false}) {
-    const {Button, Tooltips: {Tooltip}} = DiscordModules;
+    const {Tooltips: {Tooltip}} = DiscordModules;
 
     return (
         <Tooltip text={label} position="top">
             {props => (
-                <Button
+                <div
                     {...props}
                     className="pc-settings-toolbutton"
-                    look={Button.Looks.BLANK}
-                    size={Button.Sizes.NONE}
                     onClick={onClick}
                     disabled={disabled}
                 >
                     <DiscordIcon name={icon} color={danger ? "#ed4245" : void 0} width="20" height="20" />
-                </Button>
+                </div>
             )}
         </Tooltip>
     );
@@ -48,7 +46,7 @@ function getPanel(id) {
     const get = settings.get(id);
     if (get) return get;
 
-    for(const [key, options] of settings.entries()) {
+    for (const [key, options] of settings.entries()) {
         if (options.category == id) return settings.get(key);
     }
 
@@ -83,23 +81,39 @@ export default function AddonCard({addon, manager, openSettings, hasSettings, ty
 
                             SettingsApi.setPage({
                                 label: addon.manifest.name,
-                                render: typeof(Settings.render) === "function"
+                                render: typeof (Settings.render) === "function"
                                     ? (() => DiscordModules.React.createElement(Settings.render, cache.get(addon.entityID).makeProps()))
                                     : Settings.render
                             });
                         }}
                     />}
-                    <ToolButton label="Reload" icon="Replay" disabled={!manager.isEnabled?.(addon) ?? true} onClick={() => manager.reload(addon)} />
-                    <ToolButton label="Open Path" icon="Folder" onClick={() => {
-                        if (!fs.existsSync(addon.path)) return;
-
-                        electron.shell.showItemInFolder(addon.path);
+                    <ToolButton label="Reload" icon="Replay" disabled={!manager.isEnabled?.(addon) ?? true} onClick={() => {
+                        try {
+                            manager.reload(addon);
+                            sendToast(null, {
+                                header: 'Reloaded',
+                                content: `${addon.displayName} was reloaded successfully.`,
+                                icon: {
+                                    icon: 'redo-alt',
+                                    color: 'var(--info-positive-foreground)'
+                                }
+                            });
+                        } catch {
+                            sendToast(null, {
+                                header: 'Reload',
+                                content: `${addon.displayName} failed to reload.`,
+                                icon: {
+                                    icon: 'times',
+                                    color: 'var(--info-danger-foreground)'
+                                }
+                            });
+                        }
                     }} />
                     <ToolButton label="Delete" icon="Trash" onClick={() => {
                         Modals.showConfirmationModal("Are you sure?", `Are you sure that you want to delete the ${type} "${addon.manifest.name}"?`, {
                             danger: true,
                             onConfirm: () => {
-                                manager.delete(addon.entityID)
+                                manager.delete(addon.entityID);
                             }
                         });
                     }} />

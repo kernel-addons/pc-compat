@@ -23,7 +23,7 @@ const DataStore = new class DataStore extends Store<"misc" | "data-update"> {
         const previous = path.resolve(this.baseDir, "storage", "strencher.pc-compat");
 
         if (fs.existsSync(previous)) {
-            Logger.log("Old settings folder detected, migrating settings.")
+            Logger.log("Old settings folder detected, migrating settings.");
             const files = fs.readdirSync(previous);
 
             for (const file of files) {
@@ -40,10 +40,10 @@ const DataStore = new class DataStore extends Store<"misc" | "data-update"> {
             }
 
             try {
-               fs.rmSync(previous, { recursive: true, force: true });
-            } catch(e) {
-               console.log(e)
-             }
+                fs.rmSync(previous, {recursive: true, force: true});
+            } catch (e) {
+                console.log(e);
+            }
 
             Logger.log("Migration completed.");
         }
@@ -88,7 +88,7 @@ const DataStore = new class DataStore extends Store<"misc" | "data-update"> {
     }
 
     getMisc(misc: string = "", def: any) {
-        return getProps(this.tryLoadData("misc", def), misc);
+        return getProps(this.tryLoadData("misc"), misc) ?? def;
     }
 
     setMisc(misc: any = this.getMisc("", {}), prop: string, value: any) {
@@ -99,32 +99,32 @@ const DataStore = new class DataStore extends Store<"misc" | "data-update"> {
 
     merge(target, ...sources) {
         for (const source of sources) {
-          for (let k in source) {
-            let vs = source[k],
-                vt = target[k]
+            for (let k in source) {
+                let vs = source[k],
+                    vt = target[k];
 
-            if (Object(vs) == vs && Object(vt) === vt) {
-              target[k] = this.merge(vt, vs);
-              continue;
+                if (Object(vs) == vs && Object(vt) === vt) {
+                    target[k] = this.merge(vt, vs);
+                    continue;
+                }
+
+                target[k] = source[k];
             }
-
-            target[k] = source[k];
-          }
         }
 
-        return target
+        return target;
     }
 
     // https://github.com/lukeed/dset
     set(obj, keys, val) {
-        keys.split && (keys=keys.split('.'));
-        var i=0, l=keys.length, t=obj, x, k;
+        keys.split && (keys = keys.split('.'));
+        var i = 0, l = keys.length, t = obj, x, k;
         while (i < l) {
             k = keys[i++];
             if (k === '__proto__' || k === 'constructor' || k === 'prototype') break;
-            t = t[k] = (i === l) ? val : (typeof(x=t[k])===typeof(keys)) ? x : (keys[i]*0 !== 0 || !!~(''+keys[i]).indexOf('.')) ? {} : [];
+            t = t[k] = (i === l) ? val : (typeof (x = t[k]) === typeof (keys)) ? x : (keys[i] * 0 !== 0 || !!~('' + keys[i]).indexOf('.')) ? {} : [];
         }
     }
-}
+};
 
 export default DataStore;
