@@ -12,11 +12,12 @@
         "value": false
     },
     "fetchPeriod": {
-        "type": "text",
+        "type": "number",
         "name": "Update Fetch Period",
         "note": "Period between automatically fetches for updates. (in minutes)",
         "requires": ["autoFetch"],
-        "value": 30
+        "value": 30,
+        "min": 5
     },
     "updateCountOnSettingsGear": {
         "type": "switch",

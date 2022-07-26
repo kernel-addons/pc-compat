@@ -93,10 +93,10 @@ export default class Updater {
         checks.unshift(() => this.processCoreUpdateCheck() as unknown as any);
 
         if (this.getSetting("useQueue", false)) {
-            await checks.reduce((prev, check) => prev.then(async () => {
+            for (const check of checks) {
                 const result = await check();
                 if (result) updates.push(result);
-            }), Promise.resolve());
+            }
         }
         else {
             await Promise.allSettled(checks.map(async check => {

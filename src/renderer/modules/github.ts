@@ -70,7 +70,9 @@ export type GithubRelease = {
     body: string;
 };
 
-const manifest = JSON.parse(fs.readFileSync(path.resolve(PCCompatNative.getBasePath(), "index.json"), "utf8"));
+const manifest: typeof import("../../../index.json") = JSON.parse(
+    fs.readFileSync(path.resolve(PCCompatNative.getBasePath(), "index.json"), "utf8")
+);
 
 export default class Github {
     static releases_url = "https://api.github.com/repos/strencher-kernel/pc-compat/releases/latest";
@@ -83,6 +85,6 @@ export default class Github {
     }
 
     static async hasUpdateAvailable(latestRelease: GithubRelease) {
-        return latestRelease.name !== manifest.version;
+        return latestRelease.name.trim() !== manifest.version.trim();
     }
 }

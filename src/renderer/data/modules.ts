@@ -22,6 +22,9 @@ export default {
             ["connectStores"]
         ]
     },
+    ComponentDispatcher: {
+        props: ["ComponentDispatch"]
+    },
     Dispatcher: {
         props: ["dirtyDispatch"]
     },
