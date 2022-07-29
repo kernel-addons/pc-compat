@@ -20,7 +20,11 @@ jobs:
 
       - uses: pnpm/action-setup@v2.0.1
         with:
-          version: 6.20.1
+          version: latest
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
 
       - run: |
           pnpm i
@@ -29,6 +33,12 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git add ./dist/* -f
           (git commit -m "Build.") || true
+          node ./scripts/pack.mjs
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: powercord.asar
+          path: ./dist/powercord.asar
 
       - uses: ad-m/github-push-action@master
         with:
