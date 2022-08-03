@@ -26,7 +26,7 @@ export default {
         props: ["ComponentDispatch"]
     },
     Dispatcher: {
-        props: ["dirtyDispatch"]
+        props: ["_dispatch", "dispatch"]
     },
     ContextMenuActions: {
         props: ["openContextMenu"]

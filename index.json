@@ -3,30 +3,16 @@
     "author": "Strencher",
     "id": "strencher.pc-compat",
     "description": "Allows you to load powerCord plugins within Kernel.",
-    "version": "1.5.1",
+    "version": "1.5.4",
     "changelog": {
         "date": 1657804838613,
         "image": "https://repository-images.githubusercontent.com/129125167/0e449f00-6509-11e9-9fe0-3f6f468bc727",
         "items": [
             {
-                "type": "added",
-                "title": "Changed",
-                "items": [
-                    "Revamped the addon panels"
-                ]
-            },
-            {
-                "type": "improved",
-                "title": "Improved",
-                "items": [
-                    "Improved these changelogs"
-                ]
-            },
-            {
                 "type": "fixed",
                 "title": "Fixed",
                 "items": [
-                    "Fixed the ordering of settings tabs being scattered"
+                    "Powercord Compatibility now runs again."
                 ]
             }
         ]

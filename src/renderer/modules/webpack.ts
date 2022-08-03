@@ -41,7 +41,7 @@ class WebpackModule {
     constructor() {
         this.whenReady = this.waitForGlobal.then(() => new Promise(async onReady => {
             const [Dispatcher, UserStore] = await this.findByProps(
-                ["dirtyDispatch"], ["getCurrentUser", "_dispatchToken"],
+                ["_dispatch", "dispatch"], ["getCurrentUser", "_dispatchToken"],
                 {cache: false, bulk: true, wait: true, forever: true}
             );
 

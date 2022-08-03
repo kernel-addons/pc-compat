@@ -51,7 +51,7 @@ export default new class PCCompat {
         });
 
         const stylePath = path.resolve(PCCompatNative.getBasePath(), ...(PCCompatNative.isPacked ? ["style.css"] : ["dist", "style.css"]));
-        DOM.injectCSS("core", fs.readFileSync(stylePath, 'utf-8'));
+        DOM.injectCSS("core", fs.readFileSync(stylePath, "utf-8"));
         DOM.injectCSS("font-awesome", Constants.FONTAWESOME_BASEURL, {type: "URL", documentHead: true});
 
         this.injectSettings();
