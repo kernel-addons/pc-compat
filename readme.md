@@ -12,8 +12,6 @@
 
 ---
 
-<br />
-
 ## Installation
 
 - Run `git clone https://github.com/kernel-addons/pc-compat` inside your `packages` folder.
