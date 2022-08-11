@@ -2,9 +2,9 @@
 
 ---
 
-<h2 align="center">
+<h3 align="center">
     Powercord Compatibility Layer
-</h2>
+</h3>
 
 <h5 align="center">
     Powercord Compatibility Layer for Kernel supporting themes & plugins.
