@@ -39,7 +39,15 @@ export default new class PCCompat {
         StyleManager.initialize();
         setBuffer(Internals.Webpack.findByProps("Buffer"));
         this.expose("powercord", Require("powercord"));
+
+        Object.defineProperty(Internals, "Updater", {
+            value: Updater,
+            configurable: true,
+            writable: true
+        });
+
         this.expose("PCInternals", Internals);
+
         await initializeWebpack();
 
         powercord.api.commands.initialize();

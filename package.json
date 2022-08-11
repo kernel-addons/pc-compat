@@ -1,17 +1,19 @@
 {
-    "name": "pc-compat",
+    "name": "powercord-compatibility",
     "version": "1.0.0",
     "description": "A Kernel compatibility layer for powercord plugins and themes.",
     "main": "index.js",
     "scripts": {
-        "build-renderer": "webpack --progress --env=mode=renderer --env=minify=true",
-        "build-main": "webpack --progress --env=mode=main --env=minify=true",
-        "build-preload": "webpack --progress --env=mode=preload --env=minify=true",
-        "build": "pnpm run build-renderer && pnpm run build-main && pnpm run build-preload",
+        "watch:main": "webpack --progress --env=mode=main --env=minify=true --watch",
+        "watch:preload": "webpack --progress --env=mode=preload --env=minify=true --watch",
+        "watch:renderer": "webpack --progress --env=mode=renderer --env=minify=true --watch",
+        "build:renderer": "webpack --progress --env=mode=renderer --env=minify=true",
+        "build:main": "webpack --progress --env=mode=main --env=minify=true",
+        "build:preload": "webpack --progress --env=mode=preload --env=minify=true",
+        "build": "pnpm run build:renderer && pnpm run build:main && pnpm run build:preload",
         "initialize": "pnpm install --production",
-        "start-server": "node scripts/devserver.mjs"
+        "dev": "node scripts/devserver.mjs"
     },
-    "keywords": [],
     "author": "Strencher & eternal",
     "license": "Unlicensed",
     "devDependencies": {

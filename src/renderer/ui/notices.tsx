@@ -229,4 +229,5 @@ export default class Notices {
         });
     }
 }
+
 promise.then(() => Notices.initialize());

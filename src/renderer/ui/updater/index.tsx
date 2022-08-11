@@ -19,19 +19,25 @@ export default class Updater {
 
     static settings = ["fetchPeriod", "autoFetch"];
 
-    static clearPeriod = () => { };
+    static clearPeriod = () => {};
 
-    static getName() {return this.constructor.name;}
+    static getName() {
+        return this.constructor.name;
+    }
 
-    static getPeriod() {return this.config.fetchPeriod * 6e4;}
+    static getPeriod() {
+        return this.config.fetchPeriod * 6e4;
+    }
 
-    static get shouldAutomaticallyFetch() {return this.config.autoFetch;}
+    static get shouldAutomaticallyFetch() {
+        return this.config.autoFetch;
+    }
 
-    static loadData() {return DataStore.tryLoadData("updater", DEFAULT_CONFIG);}
+    static loadData() {
+        return DataStore.tryLoadData("updater", DEFAULT_CONFIG);
+    }
 
     static initialize() {
-        if ("isUnbound" in window) return;
-
         this.config = this.loadData();
 
         SettingsRenderer.registerPanel("pc-updater", {
@@ -47,10 +53,12 @@ export default class Updater {
             Patcher.unpatchAll(this.getName());
         });
 
-        try {
-            this.patchPanelButton();
-        } catch (error) {
-            Logger.error("Failed to patch settings button:", error);
+        if (!("isUnbound" in window)) {
+            try {
+                this.patchPanelButton();
+            } catch (error) {
+                Logger.error("Failed to patch settings button:", error);
+            }
         }
 
         this.startFetchInterval();
@@ -122,6 +130,7 @@ export default class Updater {
             Logger.log("Fetching for updates...");
 
             UpdaterModule.fetchAllUpdates().then(() => {
+                if ("isUnbound" in window) return;
                 if (!UpdatesStore.getPendingUpdateCount()) return;
                 if (Notices.isShown("update-notice")) return;
 

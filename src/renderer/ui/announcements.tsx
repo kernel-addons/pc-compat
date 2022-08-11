@@ -32,7 +32,7 @@ const patchNoticeContainer = async function () {
     });
 
     instance.forceUpdate();
-}
+};
 
 promise.then(() => {
     patchClassNames();

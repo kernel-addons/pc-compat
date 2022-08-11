@@ -1,9 +1,12 @@
 {
-    "name": "PCCompat",
-    "author": "Strencher",
-    "id": "strencher.pc-compat",
-    "description": "Allows you to load powerCord plugins within Kernel.",
+    "name": "Powercord Compatibility Layer",
+    "author": "Strencher & eternal",
+    "id": "kernel-addons.pc-compat",
+    "description": "Powercord Compatibility Layer for Kernel supporting themes & plugins.",
     "version": "1.5.4",
+    "main": "dist/main",
+    "renderer": "dist/renderer",
+    "preload": "dist/preload",
     "changelog": {
         "date": 1657804838613,
         "image": "https://repository-images.githubusercontent.com/129125167/0e449f00-6509-11e9-9fe0-3f6f468bc727",
