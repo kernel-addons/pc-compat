@@ -4,6 +4,7 @@ import PluginManager from "@powercord/pluginmanager";
 import StyleManager from "@powercord/stylemanager";
 import {require as Require, path, fs} from "@node";
 import SettingsRenderer from "@modules/settings";
+import UpdaterStore from "@ui/updater/store";
 import {promise} from "@modules/discord";
 import manifest from "../../index.json";
 import * as Internals from "./modules";
@@ -40,10 +41,17 @@ export default new class PCCompat {
         setBuffer(Internals.Webpack.findByProps("Buffer"));
         this.expose("powercord", Require("powercord"));
 
-        Object.defineProperty(Internals, "Updater", {
-            value: Updater,
-            configurable: true,
-            writable: true
+        Object.defineProperties(Internals, {
+            "Updater": {
+                value: Updater,
+                configurable: true,
+                writable: true
+            },
+            "UpdaterStore": {
+                value: UpdaterStore,
+                configurable: true,
+                writable: true
+            } 
         });
 
         this.expose("PCInternals", Internals);
