@@ -39,20 +39,20 @@ export function initialize() {
     );
 
     try {
-        Patcher.before("PowercordCommands", ChannelApplicationIcon, 'type', (_, [props]) => {
+        Patcher.before("PowercordCommands", ChannelApplicationIcon, "type", (_, [props]) => {
             if (!props.section && props.command.__powercord) {
                 props.section = section;
             }
         });
-    } catch { }
+    } catch {}
 
     try {
-        Patcher.before("PowercordCommands", ApplicationCommandItem, 'default', (_, [props]) => {
+        Patcher.before("PowercordCommands", ApplicationCommandItem, "default", (_, [props]) => {
             if (!props.section && props.command.__powercord) {
                 props.section = section;
             }
         });
-    } catch { }
+    } catch {}
 
     try {
         Patcher.instead("PowercordCommands", SectionIcon, "default", (self, args, orig) => {
@@ -81,7 +81,7 @@ export function initialize() {
 
             return orig.apply(self, args);
         });
-    } catch { }
+    } catch {}
 
     if (CommandsStore?.BUILT_IN_SECTIONS) {
         CommandsStore.BUILT_IN_SECTIONS["powercord"] = section;
@@ -95,7 +95,7 @@ export function initialize() {
 
             return orig.apply(self, args);
         });
-    } catch { }
+    } catch {}
 
     try {
         Patcher.instead("PowercordCommands", SearchStore.default, "getApplicationSections", (self, args, orig) => {
@@ -111,11 +111,11 @@ export function initialize() {
                 return [];
             }
         });
-    } catch { }
+    } catch {}
 
     try {
         Patcher.after("PowercordCommands", SearchStore.default, "getQueryCommands", (_, [, , query], res) => {
-            if (!query || query.startsWith("/")) return;
+            if (!query || query?.startsWith("/")) return;
             res ??= [];
 
             for (const command of commands.values()) {
@@ -131,8 +131,12 @@ export function initialize() {
                     res = [...res, command];
                 }
             }
+
+            console.log(res);
+
+            return res;
         });
-    } catch { }
+    } catch {}
 
     try {
         Patcher.after("PowercordCommands", SearchStore, "useSearchManager", (_, [, type], res) => {
@@ -182,7 +186,7 @@ export function initialize() {
 
             return res;
         });
-    } catch { }
+    } catch {}
 
     Events.addEventListener("reload-core", () => {
         Patcher.unpatchAll("PowercordCommands");
@@ -236,9 +240,12 @@ export function registerCommand(options: any) {
 
     commands.set(command, {
         type: 0,
+        inputType: 0,
         target: 1,
         id: command,
         name: command,
+        displayName: command,
+        displayDescription: options.description,
         applicationId: section.id,
         dmPermission: true,
         listed: true,
@@ -248,7 +255,9 @@ export function registerCommand(options: any) {
                 type: 3,
                 required: false,
                 description: `Usage: ${cmd.usage?.replace?.(/{c}/g, command) ?? command}`,
-                name: "args"
+                name: "args",
+                displayName: "args",
+                displayDescription: `Usage: ${cmd.usage?.replace?.(/{c}/g, command) ?? command}`
             }
         ],
         ...cmd,
