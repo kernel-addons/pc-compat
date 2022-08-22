@@ -132,8 +132,6 @@ export function initialize() {
                 }
             }
 
-            console.log(res);
-
             return res;
         });
     } catch {}
