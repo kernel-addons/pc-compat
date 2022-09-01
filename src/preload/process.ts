@@ -1,12 +1,12 @@
 import * as IPCEvents from "../common/ipcevents";
-import {cloneObject} from "../common/util";
+import {cloneObject, getKeys} from "../common/util";
 import createIPC from "./ipc";
 import path from "path";
 
 const callbacks = new Map<string, Set<Function>>();
 const {IPC} = createIPC();
 
-const Process: NodeJS.Process = cloneObject(process) as any;
+const Process: NodeJS.Process = cloneObject(process, {}, getKeys(process).filter(e => e !== "config")) as any;
 
 const initializeCallbacks = function (event: string) {
     callbacks.set(event, new Set());
@@ -26,11 +26,6 @@ IPC.on(IPCEvents.HANDLE_CALLBACK, (event: string, ...args: any[]) => {
             console.error(error);
         }
     }
-});
-
-// Make zlibrary happy
-Object.assign(Process.env, {
-    injDir: path.resolve(__dirname, "..", "..", "bd-compat")
 });
 
 // We need to override that because using electron's contextBridge to expose the process freezes the client.
