@@ -1,7 +1,7 @@
 export default {
     // React, Modules & Constants
     Constants: {
-        props: ["API_HOST", "ActionTypes"]
+        props: ["API_HOST", "Endpoints"]
     },
     UserSettingsWindow: {
         props: ["open", "updateAccount"]
