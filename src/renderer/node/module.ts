@@ -25,7 +25,7 @@ export const nodeGlobals = ["require", "module", "exports", "__filename", "__dir
 export const globalPaths = [path.resolve(PCCompatNative.getBasePath(), "node_modules")];
 
 const wrapModule = (code: string, filename: string) => {
-    return new Function(nodeGlobals, `${code}\n\n//# sourceURL=${JSON.stringify(filename).slice(1, -1)}`);
+    return new Function(nodeGlobals, `${code}\n\n//# sourceURL=${filename}`);
 };
 
 export const extensions = {
@@ -110,7 +110,7 @@ export class Module {
 
     _compile(code: string, filename?: string) {
         const wrapped = wrapModule(code, this.filename);
-        wrapped(this.require, this, this.exports, this.filename, this.path, window);
+        wrapped.call(this.exports, this.require, this, this.exports, this.filename, this.path, window);
     }
 };
 
@@ -134,6 +134,7 @@ export function createRequire(_path: string, parent: Module): Require {
             case "powercord": return powercord;
             case "path": return path;
             case "fs": return fs;
+            case "fs/promises": return fs.promises;
             case "module": return NodeModule;
             case "process": return window.process;
             case "electron": return electron;
@@ -300,7 +301,7 @@ if (window.process && !window.process.contextIsolated) {
         }
 
         return Reflect.apply(oldLoad, this, arguments);
-    }
+    };
 
     const _extensions = [".jsx"];
     for (const ext of _extensions) {
